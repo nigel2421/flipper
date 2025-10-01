@@ -5,13 +5,13 @@
 <html lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FlipBook CMS</title>
+    <title>Business Matters</title>
     <link rel="stylesheet" href="{% static 'publications/css/style.css' %}">
 </head>
 <body>
     <header class="site-header">
         <div class="container">
-            <a href="{% url 'publications:home' %}" class="logo">Business Unusual Magazine</a>
+            <a href="{% url 'publications:home' %}" class="logo">Business Matters Magazine </a>
             <nav>
                 <a href="{% url 'publications:home' %}">Home</a>
             </nav>
@@ -27,7 +27,7 @@
     </main>
 
     <footer class="site-footer">
-        <p>&copy; {% now "Y" %} Your Company Name. All Rights Reserved.</p>
+        <p>&copy; {% now "Y" %} Business Matters. All Rights Reserved.</p>
     </footer>
 </body>
 </html>
