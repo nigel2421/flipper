@@ -1,0 +1,25 @@
+# --- Django ---
+*.log
+*.pot
+*.pyc
+__pycache__/
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# --- Virtual Environment ---
+.venv/
+venv/
+ENV/
+env/
+virtualenv/
+Virtualenv/
+
+# --- Static and Media Files ---
+# This is the most important part for your current error
+/media/
+/staticfiles/
+
+# --- Other ---
+.DS_Store
+*.swp
