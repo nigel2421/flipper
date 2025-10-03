@@ -1,29 +1,57 @@
-<!-- publications/templates/publications/home.html -->
-
 {% extends 'publications/base.html' %}
+{% load static %}
 
 {% block content %}
-    <div class="publications-header">
-        <h1>Publications</h1>
+
+    <!-- HERO BANNER SECTION -->
+    <section class="hero-banner">
+        <div class="container hero-container">
+            <div class="hero-content">
+                <p class="hero-tagline">Entrepreneurship | Leadership | Strategy</p>
+                <h1 class="hero-headline">Unlock Financial Success and Sustainability</h1>
+                <p class="hero-subheadline">Subscribe now to our magazine and start building your business today!</p>
+                <a href="#" class="hero-subscribe-button">Subscribe</a>
+            </div>
+            <div class="hero-images">
+                <!-- This loop dynamically displays the 3 most recent covers -->
+                {% for pub in latest_publications %}
+                    <a href="{% url 'publications:detail' pk=pub.id %}" class="hero-image-wrapper image-{{ forloop.counter }}">
+                        {% if pub.cover_image %}
+                            <img src="{{ pub.cover_image.url }}" alt="Cover for {{ pub.title }}">
+                        {% else %}
+                            <div class="placeholder-image">No Cover</div>
+                        {% endif %}
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- PUBLICATIONS GRID SECTION -->
+    <div class="container">
+        <div class="publications-header">
+            <h2>Publications</h2>
+        </div>
+
+        <div class="publications-grid">
+            {% for pub in all_publications %}
+                <a href="{% url 'publications:detail' pk=pub.id %}" class="publication-card">
+                    <div class="card-image-wrapper">
+                        {% if pub.cover_image %}
+                            <img src="{{ pub.cover_image.url }}" alt="Cover for {{ pub.title }}">
+                        {% else %}
+                            <div class="placeholder-image">No Cover</div>
+                        {% endif %}
+                    </div>
+                    <div class="card-content">
+                        <span class="card-date">{{ pub.uploaded_at|date:"M-y" }}</span>
+                        <h3 class="card-title">{{ pub.title }}</h3>
+                    </div>
+                </a>
+            {% empty %}
+                <p class="no-publications">No publications have been uploaded yet.</p>
+            {% endfor %}
+        </div>
     </div>
 
-    <div class="publications-grid">
-        {% for pub in publications %}
-            <a href="{% url 'publications:detail' pk=pub.id %}" class="publication-card">
-                <div class="card-image-wrapper">
-                    {% if pub.cover_image %}
-                        <img src="{{ pub.cover_image.url }}" alt="Cover for {{ pub.title }}">
-                    {% else %}
-                        <div class="placeholder-image">No Cover</div>
-                    {% endif %}
-                </div>
-                <div class="card-content">
-                    <span class="card-date">{{ pub.uploaded_at|date:"M-y" }}</span>
-                    <h3 class="card-title">{{ pub.title }}</h3>
-                </div>
-            </a>
-        {% empty %}
-            <p class="no-publications">No publications have been uploaded yet.</p>
-        {% endfor %}
-    </div>
 {% endblock %}

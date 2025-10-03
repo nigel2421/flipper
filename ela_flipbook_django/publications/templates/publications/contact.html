@@ -1,0 +1,48 @@
+<!-- publications/templates/publications/contact.html -->
+
+{% extends 'publications/base.html' %}
+
+{% block content %}
+    <div class="contact-page-container">
+        <div class="contact-header">
+            <h1>Get In Touch</h1>
+            <p>We'd love to hear from you. Reach out to us through any of the channels below.</p>
+        </div>
+
+        <div class="contact-content">
+            <div class="contact-info">
+                <h3>Contact Information</h3>
+                <p><strong>Email:</strong> info@businessmatters.co.ke</p>
+                <p><strong>Phone:</strong> +254 123 456 789</p>
+                <p><strong>Address:</strong> 123 Business Avenue, Nairobi, Kenya</p>
+
+                <div class="social-media">
+                    <h3>Follow Us</h3>
+                    <a href="https://www.facebook.com/your-page" target="_blank" class="social-icon facebook">FB</a>
+                    <a href="https://www.instagram.com/your-page" target="_blank" class="social-icon instagram">IG</a>
+                    <a href="https://www.youtube.com/your-channel" target="_blank" class="social-icon youtube">YT</a>
+                </div>
+            </div>
+            
+            <div class="contact-form-wrapper">
+                <h3>Send Us a Message</h3>
+                <!-- A simple placeholder form. This doesn't send an email yet. -->
+                <form class="contact-form" action="#" method="post">
+                    <div class="form-group">
+                        <label for="name">Your Name</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Your Email</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message</label>
+                        <textarea id="message" name="message" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn">Send Message</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
