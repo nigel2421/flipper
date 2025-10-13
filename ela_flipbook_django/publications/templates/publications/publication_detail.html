@@ -11,7 +11,8 @@
         <!-- dFlip.js Flipbook Container -->
         <div class="_df_book" 
              source="{{ publication.pdf_file.url }}" 
-             id="df_manual_book">
+             id="df_manual_book"
+             download="false">
         </div>
     </div>
 
@@ -25,5 +26,21 @@
     
     <!-- 3. Local dFlip JavaScript (Path updated to new location) -->
     <script src="{% static 'publications/dflip/dflip.min.js' %}" type="text/javascript"></script>
+
+    <!-- publications/templates/publications/publication_detail.html -->
+
+... (your flipbook div and script/link tags) ...
+
+
+<!-- NEW JAVASCRIPT BLOCK TO FORCE THE CONFIGURATION -->
+<script>
+    // When the dFlip book is created, override its options
+    var myFlipbook = $("#df_manual_book").flipBook( {
+        // Add any options you want to force here
+        download: false,
+        print: false,   // Also disable print for good measure
+        share: false    // Also disable share for good measure
+    });
+</script>
 
 {% endblock %}

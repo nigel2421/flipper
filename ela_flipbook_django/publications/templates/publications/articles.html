@@ -3,27 +3,40 @@
 {% extends 'publications/base.html' %}
 
 {% block content %}
-    <div class="publications-header">
-        <h1>All Articles</h1>
-    </div>
+    <div class="articles-container">
+        <div class="publications-header">
+            <h1>Article & Publication Archive</h1>
+        </div>
 
-    <div class="publications-grid">
-        {% for pub in publications %}
-            <a href="{% url 'publications:detail' pk=pub.id %}" class="publication-card">
-                <div class="card-image-wrapper">
-                    {% if pub.cover_image %}
-                        <img src="{{ pub.cover_image.url }}" alt="Cover for {{ pub.title }}">
-                    {% else %}
-                        <div class="placeholder-image">No Cover</div>
-                    {% endif %}
+        <!-- Filter Form -->
+        <form method="GET" action="{% url 'publications:articles' %}" class="filter-form">
+            <div class="form-group">
+                <label for="year-select">Filter by Year:</label>
+                <select name="year" id="year-select">
+                    <option value="">All Years</option>
+                    {% for date in year_list %}
+                        <option value="{{ date.year }}" {% if selected_year and date.year == selected_year|add:0 %}selected{% endif %}>
+                            {{ date.year }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="filter-btn">Search</button>
+        </form>
+
+        <!-- List of Filtered Publications -->
+        <div class="article-list">
+            {% for pub in publications %}
+                <div class="article-item">
+                    <div class="article-info">
+                        <h3 class="article-title">{{ pub.title }}</h3>
+                        <p class="article-date">Published: {{ pub.uploaded_at|date:"F j, Y" }}</p>
+                    </div>
+                    <a href="{% url 'publications:pdf_viewer' pk=pub.id %}" class="read-more-btn" target="_blank">View PDF</a>
                 </div>
-                <div class="card-content">
-                    <span class="card-date">{{ pub.uploaded_at|date:"M-y" }}</span>
-                    <h3 class="card-title">{{ pub.title }}</h3>
-                </div>
-            </a>
-        {% empty %}
-            <p class="no-publications">No articles are available at the moment.</p>
-        {% endfor %}
+            {% empty %}
+                <p class="no-publications">No publications match your filter.</p>
+            {% endfor %}
+        </div>
     </div>
 {% endblock %}
