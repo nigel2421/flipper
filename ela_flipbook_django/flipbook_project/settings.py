@@ -44,6 +44,16 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'publications',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.facebook',
+    'allauth.socialaccount.providers.twitter',
+    'allauth.socialaccount.providers.github',
+    'allauth.socialaccount.providers.linkedin',
+    'allauth.socialaccount.providers.instagram', 
+
 ]
 
 MIDDLEWARE = [
@@ -65,6 +75,8 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                 'django.template.context_processors.debug',
+                # THIS LINE IS REQUIRED BY ALLAUTH
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -134,3 +146,65 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
+
+# Required by Django for the 'sites' framework, which allauth uses
+SITE_ID = 1
+
+# Add the authentication backend
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+# allauth specific settings
+ACCOUNT_EMAIL_VERIFICATION = 'optional' # Can be 'mandatory' for better security
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+LOGIN_REDIRECT_URL = '/' # Redirect to homepage after login
+LOGOUT_REDIRECT_URL = '/' # Redirect to homepage after logout
+
+# Provider specific settings (e.g., for Google)
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        }
+    },
+    'facebook': {
+        'SCOPE': [
+            'email',
+            'public_profile',
+        ],
+        'AUTH_PARAMS': {
+            'auth_type': 'reauthenticate',
+        }
+    },
+    'twitter': {
+        'SCOPE': [
+            'email',
+        ],
+    },
+    'github': {
+        'SCOPE': [
+            'user:email',
+        ],
+    },
+    'linkedin': {
+        'SCOPE': [
+            'r_liteprofile',
+            'r_emailaddress',
+        ],
+    },
+    'instagram': {
+        'SCOPE': [
+            'user_profile',
+            'user_media',
+        ],
+    },
+    
+}
