@@ -51,7 +51,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.facebook',
     'allauth.socialaccount.providers.twitter',
     'allauth.socialaccount.providers.github',
-    'allauth.socialaccount.providers.linkedin',
+    'allauth.socialaccount.providers.linkedin_oauth2',
     'allauth.socialaccount.providers.instagram', 
 
 ]
@@ -64,6 +64,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+     'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'flipbook_project.urls'
@@ -208,3 +209,50 @@ SOCIALACCOUNT_PROVIDERS = {
     },
     
 }
+
+# --- ALLAUTH AND SESSION SETTINGS (AT THE BOTTOM OF THE FILE) ---
+
+SITE_ID = 1
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+# Tell Django where to redirect users if they try to access a protected page
+LOGIN_URL = '/accounts/login/' 
+
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+
+# allauth specific settings for local accounts
+ACCOUNT_EMAIL_VERIFICATION = 'optional' 
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False      # We will use email as the username
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_SESSION_REMEMBER = True        # Allow users to select "Remember Me"
+# --- EMAIL CONFIGURATION (Production Ready) ---
+# We use os.environ.get() to safely read secrets from the server environment.
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'localhost')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587)) # Default to 587 if not set
+
+# Use the correct SSL/TLS setting based on your port
+EMAIL_USE_TLS = (EMAIL_PORT == 587)
+EMAIL_USE_SSL = (EMAIL_PORT == 465)
+
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+
+# Optional: Set a default "from" address
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+# Use our new custom signup form (we will create this in the next step)
+ACCOUNT_FORMS = {
+    'signup': 'publications.forms.CustomSignupForm',
+}
+
+# --- LONG LOGIN PERIOD SETTING ---
+# This sets the "Remember Me" cookie duration to one month (in seconds)
+SESSION_COOKIE_AGE = 25920000  # 30 days * 24 hours * 60 minutes * 60 seconds
