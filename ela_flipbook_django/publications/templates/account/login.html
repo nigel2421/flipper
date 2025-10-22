@@ -1,24 +1,19 @@
-<!-- publications/templates/account/login.html -->
-{% extends "account/base.html" %}
-{% load socialaccount %}
+{% extends "publications/base.html" %}
 
 {% block content %}
-    <h1>Login to Business Matters</h1>
-
-    <p>To access our exclusive content, please log in using one of the methods below.</p>
-
-    <!-- The link to log in with Google -->
-    <a href="{% provider_login_url 'google' %}" class="social-login-button">
-        Login with Google
-    </a>
-    
-    <hr>
-    
-    <h3>Or, log in with your email and password:</h3>
-    
-    <form class="login" method="POST" action="{% url 'account_login' %}">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Log In</button>
-    </form>
+<div class="login-container">
+    <div class="login-box">
+        <h1>Login to Your Account</h1>
+        <p>Welcome back! Please enter your details.</p>
+        
+        <form class="login-form" method="POST" action="{% url 'account_login' %}">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="submit-btn">Log In</button>
+            <p class="auth-links">
+                <a href="{% url 'account_reset_password' %}">Forgot Password?</a>
+            </p>
+        </form>
+    </div>
+</div>
 {% endblock %}

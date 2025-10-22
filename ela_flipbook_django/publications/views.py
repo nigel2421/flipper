@@ -2,6 +2,7 @@
 
 from django.shortcuts import render, get_object_or_404
 from .models import Publication
+from django.contrib.auth.decorators import login_required 
 
 def home_view(request):
     """
@@ -17,6 +18,7 @@ def home_view(request):
     }
     return render(request, 'publications/home.html', context)
 
+@login_required
 def publication_detail_view(request, pk):
     """
     This view gets a single publication by its unique ID (pk) and sends it
@@ -28,6 +30,7 @@ def publication_detail_view(request, pk):
     }
     return render(request, 'publications/publication_detail.html', context)
 
+@login_required
 def magazine_view(request):
     """
     This view will display all publications, just like the grid on the homepage.
@@ -39,6 +42,7 @@ def magazine_view(request):
     }
     return render(request, 'publications/magazine.html', context)
 
+@login_required
 def articles_view(request):
     """
     This view now handles filtering by year and provides a list of
@@ -68,8 +72,26 @@ def pdf_viewer_view(request, pk):
     }
     return render(request, 'publications/pdf_viewer.html', context)
 
+# publications/views.py
+
+# ... (imports) ...
+
 def contact_view(request):
-    """
-    This view just needs to render the contact page template.
-    """
+    if request.method == 'POST':
+        # ... (get form data) ...
+        
+        try:
+            send_mail(
+                subject,
+                email_message,
+                'info@businessmatters.com',  # From: Your email address
+                ['info@businessmatters.com'],  # To: The inbox you want to receive messages in
+                fail_silently=False,
+            )
+            messages.success(request, 'Your message has been sent successfully! Thank you.')
+        except Exception as e:
+            messages.error(request, 'Sorry, there was an error sending your message. Please try again later.')
+
+        return redirect('publications:contact')
+
     return render(request, 'publications/contact.html')
