@@ -1,0 +1,22 @@
+<!-- publications/templates/publications/profile.html -->
+
+{% extends 'publications/base.html' %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-box">
+        <h1>Your Profile</h1>
+        
+        <div class="profile-info">
+            <p><strong>Name:</strong> {{ user.first_name }} {{ user.last_name }}</p>
+            <p><strong>Email:</strong> {{ user.email }}</p>
+            <p><strong>Phone:</strong> {{ user.profile.phone_number|default:"Not provided" }}</p>
+        </div>
+        
+        <form class="logout-form" method="post" action="{% url 'account_logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="submit-btn">Sign Out</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

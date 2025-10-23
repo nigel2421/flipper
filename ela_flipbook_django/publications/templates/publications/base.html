@@ -39,18 +39,20 @@
             </div>
 
             <!-- The Navigation Links -->
-            <nav class="main-nav" id="main-nav">
+           <nav class="main-nav" id="main-nav">
                 <a href="{% url 'publications:home' %}">Home</a>
-                
+                <a href="{% url 'publications:magazine' %}">Magazine</a>
                 <a href="{% url 'publications:articles' %}">Articles</a>
                 <a href="{% url 'publications:contact' %}">Contacts</a>
-                <!-- === UPDATED LOGIN/LOGOUT/SIGNUP LOGIC === -->
+
+                <!-- === UPDATED USER SECTION === -->
                 {% if user.is_authenticated %}
+                    <a href="{% url 'publications:profile' %}">Hi, {{ user.first_name|default:user.username }}</a>
                     <a href="{% url 'account_logout' %}">Logout</a>
                 {% else %}
                     <a href="{% url 'account_signup' %}">Sign Up</a>
                     <a href="{% url 'account_login' %}">Login</a>
-                {% endif %}
+                {% endif %} <!-- <-- THIS IS THE FIX -->
             </nav>
 
            
