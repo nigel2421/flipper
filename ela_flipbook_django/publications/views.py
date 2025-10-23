@@ -95,3 +95,12 @@ def contact_view(request):
         return redirect('publications:contact')
 
     return render(request, 'publications/contact.html')
+
+# --- NEW PROFILE VIEW ---
+@login_required
+def profile_view(request):
+    """
+    Displays the logged-in user's profile information.
+    """
+    # The user object is automatically available in the request
+    return render(request, 'publications/profile.html')

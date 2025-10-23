@@ -16,3 +16,18 @@ class CustomSignupForm(SignupForm):
         user.last_name = self.cleaned_data['last_name']
         user.save()
         return user
+    
+      # --- ADD THIS NEW FIELD ---
+    phone_number = forms.CharField(max_length=20, label='Phone Number (Optional)', required=False, widget=forms.TextInput(attrs={'placeholder': 'Phone Number'}))
+
+    def save(self, request):
+        user = super(CustomSignupForm, self).save(request)
+        user.first_name = self.cleaned_data['first_name']
+        user.last_name = self.cleaned_data['last_name']
+        user.save()
+
+        # Save the phone number to the user's profile
+        user.profile.phone_number = self.cleaned_data['phone_number']
+        user.profile.save()
+        
+        return user

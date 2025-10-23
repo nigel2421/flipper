@@ -47,13 +47,7 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    'allauth.socialaccount.providers.google',
-    'allauth.socialaccount.providers.facebook',
-    'allauth.socialaccount.providers.twitter',
-    'allauth.socialaccount.providers.github',
-    'allauth.socialaccount.providers.linkedin_oauth2',
-    'allauth.socialaccount.providers.instagram', 
-
+    
 ]
 
 MIDDLEWARE = [
@@ -165,50 +159,7 @@ ACCOUNT_AUTHENTICATION_METHOD = 'email'
 LOGIN_REDIRECT_URL = '/' # Redirect to homepage after login
 LOGOUT_REDIRECT_URL = '/' # Redirect to homepage after logout
 
-# Provider specific settings (e.g., for Google)
-SOCIALACCOUNT_PROVIDERS = {
-    'google': {
-        'SCOPE': [
-            'profile',
-            'email',
-        ],
-        'AUTH_PARAMS': {
-            'access_type': 'online',
-        }
-    },
-    'facebook': {
-        'SCOPE': [
-            'email',
-            'public_profile',
-        ],
-        'AUTH_PARAMS': {
-            'auth_type': 'reauthenticate',
-        }
-    },
-    'twitter': {
-        'SCOPE': [
-            'email',
-        ],
-    },
-    'github': {
-        'SCOPE': [
-            'user:email',
-        ],
-    },
-    'linkedin': {
-        'SCOPE': [
-            'r_liteprofile',
-            'r_emailaddress',
-        ],
-    },
-    'instagram': {
-        'SCOPE': [
-            'user_profile',
-            'user_media',
-        ],
-    },
-    
-}
+
 
 # --- ALLAUTH AND SESSION SETTINGS (AT THE BOTTOM OF THE FILE) ---
 
