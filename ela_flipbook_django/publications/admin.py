@@ -5,7 +5,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
 import csv
 from django.http import HttpResponse
-
+from .models import Event
 from .models import Publication, Profile # Import the new Profile model
 
 # --- Publication Admin (no changes) ---
@@ -13,6 +13,13 @@ class PublicationAdmin(admin.ModelAdmin):
     list_display = ('title', 'uploaded_at')
     fields = ('title', 'pdf_file', 'cover_image')
 admin.site.register(Publication, PublicationAdmin)
+
+# --- NEW EVENT ADMIN ---
+class EventAdmin(admin.ModelAdmin):
+    list_display = ('title', 'event_date')
+    fields = ('title', 'event_date', 'poster', 'caption')
+
+admin.site.register(Event, EventAdmin)
 
 
 # --- NEW: Action to export users as CSV ---
@@ -45,6 +52,10 @@ class ProfileInline(admin.StackedInline):
     model = Profile
     can_delete = False
     verbose_name_plural = 'Profile'
+
+     # --- ADD THIS LINE ---
+    # This resolves the ambiguity of multiple foreign keys.
+    fk_name = 'user'
 
 # Define a new User admin
 class UserAdmin(BaseUserAdmin):

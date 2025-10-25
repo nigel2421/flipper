@@ -2,6 +2,8 @@
 
 from django import forms
 from allauth.account.forms import SignupForm
+from django.contrib.auth.models import User
+from .models import Profile 
 
 class CustomSignupForm(SignupForm):
     # Add the fields you want to ask for
@@ -28,6 +30,40 @@ class CustomSignupForm(SignupForm):
 
         # Save the phone number to the user's profile
         user.profile.phone_number = self.cleaned_data['phone_number']
+        user.profile.save()
+        
+        return user
+    
+    def __init__(self, *args, **kwargs):
+        # --- ADD THIS LOGIC ---
+        # Get the request object, which contains the URL parameters
+        self.request = kwargs.pop('request', None)
+        super(CustomSignupForm, self).__init__(*args, **kwargs)
+        
+        # Get the referral code from the URL, if it exists
+        referral_code = self.request.GET.get('ref')
+        if referral_code:
+            try:
+                # Find the user who owns this referral code
+                self.referrer = Profile.objects.get(referral_code=referral_code).user
+            except Profile.DoesNotExist:
+                self.referrer = None
+        else:
+            self.referrer = None
+    
+    def save(self, request):
+        user = super(CustomSignupForm, self).save(request)
+        user.first_name = self.cleaned_data['first_name']
+        user.last_name = self.cleaned_data['last_name']
+        user.save()
+
+        user.profile.phone_number = self.cleaned_data.get('phone_number')
+        
+        # --- ADD THIS LOGIC ---
+        # If we found a valid referrer, save the relationship
+        if hasattr(self, 'referrer') and self.referrer:
+            user.profile.referred_by = self.referrer
+
         user.profile.save()
         
         return user
