@@ -213,3 +213,94 @@ main > .container {
     .hero-images .image-2 { transform: translate(-80%, -50%) rotate(-8deg) scale(0.95); z-index: 1; }
     .hero-images .image-3 { transform: translate(-20%, -50%) rotate(10deg) scale(0.9); z-index: 0; }
 }
+
+/* === NEW LOGIN PAGE STYLES === */
+
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+}
+
+.login-box {
+    max-width: 450px;
+    width: 100%;
+    background-color: var(--card-bg);
+    padding: 40px;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid #333;
+}
+.login-box h1 {
+    color: var(--text-dark);
+    margin-bottom: 10px;
+}
+.login-box p {
+    color: var(--text-muted);
+    margin-bottom: 30px;
+}
+
+.social-login-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.social-btn {
+    padding: 12px;
+    border-radius: 4px;
+    text-decoration: none;
+    color: #fff;
+    font-weight: bold;
+    transition: opacity 0.3s ease;
+}
+.social-btn:hover {
+    opacity: 0.9;
+}
+
+.social-btn.google { background-color: #DB4437; }
+.social-btn.facebook { background-color: #4267B2; }
+.social-btn.twitter { background-color: #1DA1F2; }
+.social-btn.linkedin { background-color: #0A66C2; }
+.social-btn.github { background-color: #333; }
+.social-btn.instagram { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: var(--text-muted);
+    margin: 30px 0;
+}
+.divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #333;
+}
+.divider span {
+    padding: 0 15px;
+}
+
+.login-form p {
+    margin: 10px 0;
+    color: var(--text-light);
+}
+.login-form input {
+    width: 95%; /* Adjust width to account for padding */
+    padding: 10px;
+    background-color: #333;
+    border: 1px solid #555;
+    border-radius: 4px;
+    color: var(--text-light);
+    font-size: 1rem;
+    margin-bottom: 10px;
+}
+
+.auth-links {
+    margin-top: 20px !important;
+    font-size: 0.9rem;
+}
+.auth-links a {
+    color: var(--accent-yellow);
+}

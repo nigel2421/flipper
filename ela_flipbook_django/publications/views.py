@@ -1,9 +1,15 @@
 # publications/views.py
 
+<<<<<<< HEAD
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from .models import Publication, Event
+=======
+from django.shortcuts import render, get_object_or_404
+from .models import Publication
+from django.contrib.auth.decorators import login_required 
+>>>>>>> a5c18e4747cac8705105c910b405787f217e22c9
 
 # --- Homepage View ---
 def home_view(request):
@@ -15,7 +21,10 @@ def home_view(request):
     }
     return render(request, 'publications/home.html', context)
 
+<<<<<<< HEAD
 # --- Publication and PDF Viewer Views (Protected) ---
+=======
+>>>>>>> a5c18e4747cac8705105c910b405787f217e22c9
 @login_required
 def publication_detail_view(request, pk):
     publication = get_object_or_404(Publication, pk=pk)
@@ -25,6 +34,7 @@ def publication_detail_view(request, pk):
     return render(request, 'publications/publication_detail.html', context)
 
 @login_required
+<<<<<<< HEAD
 def pdf_viewer_view(request, pk):
     publication = get_object_or_404(Publication, pk=pk)
     context = {
@@ -33,6 +43,8 @@ def pdf_viewer_view(request, pk):
     return render(request, 'publications/pdf_viewer.html', context)
 
 # --- Magazine and Articles Views ---
+=======
+>>>>>>> a5c18e4747cac8705105c910b405787f217e22c9
 def magazine_view(request):
     publications = Publication.objects.all()
     context = {
@@ -40,6 +52,7 @@ def magazine_view(request):
     }
     return render(request, 'publications/magazine.html', context)
 
+@login_required
 def articles_view(request):
     selected_year = request.GET.get('year')
     year_list = Publication.objects.dates('uploaded_at', 'year', order='DESC')
@@ -62,6 +75,7 @@ def events_view(request):
     }
     return render(request, 'publications/events.html', context)
 
+<<<<<<< HEAD
 # --- Contact View ---
 def contact_view(request):
     # This view is simplified and does not handle form submission for now
@@ -80,3 +94,37 @@ def profile_view(request):
         'referral_count': referral_count,
     }
     return render(request, 'publications/profile.html', context)
+=======
+# publications/views.py
+
+# ... (imports) ...
+
+def contact_view(request):
+    if request.method == 'POST':
+        # ... (get form data) ...
+        
+        try:
+            send_mail(
+                subject,
+                email_message,
+                'info@businessmatters.com',  # From: Your email address
+                ['info@businessmatters.com'],  # To: The inbox you want to receive messages in
+                fail_silently=False,
+            )
+            messages.success(request, 'Your message has been sent successfully! Thank you.')
+        except Exception as e:
+            messages.error(request, 'Sorry, there was an error sending your message. Please try again later.')
+
+        return redirect('publications:contact')
+
+    return render(request, 'publications/contact.html')
+
+# --- NEW PROFILE VIEW ---
+@login_required
+def profile_view(request):
+    """
+    Displays the logged-in user's profile information.
+    """
+    # The user object is automatically available in the request
+    return render(request, 'publications/profile.html')
+>>>>>>> a5c18e4747cac8705105c910b405787f217e22c9

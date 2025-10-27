@@ -2,8 +2,11 @@
 
 from django import forms
 from allauth.account.forms import SignupForm
+<<<<<<< HEAD
 from django.contrib.auth.models import User
 from .models import Profile 
+=======
+>>>>>>> a5c18e4747cac8705105c910b405787f217e22c9
 
 class CustomSignupForm(SignupForm):
     # Add the fields you want to ask for
@@ -32,6 +35,7 @@ class CustomSignupForm(SignupForm):
         user.profile.phone_number = self.cleaned_data['phone_number']
         user.profile.save()
         
+<<<<<<< HEAD
         return user
     
     def __init__(self, *args, **kwargs):
@@ -66,4 +70,6 @@ class CustomSignupForm(SignupForm):
 
         user.profile.save()
         
+=======
+>>>>>>> a5c18e4747cac8705105c910b405787f217e22c9
         return user

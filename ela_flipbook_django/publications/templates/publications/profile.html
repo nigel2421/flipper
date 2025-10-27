@@ -12,6 +12,7 @@
             <p><strong>Email:</strong> {{ user.email }}</p>
             <p><strong>Phone:</strong> {{ user.profile.phone_number|default:"Not provided" }}</p>
         </div>
+<<<<<<< HEAD
 
         <!-- === NEW REFERRAL SECTION === -->
         <div class="referral-section">
@@ -20,6 +21,9 @@
             <input type="text" value="{{ referral_link }}" readonly class="referral-link-input">
         </div>
 
+=======
+        
+>>>>>>> a5c18e4747cac8705105c910b405787f217e22c9
         <form class="logout-form" method="post" action="{% url 'account_logout' %}">
             {% csrf_token %}
             <button type="submit" class="submit-btn">Sign Out</button>
