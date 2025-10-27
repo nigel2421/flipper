@@ -31,8 +31,8 @@ jobs:
     - name: Deploy via FTP
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
       with:
-        server: ftp.businessmatters.co.ke
-        username: your_username
-        password: your_password
+        server: ftp.wemisi.com
+        username: flipper@businessmatters.co.ke
+        password: babatibim1.
         local-dir: ela_flipbook_django/  # Adjust if needed
         server-dir: /wemisico/businessmatters.co.ke/ela_flipbook_django/flipbook_project  # Adjust to your cPanel path
