@@ -25,6 +25,7 @@ jobs:
 
     - name: Run tests (optional)
       run: |
+        cd ela_flipbook_django
         python manage.py test
 
     - name: Deploy via FTP
