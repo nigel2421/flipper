@@ -31,8 +31,8 @@ jobs:
     - name: Deploy via FTP
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
       with:
-        server: ${{ secrets.FTP_SERVER }}
-        username: ${{ secrets.FTP_USERNAME }}
-        password: ${{ secrets.FTP_PASSWORD }}
+        server: ftp.businessmatters.co.ke
+        username: your_username
+        password: your_password
         local-dir: ela_flipbook_django/  # Adjust if needed
-        server-dir: /wemisico/businessmatters.co.ke/ela_flipbook_django  # Adjust to your cPanel path
+        server-dir: /wemisico/businessmatters.co.ke/ela_flipbook_django/flipbook_project  # Adjust to your cPanel path
