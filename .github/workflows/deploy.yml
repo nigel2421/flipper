@@ -34,5 +34,5 @@ jobs:
         server: ${{ secrets.FTP_SERVER }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        local-dir: ./  # Adjust if needed
-        server-dir: /wemisico/businessmatters.co.ke/ela_flipbook_django/flipbook_project  # Adjust to your cPanel path
+        local-dir: ela_flipbook_django/  # Adjust if needed
+        server-dir: /wemisico/businessmatters.co.ke/ela_flipbook_django  # Adjust to your cPanel path
