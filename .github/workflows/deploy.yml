@@ -35,4 +35,4 @@ jobs:
         username: flipper@businessmatters.co.ke
         password: babatibim1.
         local-dir: ela_flipbook_django/  # Adjust if needed
-        server-dir: /wemisico/businessmatters.co.ke/ela_flipbook_django/flipbook_project  # Adjust to your cPanel path
+        server-dir: /wemisico/businessmatters.co.ke/ela_flipbook_django/flipbook_project/  # Adjust to your cPanel path
