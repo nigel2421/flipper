@@ -10,21 +10,23 @@ class CustomSignupForm(SignupForm):
     last_name = forms.CharField(max_length=30, label='Last Name', widget=forms.TextInput(attrs={'placeholder': 'Last Name'}))
     phone_number = forms.CharField(max_length=20, label='Phone Number (Optional)', required=False, widget=forms.TextInput(attrs={'placeholder': 'Phone Number'}))
 
+        # --- THIS IS THE UPDATED __init__ METHOD ---
     def __init__(self, *args, **kwargs):
-        # Get the request object, which contains the URL parameters
+        # We still try to get the request, but we don't use it immediately.
         self.request = kwargs.pop('request', None)
         super(CustomSignupForm, self).__init__(*args, **kwargs)
         
-        # Get the referral code from the URL (e.g., ?ref=...), if it exists
-        referral_code = self.request.GET.get('ref')
-        if referral_code:
-            try:
-                # Find the user who owns this referral code
-                self.referrer = Profile.objects.get(referral_code=referral_code).user
-            except Profile.DoesNotExist:
+        # This is the guard clause. Only run this code if the request exists.
+        if self.request:
+            referral_code = self.request.GET.get('ref')
+            if referral_code:
+                try:
+                    # Find the user who owns this referral code
+                    self.referrer = Profile.objects.get(referral_code=referral_code).user
+                except Profile.DoesNotExist:
+                    self.referrer = None
+            else:
                 self.referrer = None
-        else:
-            self.referrer = None
     
     def save(self, request):
         # Create the new user
