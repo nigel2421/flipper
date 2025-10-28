@@ -9,7 +9,14 @@
             <a href="{% url 'publications:articles' %}" class="back-link">&larr; Back to Archive</a>
         </div>
         
-        <!-- The iframe embeds the PDF. #toolbar=0 hides the download/print buttons. -->
-        <iframe src="{{ publication.pdf_file.url }}#toolbar=0" class="pdf-iframe" title="{{ publication.title }}"></iframe>
+        <!-- 
+            This iframe now uses the Google Docs Viewer.
+            It is highly compatible with all mobile devices and provides a clean, scrollable view.
+        -->
+        <iframe 
+            src="https://docs.google.com/gview?url={{ request.scheme }}://{{ request.get_host }}{{ publication.pdf_file.url }}&embedded=true" 
+            class="pdf-iframe" 
+            title="{{ publication.title }}">
+        </iframe>
     </div>
 {% endblock %}
