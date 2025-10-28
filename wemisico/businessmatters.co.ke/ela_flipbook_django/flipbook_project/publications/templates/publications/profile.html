@@ -12,14 +12,7 @@
             <p><strong>Email:</strong> {{ user.email }}</p>
             <p><strong>Phone:</strong> {{ user.profile.phone_number|default:"Not provided" }}</p>
         </div>
-
-        <!-- === REFERRAL SECTION === -->
-        <div class="referral-section">
-            <h3>Your Referral Link</h3>
-            <p>Share this link with your friends. You have successfully referred <strong>{{ referral_count }}</strong> new member(s)!</p>
-            <input type="text" value="{{ referral_link }}" readonly class="referral-link-input" onclick="this.select();">
-        </div>
-
+        
         <form class="logout-form" method="post" action="{% url 'account_logout' %}">
             {% csrf_token %}
             <button type="submit" class="submit-btn">Sign Out</button>
