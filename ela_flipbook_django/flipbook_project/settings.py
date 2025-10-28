@@ -132,7 +132,7 @@ STATIC_URL = 'flipper/ela_flipbook_django/publications/static/'
 
 # This is the URL prefix for user-uploaded files (your PDFs).
 # It MUST have a value, like 'media/'.
-MEDIA_URL = 'flipper/ela_flipbook_django/publications/media/'
+MEDIA_URL = 'flipper/ela_flipbook_django/media/'
 
 # This is the absolute path to the folder where user-uploaded files will be stored.
 # It tells Django to create a 'media' folder in your project's main directory.
