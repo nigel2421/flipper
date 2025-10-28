@@ -1,0 +1,41 @@
+<!-- publications/templates/publications/publication_detail.html -->
+
+{% extends 'publications/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="flipbook-container">
+        <a href="{% url 'publications:home' %}" class="back-link">&larr; Back to Publications</a>
+        <h2>Viewing: {{ publication.title }}</h2>
+
+        <!-- dFlip.js Flipbook Container -->
+        <div class="_df_book" 
+             source="{{ publication.pdf_file.url }}" 
+             id="df_manual_book"
+             download="false">
+        </div>
+    </div>
+
+    <!-- === FINAL, GUARANTEED FIX for dFlip.js === -->
+
+    <!-- 1. Local dFlip CSS -->
+    <link href="{% static 'publications/dflip/dflip.min.css' %}" rel="stylesheet" type="text/css">
+    
+    <!-- 2. jQuery from a reliable CDN -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
+    <!-- 3. THIS IS THE CRUCIAL FIX -->
+    <!-- This script block MUST come BEFORE you load the main dflip.js file. -->
+    <script>
+        // Set up a global configuration object for dFlip.
+        // This explicitly tells the library where to find its dependencies.
+        var DFLIP = {
+            // Use Django's static tag to generate the correct, full URL to the libs folder.
+            libs: "{% static 'publications/dflip/libs/' %}"
+        };
+    </script>
+    
+    <!-- 4. Local dFlip JavaScript -->
+    <script src="{% static 'publications/dflip/dflip.min.js' %}" type="text/javascript"></script>
+
+{% endblock %}

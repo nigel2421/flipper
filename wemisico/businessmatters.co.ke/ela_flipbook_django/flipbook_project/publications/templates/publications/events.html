@@ -1,0 +1,88 @@
+<!-- publications/templates/publications/events.html -->
+
+{% extends 'publications/base.html' %}
+{% load static %}
+
+{% block content %}
+
+    <!-- Page Header -->
+    <div class="publications-header">
+        <h1>Upcoming Events</h1>
+        <p class="subtitle">Stay updated with the latest business events happening around.</p>
+    </div>
+
+    <div class="publications-grid">
+        {% for event in events %}
+            <div class="publication-card" data-event-date="{{ event.event_date|date:'Y-m-d' }}">
+                
+                <div class="card-image-wrapper">
+                    {% if event.poster %}
+                        <img src="{{ event.poster.url }}" alt="Poster for {{ event.title }}">
+                    {% else %}
+                        <div class="placeholder-image">No Poster</div>
+                    {% endif %}
+                </div>
+                
+                <div class="event-content">
+                    <h3 class="card-title">{{ event.title }}</h3>
+                    <p class="card-caption">{{ event.caption }}</p>
+                    
+                    <div class="event-footer">
+                        <div class="countdown" id="countdown-{{ event.id }}">
+                            <!-- JavaScript will populate this area -->
+                        </div>
+                        <p class="event-date">{{ event.event_date|date:"F d, Y" }}</p>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <!-- This message shows if there are no upcoming events. -->
+            <p class="no-publications">No upcoming events are scheduled at the moment. Please check back soon!</p>
+        {% endfor %} <!-- THIS WAS THE MISSING TAG -->
+    </div>
+
+    <!-- JavaScript for the Countdown Timers -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const eventCards = document.querySelectorAll('.publication-card[data-event-date]');
+
+            eventCards.forEach(card => {
+                const eventDateString = card.dataset.eventDate;
+                const countdownElement = card.querySelector('.countdown');
+
+                if (!eventDateString || !countdownElement) {
+                    return; 
+                }
+
+                const eventDate = new Date(eventDateString + 'T00:00:00');
+
+                function updateCountdown() {
+                    const now = new Date().getTime();
+                    const distance = eventDate - now;
+
+                    if (distance < 0) {
+                        clearInterval(interval);
+                        countdownElement.innerHTML = '<span class="countdown-label passed">Event has passed!</span>';
+                        return;
+                    }
+
+                    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                    countdownElement.innerHTML = `
+                        <div>${days}<span class="countdown-label">Days</span></div>
+                        <div>${hours}<span class="countdown-label">Hours</span></div>
+                        <div>${minutes}<span class="countdown-label">Mins</span></div>
+                        <div>${seconds}<span class="countdown-label">Secs</span></div>
+                    `;
+                }
+
+                updateCountdown();
+                const interval = setInterval(updateCountdown, 1000);
+            });
+        });
+    </script>
+
+{% endblock %}

@@ -1,0 +1,29 @@
+<!-- publications/templates/publications/magazine.html -->
+
+{% extends 'publications/base.html' %}
+
+{% block content %}
+    <div class="publications-header">
+        <h1>Magazine Issues</h1>
+    </div>
+
+    <div class="publications-grid">
+        {% for pub in publications %}
+            <a href="{% url 'publications:detail' pk=pub.id %}" class="publication-card">
+                <div class="card-image-wrapper">
+                    {% if pub.cover_image %}
+                        <img src="{{ pub.cover_image.url }}" alt="Cover for {{ pub.title }}">
+                    {% else %}
+                        <div class="placeholder-image">No Cover</div>
+                    {% endif %}
+                </div>
+                <div class="card-content">
+                    <span class="card-date">{{ pub.uploaded_at|date:"M-y" }}</span>
+                    <h3 class="card-title">{{ pub.title }}</h3>
+                </div>
+            </a>
+        {% empty %}
+            <p class="no-publications">No publications are available at the moment.</p>
+        {% endfor %}
+    </div>
+{% endblock %}

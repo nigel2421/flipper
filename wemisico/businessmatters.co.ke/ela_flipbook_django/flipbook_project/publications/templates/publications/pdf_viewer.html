@@ -1,0 +1,15 @@
+<!-- publications/templates/publications/pdf_viewer.html -->
+
+{% extends 'publications/base.html' %}
+
+{% block content %}
+    <div class="pdf-viewer-container">
+        <div class="pdf-viewer-header">
+            <h2>{{ publication.title }}</h2>
+            <a href="{% url 'publications:articles' %}" class="back-link">&larr; Back to Archive</a>
+        </div>
+        
+        <!-- The iframe embeds the PDF. #toolbar=0 hides the download/print buttons. -->
+        <iframe src="{{ publication.pdf_file.url }}#toolbar=0" class="pdf-iframe" title="{{ publication.title }}"></iframe>
+    </div>
+{% endblock %}
