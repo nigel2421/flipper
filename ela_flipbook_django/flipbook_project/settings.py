@@ -128,11 +128,11 @@ USE_TZ = True
 # --- Static and Media File Configuration ---
 
 # This is the URL prefix for your CSS and JS files.
-STATIC_URL = 'home/wemisico/businessmatters.co.ke/flipper/ela_flipbook_django/publications/static/'
+STATIC_URL = 'flipper/ela_flipbook_django/publications/static/'
 
 # This is the URL prefix for user-uploaded files (your PDFs).
 # It MUST have a value, like 'media/'.
-MEDIA_URL = 'home/wemisico/businessmatters.co.ke/flipper/ela_flipbook_django/media/'
+MEDIA_URL = 'flipper/ela_flipbook_django/publications/media/'
 
 # This is the absolute path to the folder where user-uploaded files will be stored.
 # It tells Django to create a 'media' folder in your project's main directory.
