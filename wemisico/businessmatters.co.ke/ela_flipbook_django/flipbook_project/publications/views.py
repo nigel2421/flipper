@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.urls import reverse
 from .models import Publication, Event
+from allauth.account.views import SignupView
 
 # --- Homepage View ---
 def home_view(request):
@@ -80,3 +81,12 @@ def profile_view(request):
         'referral_count': referral_count,
     }
     return render(request, 'publications/profile.html', context)
+
+class CustomSignupView(SignupView):
+    def get(self, request, *args, **kwargs):
+        # When a user first lands on the signup page, check for a referral code
+        referral_code = request.GET.get('ref')
+        if referral_code:
+            # Store it in the session so we can retrieve it after the POST
+            request.session['referral_code'] = referral_code
+        return super().get(request, *args, **kwargs)
