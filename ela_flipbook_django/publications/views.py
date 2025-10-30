@@ -70,14 +70,23 @@ def contact_view(request):
     """ Renders the static contact page. """
     return render(request, 'publications/contact.html')
 
+# --- THIS IS THE CORRECTED VIEW ---
 @login_required
 def profile_view(request):
     """ Renders the logged-in user's profile page with referral info. """
     user = request.user
+    
+    # Build the full, shareable referral link
     signup_url = reverse('account_signup')
     referral_link = f"{request.build_absolute_uri(signup_url)}?ref={user.profile.referral_code}"
+    
+    # Calculate the number of successful referrals
     referral_count = user.referrals.count()
+    
+    # Get the user who referred the current user, if one exists
     referrer = user.profile.referred_by
+    
+    # This context dictionary now includes all the necessary variables
     context = {
         'referral_link': referral_link,
         'referral_count': referral_count,
