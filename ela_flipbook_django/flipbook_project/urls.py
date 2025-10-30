@@ -4,11 +4,13 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from publications.views import CustomSignupView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
     path('', include('publications.urls')), # This points to your app's urls
+    path('accounts/signup/', CustomSignupView.as_view(), name='account_signup'),
 ]
 
 # This is for serving files in development
