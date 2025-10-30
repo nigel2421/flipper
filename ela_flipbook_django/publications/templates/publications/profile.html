@@ -11,14 +11,23 @@
             <p><strong>Name:</strong> {{ user.first_name }} {{ user.last_name }}</p>
             <p><strong>Email:</strong> {{ user.email }}</p>
             <p><strong>Phone:</strong> {{ user.profile.phone_number|default:"Not provided" }}</p>
-        </div>
 
-        <!-- === REFERRAL SECTION === -->
-                 <!-- === NEW "REFERRED BY" DISPLAY === -->
+            <!-- This part shows who you were referred by -->
             {% if referrer %}
                 <p><strong>Referred By:</strong> {{ referrer.first_name }} {{ referrer.last_name }}</p>
             {% endif %}
         </div>
+
+        <!-- === THIS IS THE MISSING REFERRAL SECTION === -->
+        <div class="referral-section">
+            <h3>Your Referral Link</h3>
+            <p>Share this link with your friends. You have successfully referred <strong>{{ referral_count }}</strong> new member(s)!</p>
+            
+            <!-- This input displays your unique referral link -->
+            <input type="text" value="{{ referral_link }}" readonly class="referral-link-input" onclick="this.select();">
+        </div>
+        <!-- === END OF MISSING SECTION === -->
+
         <form class="logout-form" method="post" action="{% url 'account_logout' %}">
             {% csrf_token %}
             <button type="submit" class="submit-btn">Sign Out</button>
