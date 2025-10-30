@@ -25,17 +25,43 @@ admin.site.register(Event, EventAdmin)
 
 # --- Custom User Admin with Profile Inline and CSV Export ---
 
-# Action to export users as CSV
+# --- UPDATED: Action to export users as CSV ---
 def export_as_csv(modeladmin, request, queryset):
+    """
+    Exports selected users with their profile info, signup date, and referrer.
+    """
     meta = modeladmin.model._meta
-    field_names = ['first_name', 'last_name', 'email', 'phone_number']
+    # Add the new fields you want to export
+    field_names = ['first_name', 'last_name', 'email', 'phone_number', 'signup_date', 'referred_by']
+
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = f'attachment; filename={meta.verbose_name_plural}.csv'
     writer = csv.writer(response)
+
     writer.writerow(field_names)
+    
+    # Eager load the related profile to make it more efficient
     for user in queryset.select_related('profile'):
+        # Get phone number from the related profile
         phone_number = user.profile.phone_number if hasattr(user, 'profile') else ''
-        writer.writerow([user.first_name, user.last_name, user.email, phone_number])
+        
+        # Get the signup date from the user model
+        signup_date = user.date_joined.strftime('%Y-%m-%d %H:%M:%S')
+        
+        # Get the referrer's email from the profile, if it exists
+        referred_by_email = ''
+        if hasattr(user, 'profile') and user.profile.referred_by:
+            referred_by_email = user.profile.referred_by.email
+
+        writer.writerow([
+            user.first_name, 
+            user.last_name, 
+            user.email, 
+            phone_number, 
+            signup_date, 
+            referred_by_email
+        ])
+
     return response
 export_as_csv.short_description = "Export Selected Users to CSV"
 
