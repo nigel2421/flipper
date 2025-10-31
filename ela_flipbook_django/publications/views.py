@@ -1,27 +1,26 @@
 # publications/views.py
 
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.urls import reverse
-from .models import Publication, Event
+from .models import Publication, Event, Profile
 from allauth.account.views import SignupView # Import the original SignupView
 
 # === CLASS-BASED VIEWS (for advanced features) ===
 
+# --- NEW: Custom Signup View to capture the referral code ---
 class CustomSignupView(SignupView):
-    """
-    Overrides the default signup view to capture a referral code from the URL.
-    """
     def get(self, request, *args, **kwargs):
-        # When a user first lands on the signup page...
+        # When a user first lands on the signup page (a GET request)...
         referral_code = request.GET.get('ref')
         if referral_code:
-            # ...store the referral code in their session for later use.
-            request.session['referral_code'] = referral_code
-        # Let the original SignupView handle the rest.
+            # ...we store the referral code in their session.
+            # This makes it available later when the form is submitted.
+            request.session['referral_code'] = str(referral_code)
+        
+        # Now, let the original SignupView do its normal job of displaying the page.
         return super().get(request, *args, **kwargs)
-
 
 # === FUNCTION-BASED VIEWS (for pages) ===
 
@@ -44,7 +43,7 @@ def magazine_view(request):
     return render(request, 'publications/magazine.html', context)
 
 def articles_view(request):
-    """ Renders the articles archive with year-based filtering. """
+    """ Renders the articles archive page with year-based filtering. """
     selected_year = request.GET.get('year')
     year_list = Publication.objects.dates('uploaded_at', 'year', order='DESC')
     publications = Publication.objects.all()
@@ -70,23 +69,30 @@ def contact_view(request):
     """ Renders the static contact page. """
     return render(request, 'publications/contact.html')
 
-# --- THIS IS THE CORRECTED VIEW ---
 @login_required
 def profile_view(request):
     """ Renders the logged-in user's profile page with referral info. """
     user = request.user
     
-    # Build the full, shareable referral link
+    # --- Referral Processing Logic ---
+    referral_code = request.session.get('referral_code')
+    if referral_code and not user.profile.referred_by:
+        try:
+            referrer_profile = Profile.objects.get(referral_code=referral_code)
+            if referrer_profile.user != user:
+                user.profile.referred_by = referrer_profile.user
+                user.profile.save()
+            del request.session['referral_code']
+        except Profile.DoesNotExist:
+            if 'referral_code' in request.session:
+                del request.session['referral_code']
+    
+    # --- Display Data ---
     signup_url = reverse('account_signup')
     referral_link = f"{request.build_absolute_uri(signup_url)}?ref={user.profile.referral_code}"
-    
-    # Calculate the number of successful referrals
     referral_count = user.referrals.count()
-    
-    # Get the user who referred the current user, if one exists
     referrer = user.profile.referred_by
     
-    # This context dictionary now includes all the necessary variables
     context = {
         'referral_link': referral_link,
         'referral_count': referral_count,
@@ -96,7 +102,7 @@ def profile_view(request):
 
 @login_required
 def publication_detail_view(request, pk):
-    """ Renders the interactive flipbook viewer for a publication. """
+    """ Renders the interactive flipbook viewer for a single publication. """
     publication = get_object_or_404(Publication, pk=pk)
     context = {
         'publication': publication

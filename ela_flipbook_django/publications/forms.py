@@ -10,28 +10,30 @@ class CustomSignupForm(SignupForm):
     phone_number = forms.CharField(max_length=20, label='Phone Number (Optional)', required=False, widget=forms.TextInput(attrs={'placeholder': 'Phone Number'}))
 
     def save(self, request):
-        # Create the new user
+        # Create the new user using allauth's standard process
         user = super(CustomSignupForm, self).save(request)
         
-        # Save the extra data
+        # Save the extra data from our form
         user.first_name = self.cleaned_data['first_name']
         user.last_name = self.cleaned_data['last_name']
         user.save()
 
-        # The profile is created automatically by our signal.
+        # Update the profile (which was created automatically by our signal)
         user.profile.phone_number = self.cleaned_data.get('phone_number')
         
         # --- THIS IS THE NEW, GUARANTEED LOGIC ---
-        # Get the referral code from the session
+        # Get the referral code from the session that we stored in the view
         referral_code = request.session.get('referral_code')
         if referral_code:
             try:
                 referrer_profile = Profile.objects.get(referral_code=referral_code)
+                # Save the relationship
                 user.profile.referred_by = referrer_profile.user
                 # Important: Clear the code from the session so it's only used once
                 del request.session['referral_code']
             except Profile.DoesNotExist:
-                pass # If the code is invalid, do nothing
+                # If the code is invalid for any reason, do nothing
+                pass
 
         user.profile.save()
         

@@ -8,9 +8,10 @@ from publications.views import CustomSignupView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('accounts/signup/', CustomSignupView.as_view(), name='account_signup'),
     path('accounts/', include('allauth.urls')),
     path('', include('publications.urls')), # This points to your app's urls
-    path('accounts/signup/', CustomSignupView.as_view(), name='account_signup'),
+    
 ]
 
 # This is for serving files in development
