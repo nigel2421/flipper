@@ -7,7 +7,7 @@ from .models import Profile
 class CustomSignupForm(SignupForm):
     first_name = forms.CharField(max_length=30, label='First Name', widget=forms.TextInput(attrs={'placeholder': 'First Name'}))
     last_name = forms.CharField(max_length=30, label='Last Name', widget=forms.TextInput(attrs={'placeholder': 'Last Name'}))
-    phone_number = forms.CharField(max_length=20, label='Phone Number', required=True, widget=forms.TextInput(attrs={'placeholder': 'Phone Number'}))
+    phone_number = forms.CharField(max_length=20, label='Phone Number (optional)', required=False, widget=forms.TextInput(attrs={'placeholder': 'Phone Number'}))
 
     def save(self, request):
         # Create the new user using allauth's standard process
