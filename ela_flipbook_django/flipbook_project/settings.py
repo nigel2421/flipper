@@ -177,14 +177,7 @@ LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
-# allauth specific settings for local accounts
-ACCOUNT_EMAIL_VERIFICATION = 'none' 
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = False      # We will use email as the username
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_SESSION_REMEMBER = True        # Allow users to select "Remember Me"
-# --- EMAIL CONFIGURATION (Production Ready) ---
-# We use os.environ.get() to safely read secrets from the server environment.
+
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.environ.get('EMAIL_HOST', 'localhost')
