@@ -153,7 +153,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # allauth specific settings
-ACCOUNT_EMAIL_VERIFICATION = 'optional' # Can be 'mandatory' for better security
+ACCOUNT_EMAIL_VERIFICATION = 'none' # Can be 'mandatory' for better security
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
