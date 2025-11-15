@@ -1,0 +1,31 @@
+{% extends "publications/base.html" %}
+{% load i18n %}
+
+{% block head_title %}{% trans "Sign In" %}{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-box">
+        
+        <h1>{% trans "Sign In Via Google" %}</h1>
+        <p style="color: var(--text-muted); margin-bottom: 30px;">
+            {% blocktrans with provider_name="Google" %}
+            You are about to sign in using a third-party account from {{ provider_name }}.
+            {% endblocktrans %}
+        </p>
+        
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="submit-btn" style="max-width: 250px; margin: 0 auto;">{% trans "Continue" %}</button>
+        </form>
+
+        <p class="auth-links" style="margin-top: 30px;">
+            {% if account.can_disconnect %}
+                {% url 'socialaccount_connections' as connections_url %}
+                {% blocktrans %}Or <a href="{{ connections_url }}">connect a different account</a>.{% endblocktrans %}
+            {% endif %}
+        </p>
+
+    </div>
+</div>
+{% endblock content %}

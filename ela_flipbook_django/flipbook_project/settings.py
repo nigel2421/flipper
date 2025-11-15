@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-p)$_lf*$b=h2x(l9cv^r8yo(662fa^1=nbnfs+fe8(iw-x^c+&'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [ 
     'press.businessmatters.co.ke',
@@ -39,15 +39,16 @@ ALLOWED_HOSTS = [
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
-    'django.contrib.contenttypes',
+    'django.contrib.contenttypes', # <-- CORE DJANGO
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',        # <-- MOVE SITES HERE (before allauth)
     'publications',
     'allauth',
     'allauth.account',
-    'allauth.socialaccount',
-    
+    'allauth.socialaccount',       # <-- CORE ALLAUTH
+    'allauth.socialaccount.providers.google',
 ]
 
 MIDDLEWARE = [
@@ -144,7 +145,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 # Required by Django for the 'sites' framework, which allauth uses
-SITE_ID = 1
+SITE_ID = 6
 
 # Add the authentication backend
 AUTHENTICATION_BACKENDS = [
@@ -161,15 +162,6 @@ LOGIN_REDIRECT_URL = '/' # Redirect to homepage after login
 LOGOUT_REDIRECT_URL = '/' # Redirect to homepage after logout
 
 
-
-# --- ALLAUTH AND SESSION SETTINGS (AT THE BOTTOM OF THE FILE) ---
-
-SITE_ID = 1
-
-AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',
-]
 
 # Tell Django where to redirect users if they try to access a protected page
 LOGIN_URL = '/accounts/login/' 
@@ -201,3 +193,31 @@ ACCOUNT_FORMS = {
 # --- LONG LOGIN PERIOD SETTING ---
 # This sets the "Remember Me" cookie duration to one month (in seconds)
 SESSION_COOKIE_AGE = 25920000  # 30 days * 24 hours * 60 minutes * 60 seconds
+
+# --- SOCIAL ACCOUNT SETTINGS ---
+# This prevents the initial custom form page and immediately directs to social login.
+SOCIALACCOUNT_LOGIN_ON_SEPARATE_URLS = True 
+
+# --- REDIRECTS ---
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+# flipbook_project/settings.py
+
+# ... (Your existing DEBUG = True/False setting) ...
+
+# === PROTOCOL CONFIGURATION (MUST BE HERE) ===
+if DEBUG:
+    # For local development without SSL
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http"
+else:
+    # For production environment with SSL
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
+
+# This is also a production-only fix, so it should only be active in production
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    # You may also want to enforce security headers on the live site
+    SECURE_SSL_REDIRECT = True
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True
+# ============================================
