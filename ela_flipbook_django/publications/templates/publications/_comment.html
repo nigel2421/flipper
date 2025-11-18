@@ -1,0 +1,38 @@
+<!-- publications/templates/publications/_comment.html -->
+
+<li class="comment {% if article.author and comment.user == article.author.user %}comment-by-author{% endif %}" id="comment-{{ comment.id }}">
+    <div class="comment-meta">
+        <strong>{{ comment.user.username }}</strong> -
+        <small>{{ comment.created_at|date:"F j, Y, g:i a" }}</small>
+    </div>
+    <p>{{ comment.text|linebreaksbr }}</p>
+
+    <!-- Reply Button -->
+    <div class="comment-actions">
+        <a href="#comment-form" class="reply-btn" data-comment-id="{{ comment.id }}">Reply</a>
+
+        <!-- Like Button -->
+        <button class="like-btn {% if request.user in comment.likes.all %}liked{% endif %}" data-comment-id="{{ comment.id }}">
+            <i class="fa fa-thumbs-up"></i> Like
+            <span class="like-count">{{ comment.like_count }}</span>
+        </button>
+
+        {% if request.user.is_authenticated and request.user != comment.user %}
+            <form action="{% url 'publications:report_comment' pk=comment.id %}" method="post" style="display: inline;">
+                {% csrf_token %}
+                <input type="hidden" name="reason" value="Inappropriate content"> {# You could make this a modal for user input #}
+                <button type="submit" class="report-btn">Report</button>
+            </form>
+        {% endif %}
+    </div>
+
+
+    <!-- Nested Replies -->
+    {% if comment.replies.all %}
+        <ul class="comment-list nested">
+            {% for reply in comment.replies.all %}
+                {% include 'publications/_comment.html' with comment=reply %}
+            {% endfor %}
+        </ul>
+    {% endif %}
+</li>

@@ -9,22 +9,22 @@
 
         <!-- Column 1: Social Sign-in -->
         <div class="social-login-column">
-            <h2>Sign Up/In with:</h2>
+            <h1>Sign Up or Log In with:</h1>
             
            <a href="{% provider_login_url 'google' %}" class="google-btn">
 
              <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google logo">
-                         Continue with Google
+                          Google
             </a>
 
             <p class="separator-line"><span>OR</span></p>
 
-            <h2 class="email-login-header">Sign in with Email</h2>
+            <!--<h2 class="email-login-header">Sign in with Email</h2>-->
         </div>
 
         <!-- Column 2: The Main Email Form -->
         <div class="email-form-column">
-            <h1 class="main-header">Login to Your Account</h1>
+            <h4 class="main-header">Login to Your Account</h4>
             <p class="sub-header">Welcome back! Please enter your details.</p>
 
             <form class="login-form" id="login_form" method="post" action="{% url 'account_login' %}">

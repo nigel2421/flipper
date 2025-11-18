@@ -7,13 +7,65 @@ import csv
 from django.http import HttpResponse
 
 # Import all your models
-from .models import Publication, Profile, Event
+from .models import Magazine, Article, Profile, Event, Author, Tag, Rating, Comment, CommentReport
 
-# --- Publication Admin ---
-class PublicationAdmin(admin.ModelAdmin):
+# --- NEW: Register Author, Tag, and Rating Models ---
+@admin.register(Author)
+class AuthorAdmin(admin.ModelAdmin):
+    list_display = ('name', 'user')
+    search_fields = ('name',)
+
+@admin.register(Tag)
+class TagAdmin(admin.ModelAdmin):
+    list_display = ('name', 'slug')
+    prepopulated_fields = {'slug': ('name',)} # Auto-fills slug from name
+
+@admin.register(Rating)
+class RatingAdmin(admin.ModelAdmin):
+    list_display = ('article', 'user', 'score')
+    list_filter = ('score',)
+
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ('user', 'article', 'text', 'created_at', 'is_reported', 'report_count')
+    list_filter = ('is_reported', 'created_at', 'article__title')
+    search_fields = ('user__username', 'article__title', 'text')
+    actions = ['mark_as_reviewed', 'mark_as_not_reported']
+
+    def mark_as_reviewed(self, request, queryset):
+        queryset.update(is_reported=False, report_count=0)
+        self.message_user(request, "Selected comments marked as reviewed.")
+    mark_as_reviewed.short_description = "Mark selected comments as reviewed"
+
+
+@admin.register(CommentReport)
+class CommentReportAdmin(admin.ModelAdmin):
+    list_display = ('comment', 'reporter', 'reason', 'created_at', 'is_resolved')
+    list_filter = ('is_resolved', 'created_at', 'comment__article__title')
+    search_fields = ('comment__text', 'reporter__username', 'reason')
+    actions = ['mark_as_resolved']
+
+    def mark_as_resolved(self, request, queryset):
+        queryset.update(is_resolved=True)
+        self.message_user(request, "Selected reports marked as resolved.")
+    mark_as_resolved.short_description = "Mark selected reports as resolved"
+
+
+# --- Magazine Admin (for Flipbooks) ---
+@admin.register(Magazine)
+class MagazineAdmin(admin.ModelAdmin):
     list_display = ('title', 'uploaded_at')
-    fields = ('title', 'pdf_file', 'cover_image')
-admin.site.register(Publication, PublicationAdmin)
+    fields = ('title', 'excerpt', 'pdf_file', 'cover_image')
+
+# --- NEW: Article Admin ---
+@admin.register(Article)
+class ArticleAdmin(admin.ModelAdmin):
+    list_display = ('title', 'author', 'uploaded_at', 'is_featured', 'is_editors_pick', 'view_count')
+    list_filter = ('is_featured', 'is_editors_pick', 'tags', 'author')
+    search_fields = ('title', 'excerpt', 'author__name')
+    filter_horizontal = ('tags',)
+    # Define the fields for the "Add/Change" page
+    fields = ('title', 'author', 'excerpt', 'content', 'cover_image', 'tags', 'is_featured', 'is_editors_pick')
 
 
 # --- Event Admin ---

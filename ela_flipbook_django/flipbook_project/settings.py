@@ -4,9 +4,13 @@ Django settings for flipbook_project project.
 
 from pathlib import Path
 import os
+import dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load environment variables from .env file
+dotenv.load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 
 # Quick-start development settings - unsuitable for production
@@ -40,6 +44,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    'ckeditor',
 ]
 
 MIDDLEWARE = [
@@ -102,6 +107,12 @@ USE_I18N = True
 USE_TZ = True
 
 
+# --- GOOGLE AI API CONFIGURATION ---
+# Store your key in an environment variable for security.
+# Example: GOOGLE_API_KEY='your-secret-api-key'
+GOOGLE_API_KEY = os.environ.get('GEMINI_API_KEY')
+
+
 # --- Static and Media File Configuration ---
 STATIC_URL = 'flipper/ela_flipbook_django/publications/static/'
 MEDIA_URL = 'flipper/ela_flipbook_django/media/'
@@ -112,7 +123,7 @@ X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 
 # --- AUTHENTICATION & ALLAUTH SETTINGS ---
-SITE_ID = 1 # The ID of the primary site record in django_site table
+SITE_ID = 6 # The ID of the primary site record in django_site table
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
@@ -120,10 +131,10 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # Allauth core settings
-ACCOUNT_EMAIL_VERIFICATION = 'none' 
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_LOGIN_METHODS = ['email']  # Use the new setting name (plural) and provide it as a list
+ACCOUNT_SIGNUP_FIELDS = ['email'] # Use the new setting name
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None # Explicitly state no username is used
 ACCOUNT_FORMS = { 'signup': 'publications.forms.CustomSignupForm', }
 
 
@@ -165,3 +176,12 @@ else:
     SECURE_SSL_REDIRECT = True
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True
+
+# --- CKEDITOR CONFIGURATION ---
+CKEDITOR_CONFIGS = {
+    'default': {
+        'toolbar': 'full',
+        'height': 300,
+        'width': '100%',
+    },
+}

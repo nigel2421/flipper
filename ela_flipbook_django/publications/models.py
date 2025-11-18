@@ -4,20 +4,110 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from ckeditor.fields import RichTextField
 import uuid
 
-# --- Publication Model ---
-class Publication(models.Model):
+# --- NEW: Author Model ---
+class Author(models.Model):
+    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True, help_text="Link to a Django user if the author has an account.")
+    name = models.CharField(max_length=100)
+    profile_photo = models.ImageField(upload_to='authors/', null=True, blank=True)
+    bio = models.TextField(blank=True)
+
+    def __str__(self):
+        return self.name
+
+# --- NEW: Tag Model (for Categories) ---
+class Tag(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    slug = models.SlugField(max_length=50, unique=True)
+
+    def __str__(self):
+        return self.name
+
+# --- Magazine Model (for Flipbooks) ---
+class Magazine(models.Model):
     title = models.CharField(max_length=200)
-    pdf_file = models.FileField(upload_to='pdfs/')
+    pdf_file = models.FileField(upload_to='publications/')
     cover_image = models.ImageField(upload_to='covers/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    # === NEW FIELDS ===
+    excerpt = models.TextField(blank=True, help_text="A short summary for card previews.")
 
     def __str__(self):
         return self.title
 
     class Meta:
         ordering = ['-uploaded_at']
+
+# --- NEW: Article Model (for Web Articles) ---
+class Article(models.Model):
+    title = models.CharField(max_length=200)
+    cover_image = models.ImageField(upload_to='article_covers/')
+    # This field holds the actual text content of the article.
+
+    content = RichTextField()
+    excerpt = models.TextField(blank=True, help_text="A short summary for card previews.")
+    author = models.ForeignKey(Author, on_delete=models.SET_NULL, null=True, blank=True, related_name="articles")
+    tags = models.ManyToManyField(Tag, blank=True, related_name="articles")
+    
+    is_featured = models.BooleanField(default=False, help_text="Set to true to display as the featured story on the articles page.")
+    is_editors_pick = models.BooleanField(default=False)
+    view_count = models.PositiveIntegerField(default=0, editable=False)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    summary = models.TextField(blank=True, null=True, help_text="AI-generated summary of the article content.")
+
+    def __str__(self):
+        return self.title
+
+# --- NEW: Rating Model ---
+class Rating(models.Model):
+    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name="ratings") # Now non-nullable
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    score = models.PositiveSmallIntegerField(choices=[(i, i) for i in range(1, 6)]) # 1 to 5 stars
+
+    class Meta:
+        unique_together = ('article', 'user')
+
+# --- NEW: Comment Model ---
+class Comment(models.Model):
+    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name='comments')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    # This field allows for nested comments
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
+
+    def __str__(self):
+        return f"Comment by {self.user.username} on {self.article.title}"
+
+    class Meta:
+        ordering = ['created_at']
+
+# --- NEW: CommentReport Model ---
+class CommentReport(models.Model):
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name='reports')
+    reporter = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True) # User who reported
+    reason = models.TextField(blank=True, help_text="Reason for reporting the comment.")
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_resolved = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Report for Comment {self.comment.id} by {self.reporter.username if self.reporter else 'Anonymous'}"
+
+    class Meta:
+        ordering = ['-created_at']
+        # A user can only report a specific comment once
+        unique_together = ('comment', 'reporter')
+
+# Add these fields to the Comment model for easy tracking
+Comment.add_to_class('is_reported', models.BooleanField(default=False))
+Comment.add_to_class('report_count', models.PositiveIntegerField(default=0))
+
+# You might need to run makemigrations and migrate after this change.
+# If you get an error about adding non-nullable fields, you might need to
+# provide a default or make them nullable temporarily.
 
 # --- Profile Model ---
 class Profile(models.Model):

@@ -40,6 +40,36 @@
         </div>
     </section>
 
+    <!-- === NEW: STATS CARD SECTION === -->
+    <div class="container">
+        <div class="stats-card-container">
+            <!-- Site Visitors -->
+            <div class="stat-card">
+                <h3 class="stat-title">Visitors Online</h3>
+                <p class="stat-number" data-target="{{ visitor_count }}">{{ visitor_count }}</p>
+                <p class="stat-description">Currently browsing articles and events.</p>
+            </div>
+
+            <!-- Number of Subscribers -->
+            <div class="stat-card">
+                <h3 class="stat-title">Subscribers</h3>
+                <p class="stat-number" data-target="{{ subscribers_count }}">{{ subscribers_count }}</p>
+                <p class="stat-description">Join our growing community of readers.</p>
+            </div>
+
+            <!-- Key Events -->
+            <div class="stat-card">
+                <h3 class="stat-title">Next Event</h3>
+                {% if key_event %}
+                    <p class="stat-number event-title">{{ key_event.title }}</p>
+                    <p class="stat-description">On {{ key_event.event_date|date:"F j, Y" }}</p>
+                {% else %}
+                    <p class="stat-description">No upcoming events scheduled. Stay tuned!</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
     <!-- PUBLICATIONS GRID SECTION -->
     <div class="container">
         <div class="publications-header">
@@ -63,6 +93,39 @@
                 </a>
             {% empty %}
                 <p class="no-publications">No publications have been uploaded yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- === NEW: MOST POPULAR ARTICLES SECTION === -->
+    <div class="container">
+        <div class="publications-header">
+            <h2>Most Popular Articles</h2>
+        </div>
+
+        <div class="publications-grid">
+            {% for article in top_articles %}
+                <div class="publication-card article-story-card">
+                    <a href="{% url 'publications:article_detail' pk=article.id %}" class="card-image-wrapper">
+                        <img src="{{ article.cover_image.url }}" alt="Cover for {{ article.title }}">
+                    </a>
+                    <div class="card-content">
+                        <h3 class="card-title"><a href="{% url 'publications:article_detail' pk=article.id %}">{{ article.title }}</a></h3>
+                        <p class="card-excerpt">{{ article.excerpt|truncatewords:20 }}</p>
+                        <div class="card-tags">
+                            {% for tag in article.tags.all %}
+                                <span class="tag">{{ tag.name }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="article-average-rating">
+                            {% if article.average_rating %}
+                                Average Rating: {{ article.average_rating|floatformat:1 }} / 5
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <p class="no-publications">No articles have been viewed yet.</p>
             {% endfor %}
         </div>
     </div>

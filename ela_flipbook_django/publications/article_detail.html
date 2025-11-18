@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ article.title }}{% endblock %}
+
+{% block extra_head %}
+{# Link the new stylesheet. Make sure your base.html has an 'extra_head' block. #}
+<link rel="stylesheet" href="{% static 'css/article_styles.css' %}">
+{# You may need to add Font Awesome if you want icons #}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="article-container">
+
+    <header class="article-header">
+        <h1>{{ article.title }}</h1>
+
+        <div class="article-meta">
+            {% if article.author %}
+            <div class="meta-item author-meta">
+                <i class="fas fa-user-edit"></i>
+                <span>By <a href="#">{{ article.author.name }}</a></span>
+            </div>
+            {% endif %}
+
+            <div class="meta-item date-meta">
+                <i class="fas fa-calendar-alt"></i>
+                <span>{{ article.uploaded_at|date:"F d, Y" }}</span>
+            </div>
+
+            <div class="meta-item views-meta">
+                <i class="fas fa-eye"></i>
+                <span>{{ article.view_count }} View{{ article.view_count|pluralize }}</span>
+            </div>
+        </div>
+    </header>
+
+    {% if article.cover_image %}
+    <img src="{{ article.cover_image.url }}" alt="{{ article.title }}" class="article-cover-image">
+    {% endif %}
+
+    <div class="article-content">
+        {{ article.content|safe }}
+    </div>
+
+    {# --- Other sections of your page can go here --- #}
+    {# For example, comments, related articles, etc. #}
+    {# I'm leaving the comment form and list out for brevity, #}
+    {# but you would integrate them here. #}
+
+</div>
+
+{# You can include your other sections like related articles below #}
+{# For example: {% include 'publications/partials/related_articles.html' %} #}
+
+{% endblock %}

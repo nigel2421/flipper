@@ -1,0 +1,47 @@
+<!-- publications/templates/publications/rated_articles.html -->
+
+{% extends 'publications/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container articles-page-container">
+    <main class="articles-main-content">
+        <div class="publications-header">
+            <h2>My Rated Articles</h2>
+            <p class="subtitle">Articles you have rated.</p>
+        </div>
+
+        <div class="publications-grid">
+            {% for rating in user_ratings %}
+                {% with article=rating.article %}
+                <div class="publication-card article-story-card">
+                    <a href="{% url 'publications:article_detail' pk=article.id %}" class="card-image-wrapper">
+                        <img src="{{ article.cover_image.url }}" alt="Cover for {{ article.title }}">
+                    </a>
+                    <div class="card-content">
+                        <h3 class="card-title"><a href="{% url 'publications:article_detail' pk=article.id %}">{{ article.title }}</a></h3>
+                        <p class="card-excerpt">{{ article.excerpt|truncatewords:20 }}</p>
+                        <div class="card-tags">
+                            {% for tag in article.tags.all %}
+                                <span class="tag">{{ tag.name }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="article-average-rating">
+                            <!-- Display user's specific rating -->
+                            Your Rating: {{ rating.score }} / 5
+                        </div>
+                        {% if article.average_rating %}
+                            <div class="article-average-rating">
+                                Average Rating: {{ article.average_rating|floatformat:1 }} / 5
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endwith %}
+            {% empty %}
+                <p class="no-publications">You haven't rated any articles yet.</p>
+            {% endfor %}
+        </div>
+    </main>
+</div>
+{% endblock %}

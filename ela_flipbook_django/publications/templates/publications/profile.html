@@ -25,6 +25,8 @@
             
             <!-- This input displays your unique referral link -->
             <input type="text" value="{{ referral_link }}" readonly class="referral-link-input" onclick="this.select();" aria-label="Your referral link" title="Your referral link">
+
+            <a href="{% url 'publications:rated_articles' %}" class="submit-btn" style="margin-top: 20px;">View My Rated Articles</a>
         </div>
         <!-- === END OF MISSING SECTION === -->
 

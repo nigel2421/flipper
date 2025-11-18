@@ -1,0 +1,48 @@
+<!-- publications/templates/publications/author_detail.html -->
+
+{% extends 'publications/base.html' %}
+
+{% block content %}
+<div class="container articles-page-container">
+    <main class="articles-main-content">
+        <!-- Author Header -->
+        <div class="publications-header author-header-flex">
+            {% if author.profile_picture %}
+                <img src="{{ author.profile_picture.url }}" alt="Profile of {{ author.name }}" class="author-profile-picture">
+            {% else %}
+                <div class="author-profile-picture-placeholder"></div>
+            {% endif %}
+            <div class="author-header-info">
+                <h1>Articles by {{ author.name }}</h1>
+                {% if author.bio %}
+                    <p class="subtitle">{{ author.bio }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Article Grid Section -->
+        <div class="publications-grid">
+            {% for article in articles %}
+                <div class="publication-card article-story-card">
+                    <a href="{% url 'publications:article_detail' pk=article.id %}" class="card-image-wrapper">
+                        {% if article.cover_image %}
+                            <img src="{{ article.cover_image.url }}" alt="Cover for {{ article.title }}">
+                        {% endif %}
+                    </a>
+                    <div class="card-content">
+                        <h3 class="card-title"><a href="{% url 'publications:article_detail' pk=article.id %}">{{ article.title }}</a></h3>
+                        <p class="card-excerpt">{{ article.excerpt|truncatewords:20 }}</p>
+                        <div class="card-tags">
+                            {% for tag in article.tags.all %}
+                                <span class="tag">{{ tag.name }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <p class="no-publications">This author has not published any articles yet.</p>
+            {% endfor %}
+        </div>
+    </main>
+</div>
+{% endblock %}

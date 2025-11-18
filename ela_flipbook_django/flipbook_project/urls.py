@@ -9,28 +9,19 @@ from django.views.generic import RedirectView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('accounts/signup/', CustomSignupView.as_view(), name='account_signup'),
-    path('accounts/', include('allauth.urls')),
-    path('', include('publications.urls')), # This points to your app's urls
-    
-]
-
-# This is for serving files in development
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-
-    urlpatterns = [
-    path('admin/', admin.site.urls),
 
     # 1. Sign-Up is immediately redirected to the Google login flow.
-    path("accounts/signup/", 
+    path("accounts/signup/",
          RedirectView.as_view(url='/accounts/google/login/', permanent=False), 
          name="account_signup"
     ),
-    
+
     # 2. All other allauth URLs
     path('accounts/', include('allauth.urls')),
-    
+
     path('', include('publications.urls')),
 ]
+
+# This is for serving files in development and should be appended at the end.
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

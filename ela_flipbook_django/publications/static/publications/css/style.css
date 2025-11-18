@@ -107,6 +107,22 @@ main > .container {
 
 .back-link { display: block; text-align: left; margin-bottom: 20px; color: var(--primary-blue); text-decoration: none; font-weight: 500; }
 
+/* --- NEW: Reading Progress Bar --- */
+.progress-container {
+    width: 100%;
+    height: 5px; /* Height of the progress bar */
+    background-color: transparent; /* Make container transparent */
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 2000; /* Ensure it's above everything */
+    display: none; /* Hidden by default, shown via JS on article pages */
+}
+.progress-bar {
+    height: 100%;
+    background-color: var(--accent-yellow);
+    width: 0%; /* Starts at 0% width */
+}
 /* ==========================================================================
    5. PAGE-SPECIFIC STYLES
    ========================================================================== */
@@ -126,6 +142,29 @@ main > .container {
 .hero-images .image-1 { z-index: 3; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(5deg); }
 .hero-images .image-2 { z-index: 2; top: 50%; left: 30%; transform: translate(-50%, -50%) rotate(-8deg); }
 .hero-images .image-3 { z-index: 1; top: 50%; left: 70%; transform: translate(-50%, -50%) rotate(12deg); }
+
+/* --- NEW: Stats Card Section --- */
+.stats-card-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: -50px; /* Pull the cards up to overlap the hero section slightly */
+    position: relative;
+    z-index: 10;
+}
+.stat-card {
+    background-color: var(--card-bg);
+    padding: 25px;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid #333;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+}
+.stat-title { color: var(--accent-yellow); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 15px 0; }
+.stat-number { font-size: 3rem; font-weight: 700; color: var(--text-dark); margin: 0 0 15px 0; line-height: 1; }
+.stat-number.event-title { font-size: 1.5rem; line-height: 1.3; min-height: 62px; /* Prevents layout shift */ display: flex; align-items: center; justify-content: center; }
+.stat-description { font-size: 0.9rem; color: var(--text-muted); margin: 0; }
+
 
 /* --- Articles Page --- */
 .articles-container { max-width: 900px; margin: 0 auto; }
@@ -162,12 +201,307 @@ main > .container {
 .contact-info a { color: var(--accent-yellow); text-decoration: none; transition: text-decoration 0.3s ease; }
 .contact-info a:hover { text-decoration: underline; }
 .social-media { margin-top: 40px; }
-.social-icon { display: inline-block; width: 44px; height: 44px; line-height: 44px; text-align: center; border-radius: 50%; color: #fff; text-decoration: none; font-weight: bold; margin: 0 10px; transition: transform 0.3s ease; }
+.social-icon { display: inline-flex; justify-content: center; align-items: center; width: 44px; height: 44px; border-radius: 50%; text-decoration: none; margin: 0 10px; transition: transform 0.3s ease; background-color: #fff; /* Added a white background for contrast */ }
 .social-icon:hover { transform: scale(1.1); }
-.social-icon.facebook { background-color: #3b5998; }
-.social-icon.instagram { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888 100%); }
-.social-icon.youtube { background-color: #ff0000; }
-.social-icon.twitter { background-color: #0c0c0c; }
+
+/* --- NEW: Style the image inside the social icon link --- */
+/* --- Article Detail Page --- */
+.article-detail-container {
+    max-width: 900px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    border: 1px solid #333;
+}
+
+.article-header h1 {
+    color: var(--text-dark);
+    margin-bottom: 10px;
+}
+
+.article-meta {
+    font-size: 0.9em;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+}
+.article-meta .average-rating {
+    margin-left: 15px;
+    font-weight: bold;
+    color: var(--accent-yellow);
+}
+
+
+.article-content {
+    color: var(--text-light);
+    line-height: 1.6;
+}
+
+/* --- Cover Image Styling --- */
+.article-cover-image {
+    width: 100%;      /* Make image responsive to its container */
+    height: auto;     /* Maintain aspect ratio */
+    object-fit: cover;
+    border-radius: 8px; /* Optional: adds rounded corners */
+    margin-bottom: 2rem;
+}
+
+/* --- NEW: Social Share Buttons Styling --- */
+.social-share-section {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #333;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap; /* Allows buttons to wrap on smaller screens */
+}
+.social-share-section span {
+    font-weight: bold;
+    color: var(--text-light);
+}
+.share-buttons {
+    display: flex;
+    gap: 10px;
+}
+.share-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%; /* Circular buttons */
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.1rem;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+.share-btn:hover { transform: scale(1.1); opacity: 0.9; }
+.share-btn.twitter { background-color: #1DA1F2; }
+.share-btn.facebook { background-color: #1877F2; }
+.share-btn.linkedin { background-color: #0A66C2; }
+.share-btn.copy-link { background-color: #6c757d; }
+.share-btn.native-share { background-color: var(--primary-blue); gap: 8px; width: auto; padding: 0 15px; border-radius: 20px; font-size: 0.9rem; }
+
+/* Social Media Icons */
+.social-icon img {
+    width: 24px;  /* Adjust size as needed */
+    height: 24px; /* Adjust size as needed */
+    object-fit: contain;
+}
+
+/* REMOVED: The background colors are no longer needed as the images provide the branding */
+/* .social-icon.facebook { background-color: #3b5998; } */
+/* .social-icon.instagram { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888 100%); } */
+
+/* Rating Section */
+.rating-section {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #333;
+}
+
+.star-rating {
+    display: inline-block;
+    font-size: 2.5rem;
+    cursor: pointer;
+}
+
+.star {
+    color: #555; /* Unselected star color */
+    transition: color 0.2s;
+}
+
+.star-rating:hover .star,
+.star-rating .star.selected {
+    color: var(--accent-yellow); /* Selected/hovered star color */
+}
+
+.star-rating:hover .star:hover ~ .star {
+    color: #555; /* Make stars to the right of the hovered one unselected */
+}
+/* Comment Section */
+.article-average-rating {
+    font-size: 0.9em;
+    color: var(--accent-yellow);
+    margin-top: 5px;
+}
+.comment-section {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #333;
+}
+
+.comment-section h3 {
+    color: var(--text-dark);
+    margin-bottom: 25px;
+}
+
+.comment-list {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 20px;
+}
+.comment-list .comment {
+    background-color: #0a192f; /* Slightly darker than card-bg */
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 15px;
+    position: relative;
+}
+.comment-list .comment:last-child {
+    margin-bottom: 0;
+}
+.comment-meta {
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.comment-meta strong { color: var(--text-dark); }
+.comment-meta small {
+    color: var(--text-muted);
+    font-size: 0.8em;
+}
+.comment p {
+    margin: 0 0 10px 0;
+}
+
+/* --- NEW: Style for comments by the article author --- */
+.comment-by-author {
+    border-color: var(--accent-yellow);
+}
+.comment-by-author .comment-meta strong::after {
+    content: 'Author';
+    background-color: var(--accent-yellow);
+    color: var(--dark-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    margin-left: 8px;
+    font-weight: bold;
+}
+
+.comment-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 5px;
+}
+.reply-btn {
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: var(--primary-blue);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+.report-btn {
+    background: none;
+    border: none;
+    color: #e74c3c; /* Red color for report */
+    font-size: 0.85rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.reply-btn:hover {
+    color: var(--accent-yellow);
+}
+.comment-list.nested {
+    margin-left: 30px;
+    padding-left: 20px;
+    border-left: 2px solid #333;
+}
+.report-btn:hover {
+    color: #c0392b;
+}
+
+/* --- NEW: Like Button Styling --- */
+.like-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: color 0.2s;
+}
+.like-btn:hover {
+    color: var(--primary-blue);
+}
+.like-btn.liked {
+    color: var(--primary-blue); /* Color when the user has liked it */
+    font-weight: bold;
+}
+.like-count { font-weight: normal; }
+
+#comment-form-header {
+    color: var(--text-dark);
+    margin-bottom: 20px;
+}
+
+/* --- NEW: Comment Form Styling --- */
+.comment-form {
+    background-color: #0a192f;
+    padding: 25px;
+    border-radius: 8px;
+    border: 1px solid #333;
+}
+.comment-form textarea,
+.comment-form input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    background-color: #333;
+    border: 1px solid #555;
+    border-radius: 4px;
+    color: var(--text-light);
+    font-size: 1rem;
+    margin-bottom: 15px;
+    box-sizing: border-box; /* Ensures padding doesn't affect width */
+}
+/* .social-icon.youtube { background-color: #ff0000; } */
+
+/* --- Pagination --- */
+.pagination {
+    margin-top: 30px;
+    text-align: center;
+}
+.pagination .step-links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+.pagination a {
+    color: var(--primary-blue);
+    text-decoration: none;
+    padding: 8px 12px;
+    border: 1px solid var(--primary-blue);
+    border-radius: 4px;
+    transition: background-color 0.2s, color 0.2s;
+}
+.pagination a:hover {
+    background-color: var(--primary-blue);
+    color: var(--text-dark);
+}
+.pagination .current {
+    color: var(--text-muted);
+    font-weight: bold;
+}
+/* .social-icon.twitter { background-color: #0c0c0c; } */
+
+/* --- Author Avatar Styling --- */
+.author-avatar-inline {
+    width: 30px; /* Adjust as needed */
+    height: 30px;
+    border-radius: 50%;
+    vertical-align: middle;
+}
 
 /* --- Login/Signup/Profile Pages --- */
 .login-container { display: flex; justify-content: center; align-items: center; padding: 40px 20px; }
@@ -230,6 +564,11 @@ main > .container {
     /* Other Tablet Styles */
     .publications-grid { grid-template-columns: repeat(2, 1fr); }
     .hero-headline { font-size: 2.2rem; }
+
+    /* Stats Card on Tablet */
+    .stats-card-container {
+        grid-template-columns: 1fr; /* Stack cards vertically */
+    }
 }
 
 /* For mobile phones */
@@ -274,3 +613,19 @@ main > .container {
     transform: scale(0.97);
 }
 
+/* =================================== */
+/*  Header & Navigation Styles         */
+/* =================================== */
+
+.logo img {
+    /* Set a maximum height for the logo. Adjust this value as needed. */
+    max-height: 50px; 
+    
+
+    /* Ensure the image scales correctly without distortion */
+    width: auto;
+    height: auto;
+    
+    /* Aligns the logo vertically with the navigation links */
+    vertical-align: middle; 
+}

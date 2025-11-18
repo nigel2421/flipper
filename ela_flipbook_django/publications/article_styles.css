@@ -1,0 +1,69 @@
+/* --- Article Detail Page Styles --- */
+
+.article-container {
+    max-width: 800px; /* Adjust as needed for your site's layout */
+    margin: 2rem auto; /* Center the container with some top/bottom margin */
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.article-header h1 {
+    font-size: 2.8rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: #222;
+    line-height: 1.2;
+}
+
+/* --- Metadata Styling --- */
+.article-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem 2rem; /* 1rem vertical gap, 2rem horizontal gap */
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+    color: #555;
+    font-size: 0.9rem;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    padding: 1rem 0;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; /* Space between icon and text */
+}
+
+.meta-item i { /* Assuming you use Font Awesome or similar */
+    color: #888;
+}
+
+.meta-item a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.meta-item a:hover {
+    text-decoration: underline;
+}
+
+/* --- Image Wrapper Fix --- */
+.article-cover-image {
+    width: 100%;      /* Make image responsive */
+    height: auto;     /* Maintain aspect ratio */
+    object-fit: cover;
+    border-radius: 8px; /* Optional: adds rounded corners */
+    margin-bottom: 2rem;
+}
+
+/* --- Article Content --- */
+.article-content {
+    line-height: 1.7;
+    font-size: 1.1rem;
+    color: #333;
+}

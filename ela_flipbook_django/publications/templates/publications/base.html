@@ -21,16 +21,24 @@
         </script>
 
     <!-- Main Stylesheet -->
-    <link rel="stylesheet" href="{% static 'publications/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'publications/css/style.css' %}?v=1">
 
 
 </head>
 <body>
+    <!-- Reading Progress Bar -->
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
     <header class="site-header">
         <!-- Changed class to 'navbar-container' for better CSS control -->
         <div class="container navbar-container">
-            <a href="{% url 'publications:home' %}" class="logo">Business Matters</a>
-            
+            <a href="{% url 'publications:home' %}" class="logo">
+                {% comment %} Replace "img/logo.png" with the actual path to your logo image {% endcomment %}
+                <img src="{% static 'img/logo.png' %}" alt="Business Matters Logo">
+            </a>
+
             <!-- === NEW: The Hamburger Menu Icon === -->
             <div class="hamburger" id="hamburger-menu">
                 <span class="bar"></span>
@@ -50,7 +58,7 @@
                     <a href="{% url 'publications:profile' %}">Hi, {{ user.first_name|default:user.username }}</a>
                     <a href="{% url 'account_logout' %}">Logout</a>
                 {% else %}
-                    <a href="{% url 'account_login' %}">Sign Up</a>
+                    <!--<a href="{% url 'account_login' %}">Sign Up</a>-->
                     <a href="{% url 'account_login' %}">Login</a>
                 {% endif %} <!-- <-- THIS IS THE FIX -->
             </nav>
@@ -102,5 +110,78 @@
         }
     </script>
 
+    <!-- === NEW: JavaScript for Interactive Star Rating === -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const stars = document.querySelectorAll('.star-rating .star');
+            const ratingForm = document.querySelector('.rating-form');
+            if (!ratingForm) return; // Exit if no rating form on the page
+
+            const scoreInput = ratingForm.querySelector('input[name="score"]');
+            const userRating = ratingForm.getAttribute('data-user-rating');
+
+            const setSelectedStars = (value) => {
+                stars.forEach(s => {
+                    s.classList.toggle('selected', s.getAttribute('data-value') <= value);
+                });
+            };
+
+            // Pre-select stars if the user has already rated
+            if (userRating) {
+                scoreInput.value = userRating;
+                setSelectedStars(user_rating);
+            }
+
+            stars.forEach(star => {
+                star.addEventListener('click', function() {
+                    const value = this.getAttribute('data-value');
+                    scoreInput.value = value;
+                    setSelectedStars(value);
+                });
+            });
+        });
+    </script>
+
+    <!-- === NEW: JavaScript for Count-Up Animation on Stat Cards === -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const statNumbers = document.querySelectorAll('.stat-number[data-target]');
+
+        const animateCountUp = (el) => {
+            const target = parseInt(el.getAttribute('data-target'), 10);
+            if (isNaN(target)) return;
+
+            let current = 0;
+            const duration = 1500; // Animation duration in milliseconds
+            const increment = target / (duration / 16);
+
+            const updateCount = () => {
+                current += increment;
+                if (current < target) {
+                    el.innerText = Math.ceil(current).toLocaleString();
+                    requestAnimationFrame(updateCount);
+                } else {
+                    el.innerText = target.toLocaleString();
+                }
+            };
+            requestAnimationFrame(updateCount);
+        };
+
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const el = entry.target;
+                    animateCountUp(el);
+                    observer.unobserve(el); // Stop observing after animation starts
+                }
+            });
+        }, { threshold: 0.5 }); // Trigger when 50% of the element is visible
+
+        statNumbers.forEach(el => {
+            el.innerText = '0'; // Set initial text to 0
+            observer.observe(el);
+        });
+    });
+    </script>
 </body>
 </html>

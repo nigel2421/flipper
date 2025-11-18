@@ -7,6 +7,10 @@ import sys
 def main():
     """Run administrative tasks."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'flipbook_project.settings')
+    import pkg_resources
+    installed_packages = {pkg.key for pkg in pkg_resources.working_set}
+    print(installed_packages)
+
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
