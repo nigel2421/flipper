@@ -184,26 +184,98 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const parentIdInput = document.querySelector('#comment-form input[name="parent_id"]');
-        const formHeader = document.getElementById('comment-form-header');
-        const cancelBtn = document.getElementById('cancel-reply-btn');
+        const mainCommentForm = document.getElementById('comment-form');
+        const mainFormHeader = document.getElementById('comment-form-header');
+        const mainCancelBtn = document.getElementById('cancel-reply-btn');
+        const parentIdInput = mainCommentForm.querySelector('input[name="parent_id"]');
+
+        let activeReplyForm = null; // To keep track of the currently active reply form
+
+        // Function to reset the main comment form
+        function resetMainCommentForm() {
+            parentIdInput.value = '';
+            mainFormHeader.innerText = 'Leave a Comment';
+            mainCancelBtn.style.display = 'none';
+            mainCommentForm.style.display = 'block'; // Ensure main form is visible
+            // Clear any text in the main form's textarea if needed
+            const mainTextarea = mainCommentForm.querySelector('textarea[name="text"]');
+            if (mainTextarea) {
+                mainTextarea.value = '';
+            }
+        }
+
+        // Initial state: ensure main form is visible and reset
+        resetMainCommentForm();
 
         document.querySelectorAll('.reply-btn').forEach(button => {
             button.addEventListener('click', function(e) {
                 e.preventDefault();
                 const commentId = this.getAttribute('data-comment-id');
-                parentIdInput.value = commentId;
-                formHeader.innerText = 'Replying to comment...';
-                cancelBtn.style.display = 'block';
-                document.getElementById('comment-form').scrollIntoView({ behavior: 'smooth' });
+                const replyFormContainer = document.getElementById(`reply-form-container-${commentId}`);
+
+                // If there's an active reply form, remove it
+                if (activeReplyForm) {
+                    activeReplyForm.remove();
+                    activeReplyForm = null;
+                }
+
+                // If clicking the same reply button, just close the form
+                if (replyFormContainer.querySelector('.comment-form')) {
+                    return;
+                }
+
+                // Clone the main comment form
+                const newReplyForm = mainCommentForm.cloneNode(true);
+                newReplyForm.id = `reply-form-${commentId}`;
+                newReplyForm.classList.add('nested-reply-form'); // Add a class for styling if needed
+                newReplyForm.style.display = 'block'; // Ensure it's visible
+
+                // Update parent_id in the cloned form
+                const newParentIdInput = newReplyForm.querySelector('input[name="parent_id"]');
+                if (newParentIdInput) {
+                    newParentIdInput.value = commentId;
+                }
+
+                // Update header
+                const newFormHeader = newReplyForm.querySelector('#comment-form-header');
+                if (newFormHeader) {
+                    newFormHeader.id = `reply-form-header-${commentId}`; // Change ID to avoid duplicates
+                    newFormHeader.innerText = `Replying to ${this.closest('.comment').querySelector('.comment-meta strong').innerText}`;
+                }
+
+                // Clear textarea content
+                const newTextarea = newReplyForm.querySelector('textarea[name="text"]');
+                if (newTextarea) {
+                    newTextarea.value = '';
+                }
+
+                // Modify the cancel button
+                const newCancelBtn = newReplyForm.querySelector('#cancel-reply-btn');
+                if (newCancelBtn) {
+                    newCancelBtn.id = `cancel-reply-btn-${commentId}`; // Change ID to avoid duplicates
+                    newCancelBtn.style.display = 'block';
+                    newCancelBtn.onclick = function(cancelEvent) {
+                        cancelEvent.preventDefault();
+                        newReplyForm.remove();
+                        activeReplyForm = null;
+                        resetMainCommentForm(); // Show main form again
+                    };
+                }
+
+                // Hide the main comment form when a reply form is active
+                mainCommentForm.style.display = 'none';
+
+                // Insert the new form
+                replyFormContainer.appendChild(newReplyForm);
+                newReplyForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                activeReplyForm = newReplyForm;
             });
         });
 
-        cancelBtn.addEventListener('click', function(e) {
+        // Original cancel button for the main form
+        mainCancelBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            parentIdInput.value = '';
-            formHeader.innerText = 'Leave a Comment';
-            cancelBtn.style.display = 'none';
+            resetMainCommentForm();
         });
     });
 

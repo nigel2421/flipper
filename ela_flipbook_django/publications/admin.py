@@ -128,6 +128,12 @@ class UserAdmin(BaseUserAdmin):
     list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff')
     actions = [export_as_csv]
 
+    def get_inline_instances(self, request, obj=None):
+        # Return no inlines when creating a new user
+        if not obj:
+            return list()
+        return super().get_inline_instances(request, obj)
+
 # Re-register UserAdmin
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)

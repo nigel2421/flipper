@@ -137,15 +137,3 @@ class Event(models.Model):
 
     class Meta:
         ordering = ['-event_date']
-
-# --- Signal to create/update user profiles ---
-@receiver(post_save, sender=User)
-def ensure_profile_exists(sender, instance, created, **kwargs):
-    """
-    Creates a Profile for a new user, or ensures an existing user has one.
-    """
-    if created:
-        Profile.objects.create(user=instance)
-    else:
-        # For existing users, check if they have a profile, and if not, create it.
-        Profile.objects.get_or_create(user=instance)
