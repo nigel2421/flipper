@@ -12,8 +12,15 @@ from .models import Magazine, Article, Profile, Event, Author, Tag, Rating, Comm
 # --- NEW: Register Author, Tag, and Rating Models ---
 @admin.register(Author)
 class AuthorAdmin(admin.ModelAdmin):
-    list_display = ('name', 'user')
-    search_fields = ('name',)
+    list_display = ('name', 'user', 'get_user_email')
+    search_fields = ('name', 'user__username', 'user__email')
+    autocomplete_fields = ['user']
+
+    def get_user_email(self, obj):
+        if obj.user:
+            return obj.user.email
+        return '-'
+    get_user_email.short_description = 'User Email'
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
@@ -62,7 +69,8 @@ class MagazineAdmin(admin.ModelAdmin):
 class ArticleAdmin(admin.ModelAdmin):
     list_display = ('title', 'author', 'uploaded_at', 'is_featured', 'is_editors_pick', 'view_count')
     list_filter = ('is_featured', 'is_editors_pick', 'tags', 'author')
-    search_fields = ('title', 'excerpt', 'author__name')
+    search_fields = ('title', 'excerpt', 'author__name', 'author__user__username', 'author__user__email')
+    autocomplete_fields = ['author']
     filter_horizontal = ('tags',)
     # Define the fields for the "Add/Change" page
     fields = ('title', 'author', 'excerpt', 'content', 'cover_image', 'tags', 'is_featured', 'is_editors_pick')

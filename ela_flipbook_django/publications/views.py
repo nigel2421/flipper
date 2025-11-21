@@ -1,4 +1,5 @@
 # publications/views.py
+# Force recompile
 
 from django.shortcuts import render, get_object_or_404
 from channels.layers import get_channel_layer
@@ -16,7 +17,7 @@ from .models import Magazine, Article, Event, Profile, Tag, Author # Import new 
 from django.db.models import Q, Avg
 from .forms import RatingForm, CommentForm
 from django.db.models.functions import ExtractYear
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect
 from allauth.account.views import SignupView # Import the original SignupView
 
 # === CLASS-BASED VIEWS (for advanced features) ===
@@ -44,8 +45,8 @@ def home_view(request):
     top_articles = Article.objects.order_by('-view_count')[:5]
 
     # --- NEW: Stats Card Logic ---
-    # 1. Get subscriber count and add 200
-    subscribers_count = User.objects.count() + 200
+    # 1. Get subscriber count and add 350
+    subscribers_count = User.objects.count() + 350
 
     # 2. Get or generate visitor count (updates every 4 hours)
     visitor_count = cache.get('visitor_count')
@@ -112,9 +113,6 @@ def articles_view(request):
     # Get the featured story and exclude it from the main grid to avoid duplication
     featured_story = Article.objects.filter(is_featured=True).first()
     if featured_story:
-        # Calculate average rating for the featured story
-        featured_story.average_rating = featured_story.ratings.aggregate(Avg('score'))['score__avg']
-        
         articles = articles.exclude(pk=featured_story.pk)
 
     context = {
@@ -132,10 +130,7 @@ def articles_view(request):
 @login_required
 def article_detail_view(request, pk):
     """ Renders a single web article page. """
-    from django.http import HttpResponseRedirect
     article = get_object_or_404(Article, pk=pk)    
-    # Calculate average rating for the current article
-    article.average_rating = article.ratings.aggregate(Avg('score'))['score__avg']
 
     # --- NEW: Get the current user's rating for this article ---
     user_rating = None
@@ -190,9 +185,9 @@ def article_detail_view(request, pk):
             parent_id = comment_form.cleaned_data.get('parent_id')
             parent_comment = None
             if parent_id:
-                try:
+                try: # Use the related_name 'comments' or the default manager
                     parent_comment = article.comments.get(id=parent_id)
-                except Article.comments.model.DoesNotExist:
+                except article.comments.model.DoesNotExist:
                     pass # Handle error case if parent comment is not found
             # Save comment
             article.comments.create(user=request.user, text=text, parent=parent_comment)
@@ -339,6 +334,7 @@ def rated_articles_view(request):
 @login_required
 def report_comment(request, pk):
     """ Allows a logged-in user to report an inappropriate comment. """
+    from .models import Comment, CommentReport # Import CommentReport model
     comment = get_object_or_404(Comment, pk=pk)
 
     if request.method == 'POST':
@@ -373,26 +369,27 @@ def like_comment_view(request, pk):
     comment = get_object_or_404(Comment, pk=pk)
     
     is_liked = False
-    if comment.likes.filter(id=request.user.id).exists():
+    if comment.liked_by.filter(id=request.user.id).exists():
         # User has already liked this comment, so unlike it.
-        comment.likes.remove(request.user)
+        comment.liked_by.remove(request.user)
         is_liked = False
     else:
         # User has not liked this comment yet, so like it.
-        comment.likes.add(request.user)
+        comment.liked_by.add(request.user)
         is_liked = True
 
-    # Send WebSocket message to update all clients
+    # Send WebSocket message to update all clients if channel_layer is available
     channel_layer = get_channel_layer()
-    article_id = comment.article.id
-    async_to_sync(channel_layer.group_send)(
-        f'article_{article_id}_comments',
-        {
-            'type': 'comment_like_update', # This calls the comment_like_update method in the consumer
-            'message': {
-                'comment_id': comment.id,
-                'like_count': comment.like_count
+    if channel_layer:
+        article_id = comment.article.id
+        async_to_sync(channel_layer.group_send)(
+            f'article_{article_id}_comments',
+            {
+                'type': 'comment_like_update', # This calls the comment_like_update method in the consumer
+                'message': {
+                    'comment_id': comment.id,
+                    'like_count': comment.like_count
+                }
             }
-        }
-    )
+        )
     return JsonResponse({'liked': is_liked, 'like_count': comment.like_count})

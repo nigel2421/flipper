@@ -12,9 +12,9 @@ class Author(models.Model):
     user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True, help_text="Link to a Django user if the author has an account.")
     name = models.CharField(max_length=100)
     profile_photo = models.ImageField(upload_to='authors/', null=True, blank=True)
-    bio = models.TextField(blank=True)
-
     def __str__(self):
+        if self.user:
+            return f"{self.name} ({self.user.email})"
         return self.name
 
 # --- NEW: Tag Model (for Categories) ---
@@ -61,6 +61,15 @@ class Article(models.Model):
     def __str__(self):
         return self.title
 
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('publications:article_detail', kwargs={'pk': self.pk})
+
+    @property
+    def average_rating(self):
+        from django.db.models import Avg
+        return self.ratings.aggregate(Avg('score'))['score__avg'] or 0
+
 # --- NEW: Rating Model ---
 class Rating(models.Model):
     article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name="ratings") # Now non-nullable
@@ -78,6 +87,17 @@ class Comment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     # This field allows for nested comments
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
+    
+    # Fields for likes
+    liked_by = models.ManyToManyField(User, related_name='liked_comments', blank=True)
+
+    # Fields for reporting
+    is_reported = models.BooleanField(default=False)
+    report_count = models.PositiveIntegerField(default=0)
+
+    @property
+    def like_count(self):
+        return self.liked_by.count()
 
     def __str__(self):
         return f"Comment by {self.user.username} on {self.article.title}"
@@ -102,8 +122,8 @@ class CommentReport(models.Model):
         unique_together = ('comment', 'reporter')
 
 # Add these fields to the Comment model for easy tracking
-Comment.add_to_class('is_reported', models.BooleanField(default=False))
-Comment.add_to_class('report_count', models.PositiveIntegerField(default=0))
+# Comment.add_to_class('is_reported', models.BooleanField(default=False))
+# Comment.add_to_class('report_count', models.PositiveIntegerField(default=0))
 
 # You might need to run makemigrations and migrate after this change.
 # If you get an error about adding non-nullable fields, you might need to

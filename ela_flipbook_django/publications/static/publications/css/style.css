@@ -208,8 +208,8 @@ main > .container {
 /* --- Article Detail Page --- */
 .article-detail-container {
     max-width: 900px;
-    margin: 20px auto;
-    padding: 20px;
+    margin: 40px auto; /* More vertical space */
+    padding: 40px;
     background-color: var(--card-bg);
     border-radius: 8px;
     border: 1px solid #333;
@@ -217,24 +217,59 @@ main > .container {
 
 .article-header h1 {
     color: var(--text-dark);
-    margin-bottom: 10px;
+    margin-bottom: 15px;
+    font-size: 2.5rem; /* Larger title */
+    line-height: 1.2;
 }
 
 .article-meta {
-    font-size: 0.9em;
+    font-size: 0.9rem;
     color: var(--text-muted);
-    margin-bottom: 20px;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #333;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px 25px; /* row-gap column-gap */
+    align-items: center;
 }
-.article-meta .average-rating {
-    margin-left: 15px;
+
+.article-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.article-meta i.fas, .article-meta i.far {
+    color: var(--primary-blue);
+    font-size: 1.1em;
+}
+
+.average-rating {
     font-weight: bold;
     color: var(--accent-yellow);
 }
 
+.rating-stars {
+    color: var(--accent-yellow);
+}
 
 .article-content {
     color: var(--text-light);
-    line-height: 1.6;
+    line-height: 1.7;
+    font-size: 1.1rem;
+}
+
+.article-content a {
+    color: var(--accent-yellow);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(255, 196, 0, 0.5);
+    transition: all 0.2s ease-in-out;
+}
+
+.article-content a:hover {
+    background-color: rgba(255, 196, 0, 0.1);
+    border-bottom-color: var(--accent-yellow);
 }
 
 /* --- Cover Image Styling --- */
