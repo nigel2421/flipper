@@ -125,7 +125,7 @@ X_FRAME_OPTIONS = 'SAMEORIGIN'
 STATIC_ROOT = BASE_DIR / 'staticfiles_collected'
 
 # --- AUTHENTICATION & ALLAUTH SETTINGS ---
-SITE_ID = 1 # The ID of the primary site record in django_site table
+SITE_ID = 6 # The ID of the primary site record in django_site table
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
@@ -197,13 +197,6 @@ CKEDITOR_5_CONFIGS = {
             'outdent', 'indent', '|',
             'uploadImage', 'insertTable', 'undo', 'redo',
         ],
-        
-        # --- FIX FOR WHITE TEXT IN ADMIN ---
-        # The path here must match your static file structure 
-        # (e.g., publications/static/publications/css/ckeditor-fix.css)
-        'extra_plugins': ['style', 'publications/css/ckeditor-fix.css'],
-        # -----------------------------------
-        
         'image': {
             'toolbar': ['imageTextAlternative', 'imageTitle', '|', 'imageStyle:alignLeft', 'imageStyle:full', 'imageStyle:alignRight'],
             'styles': ['full', 'alignLeft', 'alignRight']
@@ -225,10 +218,6 @@ CKEDITOR_5_CONFIGS = {
             'uploadImage', 'insertTable', 'mediaEmbed', 'removeFormat', 'sourceEditing', 'undo', 'redo',
         ],
         
-        # --- FIX FOR WHITE TEXT IN ADMIN ---
-        'extra_plugins': ['style', 'publications/css/ckeditor-fix.css'],
-        # -----------------------------------
-        
         'image': {
             'toolbar': ['imageTextAlternative', 'imageTitle', '|', 'imageStyle:alignLeft', 'imageStyle:full', 'imageStyle:alignRight'],
             'styles': ['full', 'alignLeft', 'alignRight']
@@ -248,11 +237,11 @@ CKEDITOR_5_CONFIGS = {
     'minimal': {
         # A simple toolbar for short descriptions or excerpts
         'toolbar': ['bold', 'italic', 'link', 'bulletedList', 'numberedList'],
-        
-        # --- FIX FOR WHITE TEXT IN ADMIN ---
-        'extra_plugins': ['style', 'publications/css/ckeditor-fix.css'],
-        # -----------------------------------
-        
         'height': 150,
     },
 }
+
+# --- FIX FOR WHITE TEXT IN CKEDITOR ADMIN ---
+# This setting injects custom CSS into the editor's content area.
+# The path should be relative to your STATIC_URL.
+CKEDITOR_5_CUSTOM_CSS = 'publications/css/ckeditor-fix.css'
