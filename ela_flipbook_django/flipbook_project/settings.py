@@ -123,7 +123,7 @@ X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 
 # --- AUTHENTICATION & ALLAUTH SETTINGS ---
-SITE_ID = 6 # The ID of the primary site record in django_site table
+SITE_ID = 1 # The ID of the primary site record in django_site table
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
