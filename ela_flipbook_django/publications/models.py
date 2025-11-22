@@ -4,7 +4,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from ckeditor.fields import RichTextField
+from django_ckeditor_5.fields import CKEditor5Field
 import uuid
 
 # --- NEW: Author Model ---
@@ -31,6 +31,7 @@ class Magazine(models.Model):
     pdf_file = models.FileField(upload_to='publications/')
     cover_image = models.ImageField(upload_to='covers/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
+    
 
     # === NEW FIELDS ===
     excerpt = models.TextField(blank=True, help_text="A short summary for card previews.")
@@ -47,7 +48,9 @@ class Article(models.Model):
     cover_image = models.ImageField(upload_to='article_covers/')
     # This field holds the actual text content of the article.
 
-    content = RichTextField()
+    content = CKEditor5Field('Content', config_name='article') 
+    excerpt = CKEditor5Field('Excerpt', config_name='minimal')
+    
     excerpt = models.TextField(blank=True, help_text="A short summary for card previews.")
     author = models.ForeignKey(Author, on_delete=models.SET_NULL, null=True, blank=True, related_name="articles")
     tags = models.ManyToManyField(Tag, blank=True, related_name="articles")

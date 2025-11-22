@@ -9,6 +9,8 @@ from django.views.generic import RedirectView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    
+    path("ckeditor5/", include('django_ckeditor_5.urls')),
 
     # 1. Sign-Up is immediately redirected to the Google login flow.
     path("accounts/signup/",
@@ -20,6 +22,7 @@ urlpatterns = [
     path('accounts/', include('allauth.urls')),
 
     path('', include('publications.urls')),
+    
 ]
 
 # This is for serving files in development and should be appended at the end.

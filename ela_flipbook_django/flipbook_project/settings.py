@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
-    'ckeditor',
+    'django_ckeditor_5',
 ]
 
 MIDDLEWARE = [
@@ -122,6 +122,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 
+STATIC_ROOT = BASE_DIR / 'staticfiles_collected'
+
 # --- AUTHENTICATION & ALLAUTH SETTINGS ---
 SITE_ID = 1 # The ID of the primary site record in django_site table
 
@@ -178,10 +180,79 @@ else:
     SESSION_COOKIE_SECURE = True
 
 # --- CKEDITOR CONFIGURATION ---
-CKEDITOR_CONFIGS = {
+# settings.py
+
+# --- CKEDITOR 5 CONFIGURATION ---
+# settings.py
+
+# --- CKEDITOR 5 CONFIGURATION ---
+CKEDITOR_5_CONFIGS = {
+    # 1. DEFAULT CONFIGURATION (Used if no config_name is specified in the model field)
     'default': {
-        'toolbar': 'full',
+        'toolbar': [
+            'heading', '|', 
+            'bold', 'italic', 'underline', 'strikethrough', 'link', 'bulletedList', 'numberedList', 'blockquote', '|',
+            'fontfamily', 'fontsize', 'fontColor', 'fontBackgroundColor', '|',
+            'alignment', '|',
+            'outdent', 'indent', '|',
+            'uploadImage', 'insertTable', 'undo', 'redo',
+        ],
+        
+        # --- FIX FOR WHITE TEXT IN ADMIN ---
+        # The path here must match your static file structure 
+        # (e.g., publications/static/publications/css/ckeditor-fix.css)
+        'extra_plugins': ['style', 'publications/css/ckeditor-fix.css'],
+        # -----------------------------------
+        
+        'image': {
+            'toolbar': ['imageTextAlternative', 'imageTitle', '|', 'imageStyle:alignLeft', 'imageStyle:full', 'imageStyle:alignRight'],
+            'styles': ['full', 'alignLeft', 'alignRight']
+        },
+        'theme': 'lark',
         'height': 300,
-        'width': '100%',
+        'language': 'en',
+    },
+    
+    # 2. ARTICLE CONFIGURATION (Suitable for Article.content field)
+    'article': {
+        # A rich toolbar optimized for long-form content 
+        'toolbar': [
+            'heading', '|',
+            'bold', 'italic', 'underline', 'link', 'bulletedList', 'numberedList', 'blockquote', 'codeBlock', '|',
+            'fontfamily', 'fontsize', 'fontColor', 'fontBackgroundColor', '|',
+            'alignment', '|',
+            'outdent', 'indent', '|',
+            'uploadImage', 'insertTable', 'mediaEmbed', 'removeFormat', 'sourceEditing', 'undo', 'redo',
+        ],
+        
+        # --- FIX FOR WHITE TEXT IN ADMIN ---
+        'extra_plugins': ['style', 'publications/css/ckeditor-fix.css'],
+        # -----------------------------------
+        
+        'image': {
+            'toolbar': ['imageTextAlternative', 'imageTitle', '|', 'imageStyle:alignLeft', 'imageStyle:full', 'imageStyle:alignRight'],
+            'styles': ['full', 'alignLeft', 'alignRight']
+        },
+        'heading': {
+            'options': [
+                {'model': 'paragraph', 'title': 'Paragraph', 'class': 'ck-heading_paragraph'},
+                {'model': 'heading1', 'view': 'h1', 'title': 'Heading 1', 'class': 'ck-heading_heading1'},
+                {'model': 'heading2', 'view': 'h2', 'title': 'Heading 2', 'class': 'ck-heading_heading2'},
+                {'model': 'heading3', 'view': 'h3', 'title': 'Heading 3', 'class': 'ck-heading_heading3'},
+            ]
+        },
+        'height': 500,
+    },
+    
+    # 3. MINIMAL CONFIGURATION (Suitable for short summaries or excerpts)
+    'minimal': {
+        # A simple toolbar for short descriptions or excerpts
+        'toolbar': ['bold', 'italic', 'link', 'bulletedList', 'numberedList'],
+        
+        # --- FIX FOR WHITE TEXT IN ADMIN ---
+        'extra_plugins': ['style', 'publications/css/ckeditor-fix.css'],
+        # -----------------------------------
+        
+        'height': 150,
     },
 }

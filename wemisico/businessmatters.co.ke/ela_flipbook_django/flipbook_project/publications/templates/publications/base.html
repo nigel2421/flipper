@@ -50,7 +50,7 @@
                     <a href="{% url 'publications:profile' %}">Hi, {{ user.first_name|default:user.username }}</a>
                     <a href="{% url 'account_logout' %}">Logout</a>
                 {% else %}
-                    <a href="{% url 'account_signup' %}">Sign Up</a>
+                    <a href="{% url 'account_login' %}">Sign Up</a>
                     <a href="{% url 'account_login' %}">Login</a>
                 {% endif %} <!-- <-- THIS IS THE FIX -->
             </nav>

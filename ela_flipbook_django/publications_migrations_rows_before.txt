@@ -1,0 +1,11 @@
+27|publications|0001_initial|2025-10-28 09:30:45.849801
+28|publications|0002_publication_cover_image|2025-10-28 09:30:45.856725
+29|publications|0003_alter_publication_cover_image|2025-10-28 09:30:45.862793
+30|publications|0004_profile|2025-10-28 09:30:45.878840
+31|publications|0005_profile_referral_code_profile_referred_by|2025-10-28 09:30:45.944827
+32|publications|0006_event|2025-10-28 09:30:45.948443
+40|publications|0007_publication_extracted_text_publication_summary|2025-11-06 12:16:03.964627
+51|publications|0002_alter_comment_options_comment_parent|2025-11-22 16:50:58.298866
+52|publications|0003_comment_is_reported_comment_report_count_and_more|2025-11-22 16:50:58.301983
+53|publications|0004_article_summary|2025-11-22 16:50:58.303466
+54|publications|0005_remove_author_bio_comment_liked_by|2025-11-22 16:50:58.304894
