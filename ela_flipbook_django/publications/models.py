@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django_ckeditor_5.fields import CKEditor5Field
+from django.contrib.auth.models import AbstractUser, PermissionsMixin
 import uuid
 
 # --- NEW: Author Model ---
@@ -160,3 +161,45 @@ class Event(models.Model):
 
     class Meta:
         ordering = ['-event_date']
+        
+# --- CUSTOM USER MODEL DEFINITION ---
+class CustomUser(AbstractUser):
+    # Fix: Define groups and user_permissions with unique related_names
+    groups = models.ManyToManyField(
+        'auth.Group',
+        verbose_name=('groups'),
+        blank=True,
+        help_text=(
+            'The groups this user belongs to. A user will get all permissions '
+            'granted to each of their groups.'
+        ),
+        # FIX HERE: Provide a unique related name for the reverse relationship
+        related_name="custom_user_set", 
+        related_query_name="custom_user",
+    )
+    user_permissions = models.ManyToManyField(
+        'auth.Permission',
+        verbose_name=('user permissions'),
+        blank=True,
+        help_text=('Specific permissions for this user.'),
+        # FIX HERE: Provide a unique related name for the reverse relationship
+        related_name="custom_user_permissions_set",
+        related_query_name="custom_user_permission",
+    )
+    
+    # Existing fields from the last successful step:
+    username = models.CharField(
+        max_length=150, 
+        unique=False,  
+        blank=True, 
+        null=True
+    )
+    email = models.EmailField(unique=True, null=False, blank=False)
+    USERNAME_FIELD = 'email'
+    EMAIL_FIELD = 'email'
+    REQUIRED_FIELDS = [] 
+
+    def __str__(self):
+        return str(self.email) 
+
+# --- END CUSTOM USER MODEL DEFINITION ---

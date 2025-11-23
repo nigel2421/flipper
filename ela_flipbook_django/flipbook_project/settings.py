@@ -125,7 +125,7 @@ X_FRAME_OPTIONS = 'SAMEORIGIN'
 STATIC_ROOT = BASE_DIR / 'staticfiles_collected'
 
 # --- AUTHENTICATION & ALLAUTH SETTINGS ---
-SITE_ID = 6 # The ID of the primary site record in django_site table
+SITE_ID = 1 # The ID of the primary site record in django_site table
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
@@ -245,3 +245,6 @@ CKEDITOR_5_CONFIGS = {
 # This setting injects custom CSS into the editor's content area.
 # The path should be relative to your STATIC_URL.
 CKEDITOR_5_CUSTOM_CSS = 'publications/css/ckeditor-fix.css'
+
+# settings.py
+SOCIALACCOUNT_ADAPTER = 'publications.adapter.CustomSocialAccountAdapter'
