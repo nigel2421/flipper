@@ -25,7 +25,14 @@ ALLOWED_HOSTS = [
     'businessmatters.co.ke',
     '127.0.0.1',
     'localhost',
-    'www.businessmatters.co.ke', # <-- Added for completeness
+    'www.businessmatters.co.ke',
+    # Add the development server host
+    '8000-firebase-flippergit-1764678684466.cluster-cbeiita7rbe7iuwhvjs5zww2i4.cloudworkstations.dev',
+]
+
+# Trust the development server origin for CSRF
+CSRF_TRUSTED_ORIGINS = [
+    'https://8000-firebase-flippergit-1764678684466.cluster-cbeiita7rbe7iuwhvjs5zww2i4.cloudworkstations.dev',
 ]
 
 
@@ -114,8 +121,8 @@ GOOGLE_API_KEY = os.environ.get('GEMINI_API_KEY')
 
 
 # --- Static and Media File Configuration ---
-STATIC_URL = 'flipper/ela_flipbook_django/publications/static/'
-MEDIA_URL = 'flipper/ela_flipbook_django/media/'
+STATIC_URL = '/static/'
+MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -150,6 +157,8 @@ LOGOUT_REDIRECT_URL = '/'
 SOCIALACCOUNT_LOGIN_ON_SEPARATE_URLS = True
 SESSION_COOKIE_AGE = 25920000 # 30 days
 
+# My settings
+SOCIALACCOUNT_ADAPTER = 'publications.adapter.CustomSocialAccountAdapter'
 
 # --- EMAIL CONFIGURATION ---
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -164,10 +173,7 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 # === PRODUCTION/SECURITY CONFIGURATION ===
 
-if DEBUG:
-    # Local Development: No SSL, no strong headers
-    ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http"
-else:
+if not DEBUG:
     # Production: Enforce SSL/HTTPS and proxy headers
     ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
     
@@ -178,16 +184,12 @@ else:
     SECURE_SSL_REDIRECT = True
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True
+else:
+    # Local Development: No SSL, no strong headers
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http"
 
 # --- CKEDITOR CONFIGURATION ---
-# settings.py
-
-# --- CKEDITOR 5 CONFIGURATION ---
-# settings.py
-
-# --- CKEDITOR 5 CONFIGURATION ---
 CKEDITOR_5_CONFIGS = {
-    # 1. DEFAULT CONFIGURATION (Used if no config_name is specified in the model field)
     'default': {
         'toolbar': [
             'heading', '|', 
@@ -205,46 +207,6 @@ CKEDITOR_5_CONFIGS = {
         'height': 300,
         'language': 'en',
     },
-    
-    # 2. ARTICLE CONFIGURATION (Suitable for Article.content field)
-    'article': {
-        # A rich toolbar optimized for long-form content 
-        'toolbar': [
-            'heading', '|',
-            'bold', 'italic', 'underline', 'link', 'bulletedList', 'numberedList', 'blockquote', 'codeBlock', '|',
-            'fontfamily', 'fontsize', 'fontColor', 'fontBackgroundColor', '|',
-            'alignment', '|',
-            'outdent', 'indent', '|',
-            'uploadImage', 'insertTable', 'mediaEmbed', 'removeFormat', 'sourceEditing', 'undo', 'redo',
-        ],
-        
-        'image': {
-            'toolbar': ['imageTextAlternative', 'imageTitle', '|', 'imageStyle:alignLeft', 'imageStyle:full', 'imageStyle:alignRight'],
-            'styles': ['full', 'alignLeft', 'alignRight']
-        },
-        'heading': {
-            'options': [
-                {'model': 'paragraph', 'title': 'Paragraph', 'class': 'ck-heading_paragraph'},
-                {'model': 'heading1', 'view': 'h1', 'title': 'Heading 1', 'class': 'ck-heading_heading1'},
-                {'model': 'heading2', 'view': 'h2', 'title': 'Heading 2', 'class': 'ck-heading_heading2'},
-                {'model': 'heading3', 'view': 'h3', 'title': 'Heading 3', 'class': 'ck-heading_heading3'},
-            ]
-        },
-        'height': 500,
-    },
-    
-    # 3. MINIMAL CONFIGURATION (Suitable for short summaries or excerpts)
-    'minimal': {
-        # A simple toolbar for short descriptions or excerpts
-        'toolbar': ['bold', 'italic', 'link', 'bulletedList', 'numberedList'],
-        'height': 150,
-    },
 }
 
-# --- FIX FOR WHITE TEXT IN CKEDITOR ADMIN ---
-# This setting injects custom CSS into the editor's content area.
-# The path should be relative to your STATIC_URL.
 CKEDITOR_5_CUSTOM_CSS = 'publications/css/ckeditor-fix.css'
-
-# settings.py
-SOCIALACCOUNT_ADAPTER = 'publications.adapter.CustomSocialAccountAdapter'
