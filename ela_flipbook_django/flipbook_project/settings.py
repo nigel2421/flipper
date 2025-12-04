@@ -37,6 +37,10 @@ ALLOWED_HOSTS = [
     '8000-firebase-flippergit-1764678684466.cluster-cbeiita7rbe7iuwhvjs5zww2i4.cloudworkstations.dev',
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://8000-firebase-flippergit-1764678684466.cluster-cbeiita7rbe7iuwhvjs5zww2i4.cloudworkstations.dev',
+]
+
 SITE_ID = 1
 
 
