@@ -825,3 +825,8 @@ main > .container {
     text-shadow: 0 2px 6px rgba(0,0,0,0.45);
 }
 */
+/* ela_flipbook_django/publications/static/publications/css/style.css */
+.ck-editor__editable_inline {
+    color: #000 !important;
+    background-color: #fff !important;
+}

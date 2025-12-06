@@ -1,7 +1,6 @@
 # publications/adapter.py
 
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
-from allauth.account.utils import user_email, user_username, user_field
 from django.utils.text import slugify
 import random
 import string
@@ -10,11 +9,36 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
 
     def save_user(self, request, sociallogin, form=None):
         """
-        Saves a new user instance.
+        Saves a new user instance, populating email, first_name, and last_name
+        from the social account's extra_data.
+        This is called when a user signs up via a social provider.
         """
+        # Get the user instance and social provider data
         user = sociallogin.user
-        user_username(user, self.generate_unique_username(user_email(user)))
+        extra_data = sociallogin.account.extra_data
+
+        # Populate user fields from social data if they are empty
+        if not user.email and 'email' in extra_data:
+            user.email = extra_data['email']
+            
+        if not user.first_name and 'given_name' in extra_data:
+            user.first_name = extra_data['given_name']
+            
+        if not user.last_name and 'family_name' in extra_data:
+            user.last_name = extra_data['family_name']
+
+        # Generate a unique username
+        user.username = self.generate_unique_username(user.email)
+        
+        # Set a random, unusable password for social-only users
+        user.set_unusable_password()
+
+        # Save the user model with the new data
+        user.save()
+        
+        # Connect the social account to the user
         sociallogin.save(request)
+        
         return user
 
     def generate_unique_username(self, email):
