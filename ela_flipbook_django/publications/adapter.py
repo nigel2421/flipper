@@ -1,50 +1,53 @@
 # publications/adapter.py
 
-from allauth.account.adapter import DefaultAccountAdapter
-from allauth.socialaccount.adapter import DefaultSocialAccountAdapter # <-- IMPORTANT: Use the Social adapter
-from django.contrib.auth import get_user_model
-from django.template.defaultfilters import slugify
-from django.utils.text import slugify as django_slugify # Use Django's slugify
+from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
+from allauth.account.utils import user_email, user_username, user_field
+from django.utils.text import slugify
+import random
+import string
 
-# Get your custom user model
-User = get_user_model() 
-
-# ----------------------------------------------------------------------
-# 1. Custom Account Adapter (For standard login/signup flow, if needed)
-# ----------------------------------------------------------------------
 class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
-    """
-    Handles social sign-up/login flow.
-    """
-    # *** CHANGE THE SIGNATURE (Remove commit=True) ***
-    # This matches the latest allauth standard signature
-    def save_user(self, request, sociallogin, form=None): 
+
+    def save_user(self, request, sociallogin, form=None):
+        """
+        Saves a new user instance.
+        """
         user = sociallogin.user
+        user_username(user, self.generate_unique_username(user_email(user)))
+        sociallogin.save(request)
+        return user
+
+    def generate_unique_username(self, email):
+        """
+        Generates a unique username from the user's email.
+        """
+        # Try to use the local part of the email as a base username
+        if email:
+            base_username = slugify(email.split('@')[0])
+        else:
+            # If no email, generate a random username
+            base_username = 'user'
+
+        username = base_username
+        i = 1
+        # Keep generating a new username until it's unique
+        while self.is_username_taken(username):
+            # Append a number to the username
+            username = f'{base_username}{i}'
+            i += 1
+
+        # If the username is still taken, add a random string
+        if self.is_username_taken(username):
+            random_suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=4))
+            username = f'{base_username}_{random_suffix}'
+
+        return username
+
+    def is_username_taken(self, username):
+        """
+        Checks if a username is already taken.
+        """
+        # This method requires you to import your User model
+        from django.contrib.auth import get_user_model
         User = get_user_model()
-        
-        # Check if the user is new (pk is None)
-        if user.pk is None:
-            # --- USERNAME GENERATION LOGIC ---
-            
-            # Use email for username base if available
-            email = sociallogin.account.extra_data.get('email') or user.email
-            if email:
-                base_username = django_slugify(email.split('@')[0])
-            else:
-                # Fallback to full name or a generic name
-                full_name = sociallogin.account.extra_data.get('name', '')
-                base_username = django_slugify(full_name) or 'socialuser'
-
-            username = base_username
-            i = 0
-            while User.objects.filter(username=username).exists():
-                i += 1
-                username = f"{base_username}_{i}"
-
-            user.username = username
-            user.first_name = sociallogin.account.extra_data.get('given_name', user.first_name or '')
-            user.last_name = sociallogin.account.extra_data.get('family_name', user.last_name or '')
-        
-        # Call the parent save method. DO NOT PASS 'commit=commit' anymore.
-        # *** CHANGE THIS LINE ***
-        return super().save_user(request, sociallogin, form=form)
+        return User.objects.filter(username=username).exists()

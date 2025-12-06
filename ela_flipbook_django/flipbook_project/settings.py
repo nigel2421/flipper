@@ -133,12 +133,12 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-# Allauth core settings
+# Allauth core settings for email-based authentication
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_EMAIL_VERIFICATION = 'none'
-ACCOUNT_LOGIN_METHODS = ['email']  # Use the new setting name (plural) and provide it as a list
-ACCOUNT_SIGNUP_FIELDS = ['email'] # Use the new setting name
-ACCOUNT_USER_MODEL_USERNAME_FIELD = None # Explicitly state no username is used
-ACCOUNT_FORMS = { 'signup': 'publications.forms.CustomSignupForm', }
+SOCIALACCOUNT_ADAPTER = 'publications.adapter.CustomSocialAccountAdapter'
 
 
 # Redirects and URLs
