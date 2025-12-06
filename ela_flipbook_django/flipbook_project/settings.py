@@ -55,7 +55,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',        # <-- CORE: Must be before allauth
-    'publications',
+    'publications.apps.PublicationsConfig',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',

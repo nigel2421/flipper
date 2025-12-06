@@ -6,20 +6,9 @@ from django.contrib.auth.models import User
 import csv
 from django.http import HttpResponse
 
-# --- PATCH for SocialAccountAdmin ---
-from allauth.socialaccount.admin import SocialAccountAdmin
-# The default `list_display` for `SocialAccountAdmin` can cause a TypeError
-# because the model's __str__ method may return a lazy translation object.
-# We patch it here to use a safe function that explicitly casts to a string.
-def safe_social_account_str(obj):
-    return str(obj)
-safe_social_account_str.short_description = 'Social Account'
-# Patch the list_display of the imported admin class
-SocialAccountAdmin.list_display = (safe_social_account_str, 'user', 'provider')
-# --- END PATCH ---
-
 # Import all your models
 from .models import Magazine, Article, Profile, Event, Author, Tag, Rating, Comment, CommentReport
+
 
 # --- NEW: Register Author, Tag, and Rating Models ---
 @admin.register(Author)
