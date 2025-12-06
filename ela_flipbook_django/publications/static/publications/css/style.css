@@ -800,3 +800,10 @@ main > .container {
         gap: 8px;
     }
 }
+/* ela_flipbook_django/publications/static/publications/css/style.css */
+.article-header h1 {
+    color: var(--text-light) !important; /* This will make the headline visible */
+    margin-bottom: 15px;
+    font-size: 2.5rem;
+    line-height: 1.2;
+}
