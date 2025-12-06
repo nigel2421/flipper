@@ -11,6 +11,9 @@ class PublicationsConfig(AppConfig):
         It applies a monkey patch to fix a TypeError in the Django admin
         caused by the __str__ method of allauth's SocialAccount model.
         """
+        # Import the signals module to register the signal handlers
+        import publications.signals
+
         try:
             from allauth.socialaccount.models import SocialAccount
 
