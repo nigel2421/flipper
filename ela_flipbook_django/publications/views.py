@@ -273,15 +273,16 @@ def contact_view(request):
 def profile_view(request):
     """ Renders the logged-in user's profile page with referral info. """
     user = request.user
+    profile, created = Profile.objects.get_or_create(user=user)
     
     # --- Referral Processing Logic ---
     referral_code = request.session.get('referral_code')
-    if referral_code and not user.profile.referred_by:
+    if referral_code and not profile.referred_by:
         try:
             referrer_profile = Profile.objects.get(referral_code=referral_code)
             if referrer_profile.user != user:
-                user.profile.referred_by = referrer_profile.user
-                user.profile.save()
+                profile.referred_by = referrer_profile.user
+                profile.save()
             del request.session['referral_code']
         except Profile.DoesNotExist:
             if 'referral_code' in request.session:
@@ -289,9 +290,9 @@ def profile_view(request):
     
     # --- Display Data ---
     signup_url = reverse('account_signup')
-    referral_link = f"{request.build_absolute_uri(signup_url)}?ref={user.profile.referral_code}"
+    referral_link = f"{request.build_absolute_uri(signup_url)}?ref={profile.referral_code}"
     referral_count = user.referrals.count()
-    referrer = user.profile.referred_by
+    referrer = profile.referred_by
     
     context = {
         'referral_link': referral_link,
