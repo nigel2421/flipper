@@ -393,3 +393,7 @@ def like_comment_view(request, pk):
             }
         )
     return JsonResponse({'liked': is_liked, 'like_count': comment.like_count})
+
+def subscribe_view(request):
+    """ Renders the subscribe page. """
+    return render(request, 'publications/subscribe.html')

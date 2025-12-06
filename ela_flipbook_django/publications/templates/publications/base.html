@@ -61,10 +61,9 @@
                 {% else %}
                     <!--<a href="{% url 'account_login' %}">Sign Up</a>-->
                     <a href="{% url 'account_login' %}">Login</a>
-                {% endif %} <!-- <-- THIS IS THE FIX -->
+                {% endif %} 
+                <a href="{% url 'publications:subscribe' %}" class="subscribe-btn-header">Subscribe</a>
             </nav>
-
-           
 
 
         </div>
