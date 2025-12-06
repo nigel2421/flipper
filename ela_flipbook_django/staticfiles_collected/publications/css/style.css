@@ -790,10 +790,6 @@ main > .container {
         width: 100%;
     }
 
-    .articles-sidebar {
-        display: block; /* Overrides the default */
-    }
-
     .filter-toggle-btn {
         display: flex;
         align-items: center;
@@ -843,5 +839,34 @@ main > .container {
 .publication-card .card-title {
     color: var(--accent-yellow);
     text-shadow: 0 2px 6px rgba(0,0,0,0.45);
+}
+
+/* Show sidebar on desktop and arrange layout */
+@media (min-width: 993px) {
+    .articles-page-container {
+        display: flex;
+        gap: 30px;
+    }
+
+    .articles-sidebar {
+        flex: 0 0 280px;
+        position: static;
+        transform: translateX(0);
+        height: auto;
+        padding: 0;
+        background: none;
+    }
+
+    .sidebar-header {
+        display: none; /* Hide the mobile header with the close button */
+    }
+
+    .articles-main-content {
+        flex: 1;
+    }
+
+    .filter-toggle-btn {
+        display: none; /* Hide the floating button on desktop */
+    }
 }
 
