@@ -105,7 +105,7 @@
                         <img src="{{ article.cover_image.url }}" alt="Cover for {{ article.title }}">
                     </a>
                     <div class="card-content">
-                        <h3 class="card-title"><a href="{% url 'publications:article_detail' pk=article.id %}"">{{ article.title }}</a></h3>
+                        <h3 class="card-title"><a href="{% url 'publications:article_detail' pk=article.id %}">{{ article.title }}</a></h3>
                         <p class="card-excerpt">{{ article.excerpt|truncatewords:20 }}</p>
                         <div class="card-tags">
                             {% for tag in article.tags.all %}
@@ -125,6 +125,7 @@
         </div>
     </main>
 </div>
+{% endblock %}
 
 {% block extra_js %}
 <script>
