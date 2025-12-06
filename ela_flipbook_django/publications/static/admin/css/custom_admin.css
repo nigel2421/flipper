@@ -1,0 +1,8 @@
+
+.ck-editor__editable_inline {
+    /* Force text to black for visibility against a white background */
+    color: #000 !important;
+    
+    /* Force background to white for high contrast */
+    background-color: #fff !important;
+}

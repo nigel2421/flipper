@@ -118,10 +118,16 @@ class MagazineAdmin(admin.ModelAdmin):
 class ArticleAdmin(admin.ModelAdmin):
     list_display = ('title', 'author', 'uploaded_at', 'is_featured', 'is_editors_pick', 'view_count')
     list_filter = ('is_featured', 'is_editors_pick', 'tags', 'author')
-    search_fields = ('title', 'excerpt', 'author__name', 'author__user__username')
+    search_fields = ('title', 'excerpt', 'author__name', 'author__user__username', 'author__user__email')
     autocomplete_fields = ['author']
     filter_horizontal = ('tags',)
     fields = ('title', 'author', 'excerpt', 'content', 'cover_image', 'tags', 'is_featured', 'is_editors_pick')
+    
+    # --- NEW: Load custom CSS for the Article admin page ---
+    class Media:
+        css = {
+            'all': ('admin/css/custom_admin.css',)
+        }
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
