@@ -73,7 +73,7 @@
         </div>
 
         <div class="publications-grid">
-            {% for pub in all_publications %}
+            {% for pub in all_publications|slice:":4" %}
                 <a href="{% url 'publications:detail' pk=pub.id %}" class="publication-card">
                     <div class="card-image-wrapper">
                         {% if pub.cover_image %}
@@ -91,6 +91,7 @@
                 <p class="no-publications">No publications have been uploaded yet.</p>
             {% endfor %}
         </div>
+        <a href="{% url 'publications:magazine' %}" class="show-more-btn">Show More Publications</a>
     </div>
 
     <!-- === NEW: MOST POPULAR ARTICLES SECTION === -->
@@ -100,7 +101,7 @@
         </div>
 
         <div class="publications-grid">
-            {% for article in top_articles %}
+            {% for article in top_articles|slice:":4" %}
                 <div class="publication-card article-story-card">
                     <a href="{% url 'publications:article_detail' pk=article.id %}" class="card-image-wrapper">
                         <img src="{{ article.cover_image.url }}" alt="Cover for {{ article.title }}">
@@ -124,6 +125,7 @@
                 <p class="no-publications">No articles have been viewed yet.</p>
             {% endfor %}
         </div>
+        <a href="{% url 'publications:articles' %}" class="show-more-btn">Show More Articles</a>
     </div>
 
 {% endblock %}

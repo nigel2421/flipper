@@ -7,10 +7,21 @@
 <div class="container articles-page-container">
 
     <!-- =================================== -->
-    <!--  1. LEFT SIDEBAR FOR FILTERS        -->
+    <!--  1. MOBILE FILTER BUTTON            -->
     <!-- =================================== -->
-    <aside class="articles-sidebar">
-        <h3>Filters</h3>
+    <button id="filter-toggle-btn" class="filter-toggle-btn">
+        <i class="fas fa-filter"></i>
+        Filters
+    </button>
+
+    <!-- =================================== -->
+    <!--  2. LEFT SIDEBAR FOR FILTERS        -->
+    <!-- =================================== -->
+    <aside id="articles-sidebar" class="articles-sidebar">
+        <div class="sidebar-header">
+             <h3>Filters</h3>
+             <button id="close-filter-btn" class="close-filter-btn">&times;</button>
+        </div>
         <form method="GET" action="{% url 'publications:articles' %}" class="filter-form">
             <!-- Search Bar -->
             <div class="form-group">
@@ -59,7 +70,7 @@
     </aside>
 
     <!-- =================================== -->
-    <!--  2. MAIN CONTENT FOR ARTICLES       -->
+    <!--  3. MAIN CONTENT FOR ARTICLES       -->
     <!-- =================================== -->
     <main class="articles-main-content">
         <!-- Featured Story Section (now uses the specific context variable) -->
@@ -94,7 +105,7 @@
                         <img src="{{ article.cover_image.url }}" alt="Cover for {{ article.title }}">
                     </a>
                     <div class="card-content">
-                        <h3 class="card-title"><a href="{% url 'publications:article_detail' pk=article.id %}">{{ article.title }}</a></h3>
+                        <h3 class="card-title"><a href="{% url 'publications:article_detail' pk=article.id %}"">{{ article.title }}</a></h3>
                         <p class="card-excerpt">{{ article.excerpt|truncatewords:20 }}</p>
                         <div class="card-tags">
                             {% for tag in article.tags.all %}
@@ -114,4 +125,25 @@
         </div>
     </main>
 </div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterToggleBtn = document.getElementById('filter-toggle-btn');
+    const articlesSidebar = document.getElementById('articles-sidebar');
+    const closeFilterBtn = document.getElementById('close-filter-btn');
+
+    if (filterToggleBtn) {
+        filterToggleBtn.addEventListener('click', function() {
+            articlesSidebar.classList.toggle('open');
+        });
+    }
+
+    if (closeFilterBtn) {
+        closeFilterBtn.addEventListener('click', function() {
+            articlesSidebar.classList.remove('open');
+        });
+    }
+});
+</script>
 {% endblock %}
