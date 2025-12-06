@@ -145,3 +145,17 @@ class UserAdmin(BaseUserAdmin):
 # Re-register UserAdmin
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
+
+from allauth.socialaccount.models import SocialAccount
+from django.utils.translation import gettext_lazy as _
+
+class SocialAccountAdmin(admin.ModelAdmin):
+    list_display = ('user_email', 'provider', 'uid', 'last_login', 'date_joined')
+    list_filter = ('provider',)
+    search_fields = ('user__email', 'uid')
+
+    def user_email(self, obj):
+        return obj.user.email
+    user_email.short_description = _('User Email')
+
+admin.site.register(SocialAccount, SocialAccountAdmin)
