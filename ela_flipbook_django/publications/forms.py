@@ -1,6 +1,7 @@
 # publications/forms.py
 
 from django import forms
+from .models import Contributor
 
 class RatingForm(forms.Form):
     # The score will be set by JavaScript, so we use a hidden input.
@@ -20,10 +21,7 @@ class CommentForm(forms.Form):
         self.fields['text'].widget.attrs.update({'class': 'comment-textarea'})
 
 
-class ContributorForm(forms.Form):
-    name = forms.CharField(max_length=100, label="Your Name")
-    email = forms.EmailField(label="Enter your email")
-    phone_number = forms.CharField(max_length=20, label="Enter your phone number (Preferably Whatsapp Number)")
-    expertise = forms.CharField(max_length=100, label="Enter your Expertise Industry/ Field")
-    company = forms.CharField(max_length=100, required=False, label="Company Name (If joining on behalf of a company)")
-    linkedin = forms.URLField(required=False, label="Enter your LinkedIn Profile Link")
+class ContributorForm(forms.ModelForm):
+    class Meta:
+        model = Contributor
+        fields = ['full_name', 'email', 'phone_number', 'country', 'submission_type', 'subject', 'message', 'attachment']

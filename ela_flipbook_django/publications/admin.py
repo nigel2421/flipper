@@ -12,7 +12,7 @@ from allauth.account.models import EmailAddress
 from allauth.account.admin import EmailAddressAdmin as AllauthEmailAddressAdmin
 
 # Import your project's models
-from .models import Magazine, Article, Profile, Event, Author, Tag, Rating, Comment, CommentReport
+from .models import Contributor, Magazine, Article, Profile, Event, Author, Tag, Rating, Comment, CommentReport
 
 
 # --- Custom Admin Action to Export User Emails ---
@@ -165,3 +165,10 @@ class CustomEmailAddressAdmin(AllauthEmailAddressAdmin):
 # Unregister the default EmailAddress admin and register our custom one
 admin.site.unregister(EmailAddress)
 admin.site.register(EmailAddress, CustomEmailAddressAdmin)
+
+# --- NEW: Contributor Admin ---
+@admin.register(Contributor)
+class ContributorAdmin(admin.ModelAdmin):
+    list_display = ('full_name', 'email', 'submission_type', 'subject', 'submitted_at')
+    list_filter = ('submission_type', 'submitted_at')
+    search_fields = ('full_name', 'email', 'subject', 'message')

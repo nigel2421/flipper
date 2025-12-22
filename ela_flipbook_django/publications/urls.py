@@ -20,4 +20,5 @@ urlpatterns = [
     path('comment/<int:pk>/report/', views.report_comment, name='report_comment'),
     path('subscribe/', views.subscribe_view, name='subscribe'),
     path('contributors/', views.contributors_view, name='contributors'),
+    path('submission-successful/', views.submission_successful_view, name='submission_successful'),
 ]

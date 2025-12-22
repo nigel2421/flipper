@@ -1,0 +1,14 @@
+{% extends 'publications/base.html' %}
+
+{% block title %}Submission Successful{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="alert alert-success" role="alert">
+        <h4 class="alert-heading">Thank You!</h4>
+        <p>Your submission has been received. We will review it and get back to you shortly.</p>
+        <hr>
+        <p class="mb-0">You can now return to the <a href="{% url 'publications:home' %}" class="alert-link">homepage</a>.</p>
+    </div>
+</div>
+{% endblock %}

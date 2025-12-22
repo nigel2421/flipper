@@ -203,3 +203,28 @@ class CustomUser(AbstractUser):
         return str(self.email) 
 
 # --- END CUSTOM USER MODEL DEFINITION ---
+
+# --- NEW: Contributor Model ---
+class Contributor(models.Model):
+    SUBMISSION_TYPE_CHOICES = [
+        ('general', 'General Inquiry'),
+        ('pitch', 'Story Pitch'),
+        ('article', 'Article Submission'),
+        ('photo', 'Photo Submission'),
+    ]
+
+    full_name = models.CharField(max_length=100)
+    email = models.EmailField()
+    phone_number = models.CharField(max_length=20)
+    country = models.CharField(max_length=100)
+    submission_type = models.CharField(max_length=20, choices=SUBMISSION_TYPE_CHOICES, default='general')
+    subject = models.CharField(max_length=200)
+    message = models.TextField()
+    attachment = models.FileField(upload_to='contributor_submissions/', blank=True, null=True)
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.full_name} - {self.subject}"
+
+    class Meta:
+        ordering = ['-submitted_at']

@@ -1,6 +1,6 @@
 # publications/views.py
 
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from django.contrib import messages
@@ -328,25 +328,14 @@ def subscribe_view(request):
 
 def contributors_view(request):
     if request.method == 'POST':
-        form = ContributorForm(request.POST)
+        form = ContributorForm(request.POST, request.FILES)
         if form.is_valid():
-            send_mail(
-                'New Contributor Application',
-                f"""\
-                Name: {form.cleaned_data['name']}
-                Email: {form.cleaned_data['email']}
-                Phone: {form.cleaned_data['phone_number']}
-                Expertise: {form.cleaned_data['expertise']}
-                Company: {form.cleaned_data['company']}
-                LinkedIn: {form.cleaned_data['linkedin']}
-                """,
-                'from@example.com',
-                ['editorial@businessmatters.co.ke'],
-                fail_silently=False,
-            )
-            messages.success(request, 'Thank you for your interest! We will be in touch shortly.')
-            return HttpResponseRedirect(request.path_info)
+            form.save()
+            return redirect('publications:submission_successful')
     else:
         form = ContributorForm()
 
     return render(request, 'publications/contributors.html', {'form': form})
+
+def submission_successful_view(request):
+    return render(request, 'publications/submission_successful.html')
