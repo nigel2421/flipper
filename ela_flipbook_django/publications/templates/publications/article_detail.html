@@ -235,63 +235,68 @@
         const stopBtn = document.getElementById('stop-tts-btn');
         const ttsStatus = document.getElementById('tts-status');
         const voiceSelect = document.getElementById('voice-select');
+        const ttsSection = document.querySelector('.text-to-speech-section');
 
-        const articleContent = document.querySelector('.article-content').innerText;
-        let utterance = new SpeechSynthesisUtterance(articleContent);
-        let voices = [];
+        if ('speechSynthesis' in window) {
+            const articleContent = document.querySelector('.article-content').innerText;
+            let utterance = new SpeechSynthesisUtterance(articleContent);
+            let voices = [];
 
-        function populateVoiceList() {
-            voices = speechSynthesis.getVoices();
-            voiceSelect.innerHTML = '';
-            voices.forEach((voice, i) => {
-                const option = document.createElement('option');
-                option.textContent = `${voice.name} (${voice.lang})`;
-                option.setAttribute('data-lang', voice.lang);
-                option.setAttribute('data-name', voice.name);
-                voiceSelect.appendChild(option);
-            });
-        }
-
-        populateVoiceList();
-        if (speechSynthesis.onvoiceschanged !== undefined) {
-            speechSynthesis.onvoiceschanged = populateVoiceList;
-        }
-
-        playBtn.addEventListener('click', () => {
-            if (speechSynthesis.paused) {
-                speechSynthesis.resume();
-            } else {
-                const selectedVoiceName = voiceSelect.selectedOptions[0].getAttribute('data-name');
-                utterance.voice = voices.find(voice => voice.name === selectedVoiceName);
-                speechSynthesis.speak(utterance);
+            function populateVoiceList() {
+                voices = speechSynthesis.getVoices().filter(voice => voice.lang.startsWith('en'));
+                voiceSelect.innerHTML = '';
+                voices.forEach((voice, i) => {
+                    const option = document.createElement('option');
+                    option.textContent = `${voice.name} (${voice.lang})`;
+                    option.setAttribute('data-lang', voice.lang);
+                    option.setAttribute('data-name', voice.name);
+                    voiceSelect.appendChild(option);
+                });
             }
-            playBtn.style.display = 'none';
-            pauseBtn.style.display = 'inline-block';
-            stopBtn.style.display = 'inline-block';
-            ttsStatus.textContent = 'Playing...';
-        });
 
-        pauseBtn.addEventListener('click', () => {
-            speechSynthesis.pause();
-            playBtn.style.display = 'inline-block';
-            pauseBtn.style.display = 'none';
-            ttsStatus.textContent = 'Paused';
-        });
+            populateVoiceList();
+            if (speechSynthesis.onvoiceschanged !== undefined) {
+                speechSynthesis.onvoiceschanged = populateVoiceList;
+            }
 
-        stopBtn.addEventListener('click', () => {
-            speechSynthesis.cancel();
-            playBtn.style.display = 'inline-block';
-            pauseBtn.style.display = 'none';
-            stopBtn.style.display = 'none';
-            ttsStatus.textContent = '';
-        });
+            playBtn.addEventListener('click', () => {
+                if (speechSynthesis.paused) {
+                    speechSynthesis.resume();
+                } else {
+                    const selectedVoiceName = voiceSelect.selectedOptions[0].getAttribute('data-name');
+                    utterance.voice = voices.find(voice => voice.name === selectedVoiceName);
+                    speechSynthesis.speak(utterance);
+                }
+                playBtn.style.display = 'none';
+                pauseBtn.style.display = 'inline-block';
+                stopBtn.style.display = 'inline-block';
+                ttsStatus.textContent = 'Playing...';
+            });
 
-        utterance.onend = () => {
-            playBtn.style.display = 'inline-block';
-            pauseBtn.style.display = 'none';
-            stopBtn.style.display = 'none';
-            ttsStatus.textContent = '';
-        };
+            pauseBtn.addEventListener('click', () => {
+                speechSynthesis.pause();
+                playBtn.style.display = 'inline-block';
+                pauseBtn.style.display = 'none';
+                ttsStatus.textContent = 'Paused';
+            });
+
+            stopBtn.addEventListener('click', () => {
+                speechSynthesis.cancel();
+                playBtn.style.display = 'inline-block';
+                pauseBtn.style.display = 'none';
+                stopBtn.style.display = 'none';
+                ttsStatus.textContent = '';
+            });
+
+            utterance.onend = () => {
+                playBtn.style.display = 'inline-block';
+                pauseBtn.style.display = 'none';
+                stopBtn.style.display = 'none';
+                ttsStatus.textContent = '';
+            };
+        } else {
+            ttsSection.innerHTML = '<p>Sorry, your browser does not support the text-to-speech feature.</p>';
+        }
     });
 
     document.addEventListener('DOMContentLoaded', function() {
