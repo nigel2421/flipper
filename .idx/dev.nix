@@ -6,7 +6,8 @@
 
   # Use https://search.nixos.org/packages to find packages
   packages = [
-    pkgs.python313Full
+    pkgs.python311Full
+    pkgs.python311Packages.pip
   ];
 
   # Sets environment variables in the workspace

@@ -19,4 +19,5 @@ urlpatterns = [
     path('my-rated-articles/', views.rated_articles_view, name='rated_articles'),
     path('comment/<int:pk>/report/', views.report_comment, name='report_comment'),
     path('subscribe/', views.subscribe_view, name='subscribe'),
+    path('contributors/', views.contributors_view, name='contributors'),
 ]

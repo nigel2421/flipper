@@ -1,0 +1,92 @@
+<!-- publications/templates/publications/contributors.html -->
+
+{% extends 'publications/base.html' %}
+
+{% block content %}
+<style>
+    .contributors-container-wrapper {
+        background: #1d0b5b; /* Dark gray from image */
+        color: white;
+        padding: 60px 20px;
+    }
+    .contributors-container {
+        max-width: 550px;
+        margin: 0 auto;
+        text-align: center;
+    }
+
+    .contributors-header h1 {
+        font-size: 3rem;
+        font-weight: bold;
+        margin-bottom: 30px;
+    }
+
+    .contributors-form-container form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px; /* Creates space between form fields */
+    }
+
+    .contributors-form-container input {
+        width: 100%;
+        padding: 18px 15px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+        font-size: 1rem;
+        background-color: #fff;
+        color: #333;
+    }
+
+    .contributors-form-container .btn {
+        padding: 18px 15px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: #fff;
+        background-color: #6a8d7d; /* Greenish color from button */
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: background-color 0.3s ease;
+    }
+
+    .contributors-form-container .btn:hover {
+        background-color: #58796a;
+    }
+</style>
+
+<div class="contributors-container-wrapper">
+    <div class="container contributors-container">
+        <header class="contributors-header">
+            <h1>Contribute to Business Matters </h1>
+        </header>
+
+        <div class="contributors-form-container">
+            <form method="post" action="">
+                {% csrf_token %}
+                
+                {{ form.name.errors }}
+                <input type="text" name="{{ form.name.name }}" id="{{ form.name.id_for_label }}" placeholder="{{ form.name.label }}">
+                
+                {{ form.email.errors }}
+                <input type="email" name="{{ form.email.name }}" id="{{ form.email.id_for_label }}" placeholder="{{ form.email.label }}">
+
+                {{ form.phone_number.errors }}
+                <input type="text" name="{{ form.phone_number.name }}" id="{{ form.phone_number.id_for_label }}" placeholder="{{ form.phone_number.label }}">
+
+                {{ form.expertise.errors }}
+                <input type="text" name="{{ form.expertise.name }}" id="{{ form.expertise.id_for_label }}" placeholder="{{ form.expertise.label }}">
+
+                {{ form.company.errors }}
+                <input type="text" name="{{ form.company.name }}" id="{{ form.company.id_for_label }}" placeholder="{{ form.company.label }}">
+
+                {{ form.linkedin.errors }}
+                <input type="url" name="{{ form.linkedin.name }}" id="{{ form.linkedin.id_for_label }}" placeholder="{{ form.linkedin.label }}">
+
+                <button type="submit" class="btn btn-primary">Join Our Contributor Network</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

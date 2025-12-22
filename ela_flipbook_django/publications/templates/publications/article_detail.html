@@ -3,6 +3,43 @@
 {% extends 'publications/base.html' %}
 
 {% block content %}
+<style>
+    .text-to-speech-section {
+        background-color: #1c1379;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 25px;
+    }
+    #tts-controls {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+    #tts-controls .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1rem;
+    }
+    #tts-status {
+        font-style: italic;
+        color: #555;
+    }
+    .voice-selection {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    #voice-select {
+        flex-grow: 1;
+        max-width: 300px;
+    }
+</style>
 <div class="container article-detail-container">
     <!-- Back button using JavaScript history -->
     <a href="javascript:history.back()" class="back-link">&larr; Back</a>
@@ -70,19 +107,19 @@
             <img src="{{ article.cover_image.url }}" alt="Cover for {{ article.title }}" class="article-cover-image">
         {% endif %}
 
-        <!-- AI Summary Section -->
-        <div class="summary-section">
-            <h3>AI Generated Summary</h3>
-            {% if article.summary %}
-                <div class="summary-content">
-                    {{ article.summary|safe }}
-                </div>
-            {% else %}
-                <form method="post" action="{% url 'publications:article_detail' pk=article.pk %}">
-                    {% csrf_token %}
-                    <button type="submit" name="generate_summary" class="btn btn-primary">Summarize with AI</button>
-                </form>
-            {% endif %}
+        <!-- Text-to-Speech Section -->
+        <div class="text-to-speech-section">
+            <h3>Listen to this Article</h3>
+            <div id="tts-controls">
+                <button id="play-tts-btn" class="btn btn-primary"><i class="fas fa-play"></i> Play</button>
+                <button id="pause-tts-btn" class="btn btn-secondary" style="display: none;"><i class="fas fa-pause"></i> Pause</button>
+                <button id="stop-tts-btn" class="btn btn-danger" style="display: none;"><i class="fas fa-stop"></i> Stop</button>
+            </div>
+            <div id="tts-status" style="margin-top: 10px;"></div>
+            <div class="voice-selection" style="margin-top: 15px;">
+                <label for="voice-select">Choose a voice:</label>
+                <select id="voice-select" class="form-control"></select>
+            </div>
         </div>
 
         <!-- Main Article Content -->
@@ -192,6 +229,71 @@
 </div>
 
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const playBtn = document.getElementById('play-tts-btn');
+        const pauseBtn = document.getElementById('pause-tts-btn');
+        const stopBtn = document.getElementById('stop-tts-btn');
+        const ttsStatus = document.getElementById('tts-status');
+        const voiceSelect = document.getElementById('voice-select');
+
+        const articleContent = document.querySelector('.article-content').innerText;
+        let utterance = new SpeechSynthesisUtterance(articleContent);
+        let voices = [];
+
+        function populateVoiceList() {
+            voices = speechSynthesis.getVoices();
+            voiceSelect.innerHTML = '';
+            voices.forEach((voice, i) => {
+                const option = document.createElement('option');
+                option.textContent = `${voice.name} (${voice.lang})`;
+                option.setAttribute('data-lang', voice.lang);
+                option.setAttribute('data-name', voice.name);
+                voiceSelect.appendChild(option);
+            });
+        }
+
+        populateVoiceList();
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = populateVoiceList;
+        }
+
+        playBtn.addEventListener('click', () => {
+            if (speechSynthesis.paused) {
+                speechSynthesis.resume();
+            } else {
+                const selectedVoiceName = voiceSelect.selectedOptions[0].getAttribute('data-name');
+                utterance.voice = voices.find(voice => voice.name === selectedVoiceName);
+                speechSynthesis.speak(utterance);
+            }
+            playBtn.style.display = 'none';
+            pauseBtn.style.display = 'inline-block';
+            stopBtn.style.display = 'inline-block';
+            ttsStatus.textContent = 'Playing...';
+        });
+
+        pauseBtn.addEventListener('click', () => {
+            speechSynthesis.pause();
+            playBtn.style.display = 'inline-block';
+            pauseBtn.style.display = 'none';
+            ttsStatus.textContent = 'Paused';
+        });
+
+        stopBtn.addEventListener('click', () => {
+            speechSynthesis.cancel();
+            playBtn.style.display = 'inline-block';
+            pauseBtn.style.display = 'none';
+            stopBtn.style.display = 'none';
+            ttsStatus.textContent = '';
+        });
+
+        utterance.onend = () => {
+            playBtn.style.display = 'inline-block';
+            pauseBtn.style.display = 'none';
+            stopBtn.style.display = 'none';
+            ttsStatus.textContent = '';
+        };
+    });
+
     document.addEventListener('DOMContentLoaded', function() {
         const mainCommentForm = document.getElementById('comment-form');
         const mainFormHeader = document.getElementById('comment-form-header');

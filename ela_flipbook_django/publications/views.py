@@ -15,10 +15,11 @@ from django.core.cache import cache
 import random 
 from .models import Magazine, Article, Event, Profile, Tag, Author # Import new models
 from django.db.models import Q, Avg
-from .forms import RatingForm, CommentForm
+from .forms import RatingForm, CommentForm, ContributorForm
 from django.db.models.functions import ExtractYear
 from django.http import JsonResponse, HttpResponseRedirect
 from allauth.account.views import SignupView # Import the original SignupView
+from django.core.mail import send_mail
 
 # === CLASS-BASED VIEWS (for advanced features) ===
 
@@ -280,7 +281,7 @@ def profile_view(request):
     if referral_code and not profile.referred_by:
         try:
             referrer_profile = Profile.objects.get(referral_code=referral_code)
-            if referrer_profile.user != user:
+            if referrer_.user != user:
                 profile.referred_by = referrer_profile.user
                 profile.save()
             del request.session['referral_code']
@@ -398,3 +399,29 @@ def like_comment_view(request, pk):
 def subscribe_view(request):
     """ Renders the subscribe page. """
     return render(request, 'publications/subscribe.html')
+
+def contributors_view(request):
+    if request.method == 'POST':
+        form = ContributorForm(request.POST)
+        if form.is_valid():
+            # Send email
+            send_mail(
+                'New Contributor Application',
+                f"""\
+                Name: {form.cleaned_data['name']}
+                Email: {form.cleaned_data['email']}
+                Phone: {form.cleaned_data['phone_number']}
+                Expertise: {form.cleaned_data['expertise']}
+                Company: {form.cleaned_data['company']}
+                LinkedIn: {form.cleaned_data['linkedin']}
+                """,
+                'from@example.com', # Replace with a valid from email
+                ['editorial@businessmatters.co.ke'],
+                fail_silently=False,
+            )
+            messages.success(request, 'Thank you for your interest! We will be in touch shortly.')
+            return HttpResponseRedirect(request.path_info) # Redirect to the same page
+    else:
+        form = ContributorForm()
+
+    return render(request, 'publications/contributors.html', {'form': form})
