@@ -4,76 +4,262 @@
 {% load static %}
 
 {% block content %}
+<style>
+    /* =================================== */
+    /*  ARTICLES PAGE CONTAINER            */
+    /* =================================== */
+    .articles-page-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    /* =================================== */
+    /*  SIDEBAR STYLING                    */
+    /* =================================== */
+    .articles-sidebar {
+        flex: 0 0 250px;
+        background-color: #f9f9f9;
+        padding: 20px;
+        border-radius: 8px;
+        height: fit-content;
+    }
+
+    .sidebar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .close-filter-btn {
+        display: none;
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+    }
+
+    /* =================================== */
+    /*  FILTER FORM STYLING                */
+    /* =================================== */
+    .filter-form {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .filter-section {
+        border-bottom: 1px solid #e0e0e0;
+        margin-bottom: 10px;
+    }
+
+    .filter-section summary {
+        font-weight: bold;
+        padding: 10px 0;
+        cursor: pointer;
+        list-style: none; /* Remove default marker */
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .filter-section summary::-webkit-details-marker {
+        display: none; /* Hide for Webkit browsers */
+    }
+
+    .filter-section summary::after {
+        content: '+';
+        font-size: 1.2rem;
+        transition: transform 0.2s;
+    }
+
+    .filter-section[open] > summary::after {
+        content: '−';
+        transform: rotate(180deg);
+    }
+
+    .filter-section .form-group {
+        padding: 10px 0;
+    }
+
+    .filter-form label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+
+    .filter-form input[type="search"],
+    .filter-form select {
+        width: 100%;
+        padding: 8px;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+    }
+
+    .filter-form .filter-btn {
+        width: 100%;
+        padding: 10px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+
+    /* =================================== */
+    /*  MAIN CONTENT STYLING               */
+    /* =================================== */
+    .articles-main-content {
+        flex: 1;
+    }
+
+    .featured-story {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    .featured-image img {
+        width: 100%;
+        height: auto;
+        border-radius: 8px;
+    }
+
+    @media (min-width: 768px) {
+        .featured-story {
+            flex-direction: row;
+        }
+        .featured-image {
+            flex: 1;
+        }
+        .featured-content {
+            flex: 2;
+        }
+    }
+
+    /* =================================== */
+    /*  MOBILE FILTER STYLING              */
+    /* =================================== */
+    .filter-toggle-btn {
+        display: none;
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1001;
+        background-color: #007bff;
+        color: white;
+        padding: 10px 15px;
+        border-radius: 50px;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    @media (max-width: 768px) {
+        .filter-toggle-btn {
+            display: block;
+        }
+        .articles-sidebar {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 80%;
+            max-width: 300px;
+            height: 100%;
+            z-index: 1002;
+            transition: left 0.3s ease;
+            overflow-y: auto;
+        }
+        .articles-sidebar.open {
+            left: 0;
+        }
+        .close-filter-btn {
+            display: block;
+        }
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        .sidebar-overlay.active {
+            display: block;
+        }
+    }
+
+</style>
+
 <div class="container articles-page-container">
 
-    <!-- =================================== -->
-    <!--  1. MOBILE FILTER BUTTON            -->
-    <!-- =================================== -->
-    <button id="filter-toggle-btn" class="filter-toggle-btn">
-        <i class="fas fa-filter"></i>
-        Filters
-    </button>
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
 
-    <!-- =================================== -->
-    <!--  2. LEFT SIDEBAR FOR FILTERS        -->
-    <!-- =================================== -->
     <aside id="articles-sidebar" class="articles-sidebar">
         <div class="sidebar-header">
              <h3>Filters</h3>
              <button id="close-filter-btn" class="close-filter-btn">&times;</button>
         </div>
         <form method="GET" action="{% url 'publications:articles' %}" class="filter-form">
-            <!-- Search Bar -->
-            <div class="form-group">
-                <label for="search-input">Search</label>
-                <input type="search" name="q" id="search-input" placeholder="Search articles..." value="{{ current_query|default:'' }}">
-            </div>
 
-            <!-- Sort By Dropdown -->
-            <div class="form-group">
-                <label for="sort-select">Sort By</label>
-                <select name="sort" id="sort-select">
-                    <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>Newest</option>
-                    <option value="most_read" {% if current_sort == 'most_read' %}selected{% endif %}>Most Read</option>
-                    <option value="editors_pick" {% if current_sort == 'editors_pick' %}selected{% endif %}>Editor's Pick</option>
-                </select>
-            </div>
+            <details class="filter-section" data-filter-title="search" open>
+                <summary>Search</summary>
+                <div class="form-group">
+                    <input type="search" name="q" id="search-input" placeholder="Search articles..." value="{{ current_query|default:'' }}">
+                </div>
+            </details>
 
-            <!-- Filter by Year -->
-            <div class="form-group">
-                <label for="year-select">Filter by Year</label>
-                <select name="year" id="year-select">
-                    <option value="">All Years</option>
-                    {% for date in year_list %}
-                        <option value="{{ date.year }}" {% if selected_year and date.year == selected_year|add:0 %}selected{% endif %}>
-                            {{ date.year }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
+            <details class="filter-section" data-filter-title="sort">
+                <summary>Sort By</summary>
+                <div class="form-group">
+                    <select name="sort" id="sort-select">
+                        <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>Newest</option>
+                        <option value="most_read" {% if current_sort == 'most_read' %}selected{% endif %}>Most Read</option>
+                        <option value="editors_pick" {% if current_sort == 'editors_pick' %}selected{% endif %}>Editor's Pick</option>
+                    </select>
+                </div>
+            </details>
 
-            <!-- DYNAMIC Category/Tag Dropdown Filter -->
-            <div class="form-group">
-                <label for="tag-select">Category</label>
-                <select name="tag" id="tag-select">
-                    <option value="">All Categories</option>
-                    {% for tag in all_tags %}
-                        <option value="{{ tag.slug }}" {% if current_tag == tag.slug %}selected{% endif %}>
-                            {{ tag.name }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
+            <details class="filter-section" data-filter-title="year">
+                <summary>Filter by Year</summary>
+                <div class="form-group">
+                    <select name="year" id="year-select">
+                        <option value="">All Years</option>
+                        {% for date in year_list %}
+                            <option value="{{ date.year }}" {% if selected_year and date.year == selected_year|add:0 %}selected{% endif %}>
+                                {{ date.year }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </details>
+
+            <details class="filter-section" data-filter-title="category">
+                <summary>Category</summary>
+                <div class_="form-group">
+                    <select name="tag" id="tag-select">
+                        <option value="">All Categories</option>
+                        {% for tag in all_tags %}
+                            <option value="{{ tag.slug }}" {% if current_tag == tag.slug %}selected{% endif %}>
+                                {{ tag.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </details>
 
             <button type="submit" class="filter-btn">Apply Filters</button>
         </form>
     </aside>
 
-    <!-- =================================== -->
-    <!--  3. MAIN CONTENT FOR ARTICLES       -->
-    <!-- =================================== -->
     <main class="articles-main-content">
-        <!-- Featured Story Section (now uses the specific context variable) -->
         {% if featured_story %}
         <section class="featured-story">
             <div class="featured-image">
@@ -93,37 +279,43 @@
         </section>
         {% endif %}
 
-        <!-- Article Grid Section -->
-        <div class="publications-header">
-            <h2>All Articles</h2>
-        </div>
-
-        <div class="publications-grid">
-            {% for article in articles %}
-                <div class="publication-card article-story-card">
-                    <a href="{% url 'publications:article_detail' pk=article.id %}" class="card-image-wrapper">
-                        <img src="{{ article.cover_image.url }}" alt="Cover for {{ article.title }}">
-                    </a>
-                    <div class="card-content">
-                        <h3 class="card-title"><a href="{% url 'publications:article_detail' pk=article.id %}">{{ article.title }}</a></h3>
-                        <p class="card-excerpt">{{ article.excerpt|truncatewords:20 }}</p>
-                        <div class="card-tags">
-                            {% for tag in article.tags.all %}
-                                <span class="tag">{{ tag.name }}</span>
-                            {% endfor %}
-                        </div>
-                        <div class="article-average-rating">
-                            {% if article.average_rating %}
-                                Average Rating: {{ article.average_rating|floatformat:1 }} / 5
-                            {% endif %}
+        {% for publication_name, articles_in_publication in articles_by_publication.items %}
+            <div class="publications-header">
+                <h2>{{ publication_name }}</h2>
+            </div>
+            <div class="publications-grid">
+                {% for article in articles_in_publication %}
+                    <div class="publication-card article-story-card">
+                        <a href="{% url 'publications:article_detail' pk=article.id %}" class="card-image-wrapper">
+                            <img src="{{ article.cover_image.url }}" alt="Cover for {{ article.title }}">
+                        </a>
+                        <div class="card-content">
+                            <h3 class="card-title"><a href="{% url 'publications:article_detail' pk=article.id %}">{{ article.title }}</a></h3>
+                            <p class="card-excerpt">{{ article.excerpt|truncatewords:20 }}</p>
+                            <div class="card-tags">
+                                {% for tag in article.tags.all %}
+                                    <span class="tag">{{ tag.name }}</span>
+                                {% endfor %}
+                            </div>
+                            <div class="article-average-rating">
+                                {% if article.average_rating %}
+                                    Average Rating: {{ article.average_rating|floatformat:1 }} / 5
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
-                </div>
-            {% empty %}
-                <p class="no-publications">No publications match your filter.</p>
-            {% endfor %}
-        </div>
+                {% endfor %}
+            </div>
+        {% empty %}
+            <p class="no-publications">No articles match your filter.</p>
+        {% endfor %}
     </main>
+
+    <button id="filter-toggle-btn" class="filter-toggle-btn">
+        <i class="fas fa-filter"></i>
+        Filters
+    </button>
+
 </div>
 {% endblock %}
 
@@ -133,18 +325,59 @@ document.addEventListener('DOMContentLoaded', function() {
     const filterToggleBtn = document.getElementById('filter-toggle-btn');
     const articlesSidebar = document.getElementById('articles-sidebar');
     const closeFilterBtn = document.getElementById('close-filter-btn');
+    const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+    function openSidebar() {
+        articlesSidebar.classList.add('open');
+        sidebarOverlay.classList.add('active');
+    }
+
+    function closeSidebar() {
+        articlesSidebar.classList.remove('open');
+        sidebarOverlay.classList.remove('active');
+    }
 
     if (filterToggleBtn) {
-        filterToggleBtn.addEventListener('click', function() {
-            articlesSidebar.classList.toggle('open');
-        });
+        filterToggleBtn.addEventListener('click', openSidebar);
     }
 
     if (closeFilterBtn) {
-        closeFilterBtn.addEventListener('click', function() {
-            articlesSidebar.classList.remove('open');
-        });
+        closeFilterBtn.addEventListener('click', closeSidebar);
     }
+
+    if (sidebarOverlay) {
+        sidebarOverlay.addEventListener('click', closeSidebar);
+    }
+
+    // --- NEW: Collapsible filter persistence ---
+    const filterDetails = document.querySelectorAll('.filter-section');
+    const filtersStateKey = 'django.admin.filtersState';
+
+    // 1. Restore filter state from sessionStorage
+    let filtersState = JSON.parse(sessionStorage.getItem(filtersStateKey));
+    if (!filtersState) {
+        filtersState = {};
+    }
+
+    filterDetails.forEach(detail => {
+        const filterTitle = detail.dataset.filterTitle;
+        if (filterTitle in filtersState) {
+            if (filtersState[filterTitle]) {
+                detail.setAttribute('open', '');
+            } else {
+                detail.removeAttribute('open');
+            }
+        }
+    });
+
+    // 2. Save filter state on toggle
+    filterDetails.forEach(detail => {
+        detail.addEventListener('toggle', event => {
+            const filterTitle = event.target.dataset.filterTitle;
+            filtersState[filterTitle] = event.target.open;
+            sessionStorage.setItem(filtersStateKey, JSON.stringify(filtersState));
+        });
+    });
 });
 </script>
 {% endblock %}
