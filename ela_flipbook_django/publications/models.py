@@ -217,6 +217,7 @@ class Contributor(models.Model):
     email = models.EmailField()
     phone_number = models.CharField(max_length=20)
     country = models.CharField(max_length=100)
+    field_or_industry = models.CharField(max_length=100, default='N/A')
     submission_type = models.CharField(max_length=20, choices=SUBMISSION_TYPE_CHOICES, default='general')
     subject = models.CharField(max_length=200)
     message = models.TextField()

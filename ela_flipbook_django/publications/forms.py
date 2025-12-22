@@ -24,4 +24,4 @@ class CommentForm(forms.Form):
 class ContributorForm(forms.ModelForm):
     class Meta:
         model = Contributor
-        fields = ['full_name', 'email', 'phone_number', 'country', 'submission_type', 'subject', 'message', 'attachment']
+        fields = ['full_name', 'email', 'phone_number', 'country', 'field_or_industry', 'submission_type', 'subject', 'message', 'attachment']
