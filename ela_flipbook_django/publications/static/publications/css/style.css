@@ -218,7 +218,7 @@ main > .container {
 }
 
 .article-header h1 {
-    color: var(--text-dark);
+    color: var(--accent-yellow);
     margin-bottom: 15px;
     font-size: 2.5rem; /* Larger title */
     line-height: 1.2;

@@ -4,6 +4,9 @@ from django.db import migrations
 
 def add_site_data(apps, schema_editor):
     Site = apps.get_model('sites', 'Site')
+    # Remove any site that has this domain but is NOT pk=1 to avoid IntegrityError
+    Site.objects.filter(domain='127.0.0.1:8000').exclude(pk=1).delete()
+    
     Site.objects.update_or_create(
         pk=1,
         defaults={
