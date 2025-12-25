@@ -226,18 +226,6 @@ def profile_view(request):
     user = request.user
     profile, created = Profile.objects.get_or_create(user=user)
     
-    referral_code = request.session.get('referral_code')
-    if referral_code and not profile.referred_by:
-        try:
-            referrer_profile = Profile.objects.get(referral_code=referral_code)
-            if referrer_profile.user != user:
-                profile.referred_by = referrer_profile.user
-                profile.save()
-            del request.session['referral_code']
-        except Profile.DoesNotExist:
-            if 'referral_code' in request.session:
-                del request.session['referral_code']
-    
     signup_url = reverse('account_signup')
     referral_link = f"{request.build_absolute_uri(signup_url)}?ref={profile.referral_code}"
     referral_count = user.referrals.count()

@@ -1,3 +1,4 @@
+
 {% extends 'publications/base.html' %}
 
 {% block content %}
@@ -5,40 +6,55 @@
     .contributors-container-wrapper {
         background: #007bff;
         color: white;
-        padding: 60px 20px;
+        padding: 40px 20px;
     }
     .contributors-container {
-        max-width: 550px;
+        max-width: 800px;
         margin: 0 auto;
         text-align: center;
     }
 
     .contributors-header h1 {
-        font-size: 3rem;
+        font-size: 2.5rem;
         font-weight: bold;
-        margin-bottom: 30px;
+        margin-bottom: 20px;
     }
 
     .contributors-form-container form {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+
+    .form-group {
+        text-align: left;
+    }
+
+    .full-width {
+        grid-column: 1 / -1;
     }
 
     .contributors-form-container input,
     .contributors-form-container select,
     .contributors-form-container textarea {
         width: 100%;
-        padding: 18px 15px;
+        padding: 15px;
         border-radius: 5px;
         border: 1px solid #ddd;
         font-size: 1rem;
         background-color: #fff;
         color: #333;
+        box-sizing: border-box;
+    }
+
+    .contributors-form-container textarea {
+        min-height: 120px;
+        resize: vertical;
     }
 
     .contributors-form-container .btn {
-        padding: 18px 15px;
+        grid-column: 1 / -1;
+        padding: 15px;
         font-size: 1.1rem;
         font-weight: bold;
         color: #fff;
@@ -53,6 +69,12 @@
 
     .contributors-form-container .btn:hover {
         background-color: #58796a;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
     }
 </style>
 
@@ -71,9 +93,9 @@
                 <div class="form-group">{{ form.country.label_tag }} {{ form.country }}</div>
                 <div class="form-group">{{ form.field_or_industry.label_tag }} {{ form.field_or_industry }}</div>
                 <div class="form-group">{{ form.submission_type.label_tag }} {{ form.submission_type }}</div>
-                <div class="form-group">{{ form.subject.label_tag }} {{ form.subject }}</div>
-                <div class="form-group">{{ form.message.label_tag }} {{ form.message }}</div>
-                <div class="form-group">{{ form.attachment.label_tag }} {{ form.attachment }}</div>
+                <div class="form-group full-width">{{ form.subject.label_tag }} {{ form.subject }}</div>
+                <div class="form-group full-width">{{ form.message.label_tag }} {{ form.message }}</div>
+                <div class="form-group full-width">{{ form.attachment.label_tag }} {{ form.attachment }}</div>
                 <button type="submit" class="btn btn-primary">Submit</button>
             </form>
         </div>
