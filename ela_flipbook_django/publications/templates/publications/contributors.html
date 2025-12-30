@@ -4,7 +4,7 @@
 {% block content %}
 <style>
     .contributors-container-wrapper {
-        background: #007bff;
+        background: #0a192f;
         color: white;
         padding: 20px 10px;
     }
@@ -117,9 +117,10 @@
         margin-bottom: 20px;
     }
 
-    .modal-content ul {
+    #terms-modal .modal-content ul {
         list-style-type: disc;
         margin-left: 20px;
+        text-align: left;
     }
 
     .agree-section {
@@ -142,6 +143,79 @@
     #submit-btn:disabled {
         background-color: #cccccc;
         cursor: not-allowed;
+    }
+    .share-section {
+        margin-top: 20px;
+    }
+    .share-icons a {
+        margin: 0 10px;
+        color: white;
+        font-size: 24px;
+    }
+    .copy-link-btn {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+    }
+
+    /* Auth Modal specific styles */
+    #auth-modal .modal-content {
+        background-color: #0a192f;
+        color: white;
+        padding: 40px;
+        border-radius: 8px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    }
+
+    #auth-modal h2 {
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    #auth-modal p {
+        font-size: 1.2rem;
+        margin-bottom: 30px;
+    }
+
+    #auth-modal .btn-container {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+    }
+
+    #auth-modal .btn {
+        padding: 15px 30px;
+        text-decoration: none;
+        border-radius: 5px;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    #auth-modal .btn-primary {
+        background-color: #6a8d7d;
+        color: white;
+    }
+    
+    #auth-modal .btn-primary:hover {
+        background-color: #58796a;
+        transform: translateY(-2px);
+    }
+
+    #auth-modal .btn-secondary {
+        background-color: #007bff;
+        color: white;
+    }
+
+    #auth-modal .btn-secondary:hover {
+        background-color: #0056b3;
+        transform: translateY(-2px);
     }
 </style>
 
@@ -166,10 +240,21 @@
                 <button type="button" class="btn btn-primary" id="open-modal-btn">Join our contributor Network</button>
             </form>
         </div>
+
+        <div class="share-section">
+            <p>Know an expert who should see this? Share it with them.</p>
+            <div class="share-icons">
+                <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ request.build_absolute_uri }}" target="_blank"><i class="fab fa-linkedin"></i></a>
+                <a href="https://api.whatsapp.com/send?text={{ request.build_absolute_uri }}" target="_blank"><i class="fab fa-whatsapp"></i></a>
+                <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" target="_blank"><i class="fab fa-facebook"></i></a>
+                <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}" target="_blank"><i class="fab fa-twitter"></i></a>
+                <button class="copy-link-btn" onclick="copyLink()"><i class="fas fa-link"></i></button>
+            </div>
+        </div>
     </div>
 </div>
 
-<!-- The Modal -->
+<!-- The Terms Modal -->
 <div id="terms-modal" class="modal">
   <div class="modal-content">
     <span class="close-btn">&times;</span>
@@ -191,40 +276,75 @@
   </div>
 </div>
 
+<!-- The Auth Modal -->
+<div id="auth-modal" class="modal">
+  <div class="modal-content">
+    <span class="close-btn">&times;</span>
+    <h2>Join Our Contributor Network</h2>
+    <p>To submit your contribution, please log in or create an account.</p>
+    <div class="btn-container">
+        <a href="{% url 'account_login' %}" class="btn btn-primary">Login</a>
+        <a href="{% url 'account_signup' %}" class="btn btn-secondary">Subscribe</a>
+    </div>
+  </div>
+</div>
+
 <script>
-    // Get the modal
-    var modal = document.getElementById("terms-modal");
+    var isAuthenticated = {{ user.is_authenticated|yesno:"true,false" }};
+
+    // Get the modals
+    var termsModal = document.getElementById("terms-modal");
+    var authModal = document.getElementById("auth-modal");
 
     // Get the button that opens the modal
-    var btn = document.getElementById("open-modal-btn");
+    var openModalBtn = document.getElementById("open-modal-btn");
 
-    // Get the <span> element that closes the modal
-    var span = document.getElementsByClassName("close-btn")[0];
+    // Get the <span> elements that close the modals
+    var termsCloseBtn = termsModal.getElementsByClassName("close-btn")[0];
+    var authCloseBtn = authModal.getElementsByClassName("close-btn")[0];
 
-    // Get the agree checkbox and submit button
-    var agreeCheckbox = document.getElementById("agree-checkbox");
-    var submitBtn = document.getElementById("submit-btn");
-
-    // When the user clicks the button, open the modal 
-    btn.onclick = function() {
-        modal.style.display = "block";
+    // When the user clicks the button, open the correct modal
+    openModalBtn.onclick = function() {
+        if (isAuthenticated) {
+            termsModal.style.display = "block";
+        } else {
+            authModal.style.display = "block";
+        }
     }
 
-    // When the user clicks on <span> (x), close the modal
-    span.onclick = function() {
-        modal.style.display = "none";
+    // When the user clicks on <span> (x), close the modals
+    termsCloseBtn.onclick = function() {
+        termsModal.style.display = "none";
+    }
+    authCloseBtn.onclick = function() {
+        authModal.style.display = "none";
     }
 
     // When the user clicks anywhere outside of the modal, close it
     window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = "none";
+        if (event.target == termsModal) {
+            termsModal.style.display = "none";
+        }
+        if (event.target == authModal) {
+            authModal.style.display = "none";
         }
     }
 
     // Enable/disable the submit button based on the checkbox
-    agreeCheckbox.onchange = function() {
-        submitBtn.disabled = !this.checked;
+    if (isAuthenticated) {
+        var agreeCheckbox = document.getElementById("agree-checkbox");
+        var submitBtn = document.getElementById("submit-btn");
+        agreeCheckbox.onchange = function() {
+            submitBtn.disabled = !this.checked;
+        }
+    }
+
+    function copyLink() {
+        navigator.clipboard.writeText(window.location.href).then(function() {
+            alert('Link copied to clipboard!');
+        }, function(err) {
+            console.error('Could not copy text: ', err);
+        });
     }
 </script>
 {% endblock %}
