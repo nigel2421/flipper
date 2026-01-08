@@ -6,27 +6,67 @@
 <div class="login-container">
     <div class="login-box">
         <h1>Your Profile</h1>
-        
+
         <div class="profile-info">
-            <p><strong>Name:</strong> {{ user.first_name }} {{ user.last_name }}</p>
-            <p><strong>Email:</strong> {{ user.email }}</p>
-            <p><strong>Phone:</strong> {{ user.profile.phone_number|default:"Not provided" }}</p>
+            <div class="profile-detail-row">
+                <span class="profile-label">Name:</span>
+                <span class="profile-value">
+                    {% if request.user.first_name or request.user.last_name %}
+                    {{ request.user.first_name }} {{ request.user.last_name }}
+                    {% else %}
+                    {{ request.user.username }}
+                    {% endif %}
+                </span>
+            </div>
+            <div class="profile-detail-row">
+                <span class="profile-label">Email:</span>
+                <span class="profile-value">{{ request.user.email }}</span>
+            </div>
 
             <!-- This part shows who you were referred by -->
             {% if referrer %}
-                <p><strong>Referred By:</strong> {{ referrer.first_name }} {{ referrer.last_name }}</p>
+            <p><strong>Referred By:</strong> {{ referrer.first_name }} {{ referrer.last_name }}</p>
             {% endif %}
+
+            <hr class="profile-divider">
+
+            <form method="post" action="{% url 'publications:profile' %}" class="profile-form">
+                {% csrf_token %}
+                <h3 class="profile-section-title">Professional Info</h3>
+
+                {% for field in form %}
+                <div class="form-group profile-field">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                    {% endif %}
+                    {% if field.errors %}
+                    <div class="error-message">
+                        {% for error in field.errors %}
+                        {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+                <button type="submit" class="submit-btn full-width">Update Profile</button>
+            </form>
         </div>
 
         <!-- === THIS IS THE MISSING REFERRAL SECTION === -->
         <div class="referral-section">
             <h3>Your Referral Link</h3>
-            <p>Share this link with your friends. You have successfully referred <strong>{{ referral_count }}</strong> new member(s)!</p>
-            
-            <!-- This input displays your unique referral link -->
-            <input type="text" value="{{ referral_link }}" readonly class="referral-link-input" onclick="this.select();" aria-label="Your referral link" title="Your referral link">
+            <p>Share this link with your friends. You have successfully referred <strong>{{ referral_count }}</strong>
+                new member(s)!</p>
 
-            <a href="{% url 'publications:rated_articles' %}" class="submit-btn" style="margin-top: 20px;">View My Rated Articles</a>
+            <!-- This input displays your unique referral link -->
+            <input type="text" value="{{ referral_link }}" readonly class="referral-link-input" onclick="this.select();"
+                aria-label="Your referral link" title="Your referral link">
+
+            <a href="{% url 'publications:rated_articles' %}" class="submit-btn" style="margin-top: 20px;">View My Rated
+                Articles</a>
         </div>
         <!-- === END OF MISSING SECTION === -->
 

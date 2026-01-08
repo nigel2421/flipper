@@ -1,7 +1,7 @@
 # publications/forms.py
 
 from django import forms
-from .models import Contributor
+from .models import Contributor, Profile
 
 class RatingForm(forms.Form):
     # The score will be set by JavaScript, so we use a hidden input.
@@ -25,3 +25,17 @@ class ContributorForm(forms.ModelForm):
     class Meta:
         model = Contributor
         fields = ['full_name', 'email', 'phone_number', 'country', 'field_or_industry', 'submission_type', 'subject', 'message', 'attachment']
+
+class ProfileForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['job_title', 'job_role', 'company', 'industry', 'bio', 'phone_number']
+        widgets = {
+            'bio': forms.Textarea(attrs={'rows': 3}),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Add CSS classes for styling
+        for field in self.fields:
+            self.fields[field].widget.attrs.update({'class': 'form-control'})

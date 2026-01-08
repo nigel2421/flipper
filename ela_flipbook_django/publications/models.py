@@ -136,6 +136,26 @@ class CommentReport(models.Model):
 # --- Profile Model ---
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    
+    # Professional Information
+    ROLE_CHOICES = [
+        ('student', 'Student/Intern'),
+        ('entry', 'Entry Level'),
+        ('manager', 'Manager'),
+        ('director', 'Director'),
+        ('vp', 'VP/Head of Department'),
+        ('c_suite', 'C-Suite (CEO, CFO, etc.)'),
+        ('founder', 'Founder/Owner'),
+        ('consultant', 'Consultant/Freelancer'),
+        ('other', 'Other'),
+    ]
+    
+    job_title = models.CharField(max_length=100, blank=True, help_text="Your current professional position.")
+    job_role = models.CharField(max_length=20, choices=ROLE_CHOICES, blank=True, help_text="Your level or capacity within the organization.")
+    company = models.CharField(max_length=100, blank=True, help_text="Where you work or represent.")
+    industry = models.CharField(max_length=100, blank=True, help_text="Your field or industry.")
+    bio = models.TextField(blank=True, help_text="A short professional summary.")
+    
     phone_number = models.CharField(max_length=20, blank=True, null=True)
     referral_code = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     referred_by = models.ForeignKey(

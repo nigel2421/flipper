@@ -226,12 +226,24 @@ def profile_view(request):
     user = request.user
     profile, created = Profile.objects.get_or_create(user=user)
     
+    from .forms import ProfileForm # Import locally to avoid circular import issues if any
+    
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, instance=profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your profile was successfully updated!')
+            return redirect('publications:profile')
+    else:
+        form = ProfileForm(instance=profile)
+    
     signup_url = reverse('account_signup')
     referral_link = f"{request.build_absolute_uri(signup_url)}?ref={profile.referral_code}"
     referral_count = user.referrals.count()
     referrer = profile.referred_by
     
     context = {
+        'form': form,
         'referral_link': referral_link,
         'referral_count': referral_count,
         'referrer': referrer,

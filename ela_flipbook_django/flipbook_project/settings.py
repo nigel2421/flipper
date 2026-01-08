@@ -66,6 +66,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     # Core Django Middleware
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -182,7 +183,7 @@ USE_TZ = True
 # --- STATIC FILES & MEDIA CONFIGURATION ---
 
 # Base URL for serving static files (e.g., CSS, JavaScript, images)
-STATIC_URL = '/static/'
+STATIC_URL = 'businessmatters.co.ke/flipper/ela_flipbook_django/static/'
 
 # Absolute path to the directory where collectstatic will gather static files
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_collected')
@@ -192,9 +193,12 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
 
+# Enable WhiteNoise's GZip compression and caching
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 
 # Base URL for serving user-uploaded media files
-MEDIA_URL = '/media/'
+MEDIA_URL = 'businessmatters.co.ke/flipper/ela_flipbook_django/media/'
 
 # Absolute path to the directory for storing user-uploaded media files
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

@@ -63,6 +63,60 @@ def export_emailaddress_csv(modeladmin, request, queryset):
 export_emailaddress_csv.short_description = "Export Selected Emails & Join Dates to CSV"
 
 
+# --- NEW: Action to export Users with full details (Professional Info & Referrals) ---
+def export_users_with_details_csv(modeladmin, request, queryset):
+    """
+    Exports users with their basic info, professional details, and referral counts to CSV.
+    """
+    if not queryset.exists():
+        queryset = modeladmin.model.objects.all()
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename=user_details_export_{datetime.date.today()}.csv'
+    writer = csv.writer(response)
+
+    # Header Row
+    writer.writerow([
+        'Username', 'Email', 'First Name', 'Last Name', 'Date Joined', 'Last Login',
+        'Job Title', 'Job Role', 'Company', 'Industry', 'Bio', 'Phone Number',
+        'Referral Count'
+    ])
+
+    for user in queryset:
+        # Access profile safely
+        profile = getattr(user, 'profile', None)
+        
+        # Basic User Info
+        row = [
+            user.username,
+            user.email,
+            user.first_name,
+            user.last_name,
+            user.date_joined.strftime('%Y-%m-%d'),
+            user.last_login.strftime('%Y-%m-%d %H:%M') if user.last_login else '-',
+        ]
+        
+        # Professional & Profile Info
+        if profile:
+            row.extend([
+                profile.job_title,
+                profile.get_job_role_display(), # Use get_FOO_display() for choices
+                profile.company,
+                profile.industry,
+                profile.bio,
+                profile.phone_number,
+                user.referrals.count() # Count number of profiles referring to this user
+            ])
+        else:
+            row.extend(['-', '-', '-', '-', '-', '-', 0])
+            
+        writer.writerow(row)
+
+    return response
+
+export_users_with_details_csv.short_description = "Export Selected Users with Details to CSV"
+
+
 # --- Model Admins ---
 
 @admin.register(Author)
@@ -144,7 +198,7 @@ class ProfileInline(admin.StackedInline):
 class UserAdmin(BaseUserAdmin):
     inlines = (ProfileInline,)
     list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff')
-    actions = [export_emails_and_join_date_csv]
+    actions = [export_emails_and_join_date_csv, export_users_with_details_csv]
 
     def get_inline_instances(self, request, obj=None):
         if not obj:
