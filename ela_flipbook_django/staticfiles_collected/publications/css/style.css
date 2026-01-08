@@ -728,6 +728,34 @@ main>.container {
     border-bottom-color: var(--accent-yellow);
 }
 
+/* --- Styled Article Images (User Request) --- */
+.article-content img,
+.article-content figure img {
+    max-width: 70%;
+    height: auto;
+    display: block;
+    margin: 30px auto;
+    border: 1px solid #333;
+    border-radius: 4px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    /* Rectangular frame effect */
+    background-color: var(--card-bg);
+    padding: 5px;
+}
+
+.article-content figure {
+    margin: 30px auto;
+    max-width: 100%;
+    text-align: center;
+}
+
+.article-content figcaption {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-top: 10px;
+    font-style: italic;
+}
+
 /* --- Cover Image Styling --- */
 .article-cover-image {
     width: 100%;
