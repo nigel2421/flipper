@@ -1,0 +1,558 @@
+<!-- publications/templates/publications/article_detail.html -->
+
+{% extends 'publications/base.html' %}
+
+{% block content %}
+<style>
+    .text-to-speech-section {
+        background-color: #1c1379;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 25px;
+    }
+
+    #tts-controls {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    #tts-controls .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1rem;
+    }
+
+    #tts-status {
+        font-style: italic;
+        color: #555;
+    }
+
+    .voice-selection {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    #voice-select {
+        flex-grow: 1;
+        max-width: 300px;
+    }
+</style>
+<div class="container article-detail-container">
+    <!-- Back button using JavaScript history -->
+    <a href="javascript:history.back()" class="back-link">&larr; Back</a>
+
+    <article>
+        <header class="article-header">
+            <h1>{{ article.title }}</h1>
+            <div class="article-meta">
+                {% if article.author %}
+                <span class="author-byline">
+                    {% if article.author.profile_photo %}
+                    <a href="{% url 'publications:author_detail' pk=article.author.pk %}">
+                        <img src="{{ article.author.profile_photo.url }}" alt="Photo of {{ article.author.name }}"
+                            class="author-avatar-inline">
+                    </a>
+                    {% endif %}
+                    <span>By:
+                        <a href="{% url 'publications:author_detail' pk=article.author.pk %}">{{ article.author.name
+                            }}</a>
+                    </span>
+                </span>
+                {% endif %}
+                <span><i class="fas fa-calendar-alt"></i> Published: {{ article.uploaded_at|date:"F j, Y" }}</span>
+                <span><i class="fas fa-eye"></i> {{ article.view_count }} Views</span>
+                {% if article.average_rating %}
+                <span class="average-rating">
+                    <span class="rating-stars">
+                        {% with rating=article.average_rating %}
+                        {% if rating >= 1 %}<i class="fas fa-star"></i>{% elif rating >= 0.5 %}<i
+                            class="fas fa-star-half-alt"></i>{% else %}<i class="far fa-star"></i>{% endif %}
+                        {% if rating >= 2 %}<i class="fas fa-star"></i>{% elif rating >= 1.5 %}<i
+                            class="fas fa-star-half-alt"></i>{% else %}<i class="far fa-star"></i>{% endif %}
+                        {% if rating >= 3 %}<i class="fas fa-star"></i>{% elif rating >= 2.5 %}<i
+                            class="fas fa-star-half-alt"></i>{% else %}<i class="far fa-star"></i>{% endif %}
+                        {% if rating >= 4 %}<i class="fas fa-star"></i>{% elif rating >= 3.5 %}<i
+                            class="fas fa-star-half-alt"></i>{% else %}<i class="far fa-star"></i>{% endif %}
+                        {% if rating >= 5 %}<i class="fas fa-star"></i>{% elif rating >= 4.5 %}<i
+                            class="fas fa-star-half-alt"></i>{% else %}<i class="far fa-star"></i>{% endif %}
+                        {% endwith %}
+                    </span>
+                    ({{ article.average_rating|floatformat:1 }})
+                </span>
+                {% endif %}
+            </div>
+            <div class="card-tags">
+                {% for tag in article.tags.all %}
+                <span class="tag">{{ tag.name }}</span>
+                {% endfor %}
+            </div>
+
+            <!-- === NEW: Social Share Buttons === -->
+            <div class="social-share-section">
+                <span>Share this article:</span>
+                <div class="share-buttons">
+                    <!-- This button will trigger the device's native share dialog -->
+                    <button id="native-share-btn" class="share-btn native-share" aria-label="Share this article"
+                        style="display: none;"><i class="fa fa-share-alt"></i> Share...</button>
+
+                    {% url 'publications:article_detail' pk=article.pk as article_path %}
+                    <div id="legacy-share-buttons" style="display: flex; gap: inherit;">
+                        {% with share_url=request.build_absolute_uri|add:article_path %}
+                        <a href="https://twitter.com/intent/tweet?url={{ share_url|urlencode }}&text={{ article.title|urlencode }}"
+                            target="_blank" class="share-btn twitter" aria-label="Share on Twitter"><i
+                                class="fab fa-twitter"></i></a>
+                        <a href="https://www.facebook.com/sharer/sharer.php?u={{ share_url|urlencode }}" target="_blank"
+                            class="share-btn facebook" aria-label="Share on Facebook"><i
+                                class="fab fa-facebook-f"></i></a>
+                        <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ share_url|urlencode }}&title={{ article.title|urlencode }}&summary={{ article.excerpt|urlencode }}"
+                            target="_blank" class="share-btn linkedin" aria-label="Share on LinkedIn"><i
+                                class="fab fa-linkedin-in"></i></a>
+                        <button id="copy-link-btn" class="share-btn copy-link" data-url="{{ share_url }}"
+                            aria-label="Copy link"><i class="fa fa-link"></i></button>
+                        {% endwith %}
+                    </div>
+                </div>
+        </header>
+
+        <!-- Cover Image -->
+        {% if article.cover_image %}
+        <img src="{{ article.cover_image.url }}" alt="Cover for {{ article.title }}" class="article-cover-image">
+        {% endif %}
+
+        <!-- Text-to-Speech Section -->
+        <div class="text-to-speech-section">
+            <h3>Listen to this Article</h3>
+            <p style="font-size: 0.85rem; color: #ccc; margin-top: -5px; margin-bottom: 15px; font-style: italic;">
+                (Works best on PC browsers)</p>
+            <div id="tts-controls">
+                <button id="play-tts-btn" class="btn btn-primary"><i class="fas fa-play"></i> Play</button>
+                <button id="pause-tts-btn" class="btn btn-secondary" style="display: none;"><i class="fas fa-pause"></i>
+                    Pause</button>
+                <button id="stop-tts-btn" class="btn btn-danger" style="display: none;"><i class="fas fa-stop"></i>
+                    Stop</button>
+            </div>
+            <div id="tts-status" style="margin-top: 10px;"></div>
+            <div class="voice-selection" style="margin-top: 15px;">
+                <label for="voice-select">Choose a voice:</label>
+                <select id="voice-select" class="form-control"></select>
+            </div>
+        </div>
+
+        <!-- Main Article Content -->
+        <div class="article-content">
+            {{ article.content|safe }}
+        </div>
+    </article>
+
+    <!-- === NEW: Related Articles Section === -->
+    {% if related_articles %}
+    <div class="related-articles-section">
+        <h3>Related Articles</h3>
+        <div class="publications-grid">
+            {% for related_article in related_articles %}
+            <div class="publication-card article-story-card">
+                <a href="{% url 'publications:article_detail' pk=related_article.id %}" class="card-image-wrapper">
+                    {% if related_article.cover_image %}
+                    <img src="{{ related_article.cover_image.url }}" alt="Cover for {{ related_article.title }}">
+                    {% endif %}
+                </a>
+                <div class="card-content">
+                    <h3 class="card-title"><a href="{% url 'publications:article_detail' pk=related_article.id %}">{{
+                            related_article.title }}</a></h3>
+                    <div class="card-tags">
+                        {% for tag in related_article.tags.all %}
+                        <span class="tag">{{ tag.name }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    <!-- === END: Related Articles Section === -->
+
+    <!-- Rating Form -->
+    <div class="rating-section">
+        <h3>Rate this Article</h3>
+        <form method="post" action="" class="rating-form" data-user-rating="{{ user_rating|default:'' }}">
+            {% csrf_token %}
+            <!-- Hidden input for the score -->
+            {{ rating_form.score }}
+            <!-- Interactive Stars -->
+            <div class="star-rating">
+                <span class="star" data-value="1">&#9733;</span>
+                <span class="star" data-value="2">&#9733;</span>
+                <span class="star" data-value="3">&#9733;</span>
+                <span class="star" data-value="4">&#9733;</span>
+                <span class="star" data-value="5">&#9733;</span>
+            </div>
+            <button type="submit" name="rating_submit" class="submit-btn" style="margin-top: 15px;">Submit
+                Rating</button>
+        </form>
+    </div>
+
+    <!-- Comment Section -->
+    <div class="comment-section">
+        <h3>Comments</h3>
+
+        <!-- Display Existing Comments -->
+        {% if comments.object_list %}
+        <ul class="comment-list">
+            {% for comment in comments.object_list %}
+            {% include 'publications/_comment.html' %}
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p>No comments yet. Be the first to comment!</p>
+        {% endif %}
+
+        <!-- Comment Form (now with an ID for targeting) -->
+        <form method="post" action="" class="comment-form" id="comment-form">
+            <h4 id="comment-form-header">Leave a Comment</h4>
+            {% csrf_token %}
+
+            <!-- === NEW: Display Form Errors === -->
+            {% if comment_form.errors %}
+            <div class="form-errors"
+                style="color: #e74c3c; border: 1px solid #e74c3c; padding: 10px; border-radius: 4px; margin-bottom: 15px;">
+                <strong>Please correct the errors below:</strong>
+                {{ comment_form.non_field_errors }}
+                {{ comment_form.text.errors }}
+            </div>
+            {% endif %}
+            {% csrf_token %}
+            {{ comment_form.as_p }}
+            <button type="submit" name="comment_submit" class="submit-btn">Add Comment</button>
+            <a href="#" id="cancel-reply-btn"
+                style="display:none; margin-top: 10px; text-align: center; display: block;">Cancel Reply</a>
+        </form>
+
+        <!-- Pagination Links -->
+        <div class="pagination">
+            <span class="step-links">
+                {% if comments.has_previous %}
+                <a href="?page=1">&laquo; first</a>
+                <a href="?page={{ comments.previous_page_number }}">previous</a>
+                {% endif %}
+
+                <span class="current">
+                    Page {{ comments.number }} of {{ comments.paginator.num_pages }}.
+                </span>
+
+                {% if comments.has_next %}
+                <a href="?page={{ comments.next_page_number }}">next</a>
+                <a href="?page={{ comments.paginator.num_pages }}">last &raquo;</a>
+                {% endif %}
+            </span>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const playBtn = document.getElementById('play-tts-btn');
+            const pauseBtn = document.getElementById('pause-tts-btn');
+            const stopBtn = document.getElementById('stop-tts-btn');
+            const ttsStatus = document.getElementById('tts-status');
+            const voiceSelect = document.getElementById('voice-select');
+            const ttsSection = document.querySelector('.text-to-speech-section');
+
+            if ('speechSynthesis' in window) {
+                const articleContent = document.querySelector('.article-content').innerText;
+                let utterance = new SpeechSynthesisUtterance(articleContent);
+                let voices = [];
+
+                function populateVoiceList() {
+                    voices = speechSynthesis.getVoices().filter(voice => voice.lang.startsWith('en'));
+                    voiceSelect.innerHTML = '';
+                    voices.forEach((voice, i) => {
+                        const option = document.createElement('option');
+                        option.textContent = `${voice.name} (${voice.lang})`;
+                        option.setAttribute('data-lang', voice.lang);
+                        option.setAttribute('data-name', voice.name);
+                        voiceSelect.appendChild(option);
+                    });
+                }
+
+                populateVoiceList();
+                if (speechSynthesis.onvoiceschanged !== undefined) {
+                    speechSynthesis.onvoiceschanged = populateVoiceList;
+                }
+
+                playBtn.addEventListener('click', () => {
+                    if (speechSynthesis.paused) {
+                        speechSynthesis.resume();
+                    } else {
+                        const selectedVoiceName = voiceSelect.selectedOptions[0].getAttribute('data-name');
+                        utterance.voice = voices.find(voice => voice.name === selectedVoiceName);
+                        speechSynthesis.speak(utterance);
+                    }
+                    playBtn.style.display = 'none';
+                    pauseBtn.style.display = 'inline-block';
+                    stopBtn.style.display = 'inline-block';
+                    ttsStatus.textContent = 'Playing...';
+                });
+
+                pauseBtn.addEventListener('click', () => {
+                    speechSynthesis.pause();
+                    playBtn.style.display = 'inline-block';
+                    pauseBtn.style.display = 'none';
+                    ttsStatus.textContent = 'Paused';
+                });
+
+                stopBtn.addEventListener('click', () => {
+                    speechSynthesis.cancel();
+                    playBtn.style.display = 'inline-block';
+                    pauseBtn.style.display = 'none';
+                    stopBtn.style.display = 'none';
+                    ttsStatus.textContent = '';
+                });
+
+                utterance.onend = () => {
+                    playBtn.style.display = 'inline-block';
+                    pauseBtn.style.display = 'none';
+                    stopBtn.style.display = 'none';
+                    ttsStatus.textContent = '';
+                };
+            } else {
+                ttsSection.innerHTML = '<p>Sorry, your browser does not support the text-to-speech feature.</p>';
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const mainCommentForm = document.getElementById('comment-form');
+            const mainFormHeader = document.getElementById('comment-form-header');
+            const mainCancelBtn = document.getElementById('cancel-reply-btn');
+            const parentIdInput = mainCommentForm.querySelector('input[name="parent_id"]');
+
+            let activeReplyForm = null; // To keep track of the currently active reply form
+
+            // Function to reset the main comment form
+            function resetMainCommentForm() {
+                parentIdInput.value = '';
+                mainFormHeader.innerText = 'Leave a Comment';
+                mainCancelBtn.style.display = 'none';
+                mainCommentForm.style.display = 'block'; // Ensure main form is visible
+                // Clear any text in the main form's textarea if needed
+                const mainTextarea = mainCommentForm.querySelector('textarea[name="text"]');
+                if (mainTextarea) {
+                    mainTextarea.value = '';
+                }
+            }
+
+            // Initial state: ensure main form is visible and reset
+            resetMainCommentForm();
+
+            document.querySelectorAll('.reply-btn').forEach(button => {
+                button.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const commentId = this.getAttribute('data-comment-id');
+                    const replyFormContainer = document.getElementById(`reply-form-container-${commentId}`);
+
+                    // If there's an active reply form, remove it
+                    if (activeReplyForm) {
+                        activeReplyForm.remove();
+                        activeReplyForm = null;
+                    }
+
+                    // If clicking the same reply button, just close the form
+                    if (replyFormContainer.querySelector('.comment-form')) {
+                        return;
+                    }
+
+                    // Clone the main comment form
+                    const newReplyForm = mainCommentForm.cloneNode(true);
+                    newReplyForm.id = `reply-form-${commentId}`;
+                    newReplyForm.classList.add('nested-reply-form'); // Add a class for styling if needed
+                    newReplyForm.style.display = 'block'; // Ensure it's visible
+
+                    // Update parent_id in the cloned form
+                    const newParentIdInput = newReplyForm.querySelector('input[name="parent_id"]');
+                    if (newParentIdInput) {
+                        newParentIdInput.value = commentId;
+                    }
+
+                    // Update header
+                    const newFormHeader = newReplyForm.querySelector('#comment-form-header');
+                    if (newFormHeader) {
+                        newFormHeader.id = `reply-form-header-${commentId}`; // Change ID to avoid duplicates
+                        newFormHeader.innerText = `Replying to ${this.closest('.comment').querySelector('.comment-meta strong').innerText}`;
+                    }
+
+                    // Clear textarea content
+                    const newTextarea = newReplyForm.querySelector('textarea[name="text"]');
+                    if (newTextarea) {
+                        newTextarea.value = '';
+                    }
+
+                    // Modify the cancel button
+                    const newCancelBtn = newReplyForm.querySelector('#cancel-reply-btn');
+                    if (newCancelBtn) {
+                        newCancelBtn.id = `cancel-reply-btn-${commentId}`; // Change ID to avoid duplicates
+                        newCancelBtn.style.display = 'block';
+                        newCancelBtn.onclick = function (cancelEvent) {
+                            cancelEvent.preventDefault();
+                            newReplyForm.remove();
+                            activeReplyForm = null;
+                            resetMainCommentForm(); // Show main form again
+                        };
+                    }
+
+                    // Hide the main comment form when a reply form is active
+                    mainCommentForm.style.display = 'none';
+
+                    // Insert the new form
+                    replyFormContainer.appendChild(newReplyForm);
+                    newReplyForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    activeReplyForm = newReplyForm;
+                });
+            });
+
+            // Original cancel button for the main form
+            mainCancelBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                resetMainCommentForm();
+            });
+        });
+
+        // --- NEW: WebSocket for Real-time Comment Likes ---
+        const articleId = "{{ article.id }}"; // Get the article ID from Django context
+        const commentSocket = new WebSocket(
+            'ws://' + window.location.host +
+            '/ws/comments/' + articleId + '/'
+        );
+
+        commentSocket.onmessage = function (e) {
+            const data = JSON.parse(e.data);
+            const commentId = data.comment_id; // Correctly get comment_id
+            const likeCount = data.like_count; // Correctly get like_count
+
+            // Find the specific like button and update its count for all users.
+            // We do NOT update the 'liked' class here, as that is user-specific
+            // and handled by the fetch request for the user who initiated the action.
+            const likeButton = document.querySelector(`.like-btn[data-comment-id="${commentId}"]`);
+            if (likeButton) {
+                const likeCountSpan = likeButton.querySelector('.like-count');
+                if (likeCountSpan) { likeCountSpan.textContent = likeCount; }
+            }
+        };
+
+        commentSocket.onclose = function (e) {
+            console.error('Comment socket closed unexpectedly');
+        };
+        // --- NEW: Script for Copy Link Button ---
+        document.getElementById('copy-link-btn').addEventListener('click', function () {
+            const urlToCopy = this.getAttribute('data-url');
+            navigator.clipboard.writeText(urlToCopy).then(() => {
+                // Optional: Provide feedback to the user
+                const originalIcon = this.innerHTML;
+                this.innerHTML = '<i class="fa fa-check"></i>';
+                setTimeout(() => {
+                    this.innerHTML = originalIcon;
+                }, 2000); // Revert back after 2 seconds
+            }).catch(err => {
+                console.error('Failed to copy link: ', err);
+                alert('Failed to copy link.');
+            });
+        });
+
+        // --- NEW: Script for Native Web Share API ---
+        document.addEventListener('DOMContentLoaded', function () {
+            const nativeShareBtn = document.getElementById('native-share-btn');
+            const legacyShareContainer = document.getElementById('legacy-share-buttons');
+            const copyBtn = document.getElementById('copy-link-btn');
+
+            const shareData = {
+                title: '{{ article.title|escapejs }}',
+                text: '{{ article.excerpt|striptags|truncatewords:25|escapejs }}',
+                url: copyBtn.getAttribute('data-url') // Reuse the URL from the copy button
+            };
+
+            // Check if the Web Share API is supported by the browser
+            if (navigator.share) {
+                // If supported, show the native share button and hide the legacy ones
+                nativeShareBtn.style.display = 'inline-flex';
+                legacyShareContainer.style.display = 'none';
+
+                nativeShareBtn.addEventListener('click', async () => {
+                    try {
+                        await navigator.share(shareData);
+                        console.log('Article shared successfully');
+                    } catch (err) {
+                        console.error('Error sharing:', err);
+                    }
+                });
+            }
+            // If navigator.share is not supported, the legacy buttons will remain visible by default.
+        });
+
+        // --- NEW: Script for Comment Likes ---
+        document.querySelectorAll('.like-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                const commentId = this.dataset.commentId;
+                const url = `/publications/comment/${commentId}/like/`;
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json'
+                    },
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        // This part now only runs for the user who clicked the button.
+                        // It provides instant UI feedback for them.
+                        this.classList.toggle('liked', data.liked);
+
+                        const likeCountSpan = this.querySelector('.like-count');
+                        if (likeCountSpan) { likeCountSpan.textContent = data.like_count; }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        // Optionally, show an error message to the user
+                    });
+            });
+        });
+
+        // --- NEW: Reading Progress Bar Logic ---
+        document.addEventListener('DOMContentLoaded', function () {
+            const progressBarContainer = document.querySelector('.progress-container');
+            const progressBar = document.getElementById('progressBar');
+            const articleContent = document.querySelector('.article-content');
+
+            // Only run this logic if all required elements are on the page
+            if (progressBarContainer && progressBar && articleContent) {
+                // 1. Make the progress bar visible on the article page
+                progressBarContainer.style.display = 'block';
+
+                // 2. Function to calculate and update the progress
+                const updateProgressBar = () => {
+                    const contentRect = articleContent.getBoundingClientRect();
+                    const viewportHeight = window.innerHeight;
+
+                    // Calculate how much of the article is visible
+                    const visibleHeight = Math.min(contentRect.bottom, viewportHeight) - Math.max(contentRect.top, 0);
+
+                    // Calculate total scrolled distance within the article
+                    const scrolled = viewportHeight - contentRect.top;
+                    const totalScrollableHeight = articleContent.offsetHeight + viewportHeight;
+
+                    const progress = (scrolled / totalScrollableHeight) * 100;
+                    progressBar.style.width = Math.min(Math.max(progress, 0), 100) + '%';
+                };
+
+                // 3. Listen for scroll events to update the bar
+                window.addEventListener('scroll', updateProgressBar);
+            }
+        });
+    </script>
+    {% endblock %}

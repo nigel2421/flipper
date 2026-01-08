@@ -152,25 +152,34 @@ main>.container {
 
 .publication-card {
     background-color: var(--card-bg);
-    border-radius: 8px;
+    border-radius: 12px;
+    /* Slightly increased radius */
     text-decoration: none;
     color: var(--text-light);
     overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    /* Deeper initial shadow */
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
     display: flex;
     flex-direction: column;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    /* Subtle border */
 }
 
 .publication-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+    transform: translateY(-8px);
+    /* Slightly less movement for a more grounded feel */
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+    border-color: rgba(255, 255, 255, 0.15);
 }
 
 .card-image-wrapper {
     width: 100%;
     aspect-ratio: 3 / 4;
     background-color: #333;
+    overflow: hidden;
+    /* Ensure image zoom stays within bounds */
+    position: relative;
 }
 
 .card-image-wrapper img,
@@ -182,6 +191,13 @@ main>.container {
     align-items: center;
     justify-content: center;
     color: var(--text-muted);
+    transition: transform 0.5s ease;
+    /* Smooth zoom transition */
+}
+
+/* Zoom effect on card hover */
+.publication-card:hover .card-image-wrapper img {
+    transform: scale(1.08);
 }
 
 .card-content {
