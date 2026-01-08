@@ -183,7 +183,7 @@ USE_TZ = True
 # --- STATIC FILES & MEDIA CONFIGURATION ---
 
 # Base URL for serving static files (e.g., CSS, JavaScript, images)
-STATIC_URL = '/home/wemisico/businessmatters.co.ke/flipper/ela_flipbook_django/static/'
+STATIC_URL = '/static/'
 
 # Absolute path to the directory where collectstatic will gather static files
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_collected')
@@ -198,7 +198,7 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
 # Base URL for serving user-uploaded media files
-MEDIA_URL = '/home/wemisico/businessmatters.co.ke/flipper/ela_flipbook_django/media/'
+MEDIA_URL = '/media/'
 
 # Absolute path to the directory for storing user-uploaded media files
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
