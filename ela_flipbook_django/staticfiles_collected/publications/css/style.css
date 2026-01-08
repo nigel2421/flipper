@@ -1209,11 +1209,21 @@ main>.container {
 /* --- Flipbook & PDF Viewer --- */
 .flipbook-container {
     text-align: center;
-    padding: 20px;
+    padding: 30px;
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    margin-top: 20px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 ._df_book {
     height: 80vh;
+    background-color: #000;
+    /* Dark background for the stage */
+    min-height: 600px;
 }
 
 .pdf-viewer-container {
