@@ -38,7 +38,7 @@ def home_view(request):
     latest_publications = Magazine.objects.order_by('-uploaded_at')[:3]
     top_articles = Article.objects.order_by('-view_count')[:5]
 
-    subscribers_count = User.objects.count() + 350
+    subscribers_count = User.objects.count() + 1350
     visitor_count = cache.get('visitor_count')
     if not visitor_count:
         visitor_count = random.randint(10, 73)
