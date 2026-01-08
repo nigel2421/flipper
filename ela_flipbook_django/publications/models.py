@@ -29,7 +29,7 @@ class Tag(models.Model):
 # --- Magazine Model (for Flipbooks) ---
 class Magazine(models.Model):
     title = models.CharField(max_length=200)
-    pdf_file = models.FileField(upload_to='publications/')
+    pdf_file = models.FileField(upload_to='pdfs/')
     cover_image = models.ImageField(upload_to='covers/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
     

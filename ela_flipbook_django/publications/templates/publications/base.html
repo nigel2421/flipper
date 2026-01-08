@@ -1,6 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,21 +12,24 @@
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'img/apple-touch-icon.png' %}">
 
     <!-- Google tag (gtag.js) -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-9KLM4PD706"></script>
-        <script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-9KLM4PD706"></script>
+    <script>
         window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
+        function gtag() { dataLayer.push(arguments); }
         gtag('js', new Date());
 
         gtag('config', 'G-9KLM4PD706');
-        </script>
+    </script>
 
     <!-- Main Stylesheet -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="{% static 'publications/css/style.css' %}?v=1.3">
-
+    {% block extra_css %}{% endblock %}
 
 </head>
+
 <body>
     <!-- Reading Progress Bar -->
     <div class="progress-container">
@@ -48,7 +52,7 @@
             </div>
 
             <!-- The Navigation Links -->
-           <nav class="main-nav" id="main-nav">
+            <nav class="main-nav" id="main-nav">
                 <a href="{% url 'publications:home' %}">Home</a>
                 <a href="{% url 'publications:events' %}">Events</a>
                 <a href="{% url 'publications:articles' %}">Articles</a>
@@ -57,12 +61,12 @@
 
                 <!-- === UPDATED USER SECTION === -->
                 {% if user.is_authenticated %}
-                    <a href="{% url 'publications:profile' %}">Hi, {{ user.first_name|default:user.username }}</a>
-                    <a href="{% url 'account_logout' %}">Logout</a>
+                <a href="{% url 'publications:profile' %}">Hi, {{ user.first_name|default:user.username }}</a>
+                <a href="{% url 'account_logout' %}">Logout</a>
                 {% else %}
-                    <!--<a href="{% url 'account_login' %}">Sign Up</a>-->
-                    <a href="{% url 'account_login' %}">Login</a>
-                {% endif %} 
+                <!--<a href="{% url 'account_login' %}">Sign Up</a>-->
+                <a href="{% url 'account_login' %}">Login</a>
+                {% endif %}
                 <a href="{% url 'account_signup' %}" class="subscribe-btn-header">Subscribe</a>
             </nav>
 
@@ -73,11 +77,11 @@
     <main>
         <!-- Messages Block -->
         {% if messages %}
-            <div class="container message-container">
-                {% for message in messages %}
-                    <div class="message {{ message.tags }}">{{ message }}</div>
-                {% endfor %}
-            </div>
+        <div class="container message-container">
+            {% for message in messages %}
+            <div class="message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
         {% endif %}
 
         <!-- Main Content Block -->
@@ -113,7 +117,7 @@
 
     <!-- === NEW: JavaScript for Interactive Star Rating === -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const stars = document.querySelectorAll('.star-rating .star');
             const ratingForm = document.querySelector('.rating-form');
             if (!ratingForm) return; // Exit if no rating form on the page
@@ -134,7 +138,7 @@
             }
 
             stars.forEach(star => {
-                star.addEventListener('click', function() {
+                star.addEventListener('click', function () {
                     const value = this.getAttribute('data-value');
                     scoreInput.value = value;
                     setSelectedStars(value);
@@ -145,46 +149,47 @@
 
     <!-- === NEW: JavaScript for Count-Up Animation on Stat Cards === -->
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const statNumbers = document.querySelectorAll('.stat-number[data-target]');
+        document.addEventListener('DOMContentLoaded', function () {
+            const statNumbers = document.querySelectorAll('.stat-number[data-target]');
 
-        const animateCountUp = (el) => {
-            const target = parseInt(el.getAttribute('data-target'), 10);
-            if (isNaN(target)) return;
+            const animateCountUp = (el) => {
+                const target = parseInt(el.getAttribute('data-target'), 10);
+                if (isNaN(target)) return;
 
-            let current = 0;
-            const duration = 1500; // Animation duration in milliseconds
-            const increment = target / (duration / 16);
+                let current = 0;
+                const duration = 1500; // Animation duration in milliseconds
+                const increment = target / (duration / 16);
 
-            const updateCount = () => {
-                current += increment;
-                if (current < target) {
-                    el.innerText = Math.ceil(current).toLocaleString();
-                    requestAnimationFrame(updateCount);
-                } else {
-                    el.innerText = target.toLocaleString();
-                }
+                const updateCount = () => {
+                    current += increment;
+                    if (current < target) {
+                        el.innerText = Math.ceil(current).toLocaleString();
+                        requestAnimationFrame(updateCount);
+                    } else {
+                        el.innerText = target.toLocaleString();
+                    }
+                };
+                requestAnimationFrame(updateCount);
             };
-            requestAnimationFrame(updateCount);
-        };
 
-        const observer = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const el = entry.target;
-                    animateCountUp(el);
-                    observer.unobserve(el); // Stop observing after animation starts
-                }
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const el = entry.target;
+                        animateCountUp(el);
+                        observer.unobserve(el); // Stop observing after animation starts
+                    }
+                });
+            }, { threshold: 0.5 }); // Trigger when 50% of the element is visible
+
+            statNumbers.forEach(el => {
+                el.innerText = '0'; // Set initial text to 0
+                observer.observe(el);
             });
-        }, { threshold: 0.5 }); // Trigger when 50% of the element is visible
-
-        statNumbers.forEach(el => {
-            el.innerText = '0'; // Set initial text to 0
-            observer.observe(el);
         });
-    });
     </script>
 
     {% block extra_js %}{% endblock %}
 </body>
+
 </html>

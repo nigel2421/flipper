@@ -66,7 +66,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     # Core Django Middleware
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    # 'whitenoise.middleware.WhiteNoiseMiddleware',  # Temporarily disabled
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -194,7 +194,7 @@ STATICFILES_DIRS = [
 ]
 
 # Enable WhiteNoise's GZip compression and caching
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+# STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'  # Temporarily disabled
 
 
 # Base URL for serving user-uploaded media files

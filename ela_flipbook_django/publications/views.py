@@ -250,7 +250,6 @@ def profile_view(request):
     }
     return render(request, 'publications/profile.html', context)
 
-@login_required
 def publication_detail_view(request, pk):
     publication = get_object_or_404(Magazine, pk=pk)
     context = {
