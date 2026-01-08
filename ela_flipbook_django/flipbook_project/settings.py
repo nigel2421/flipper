@@ -194,7 +194,7 @@ STATICFILES_DIRS = [
 ]
 
 # Enable WhiteNoise's GZip compression and caching
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 
 # Base URL for serving user-uploaded media files
