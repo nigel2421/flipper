@@ -165,8 +165,7 @@
                     {% endif %}
                 </a>
                 <div class="card-content">
-                    <h3 class="card-title"><a href="{% url 'publications:article_detail' pk=related_article.id %}">{{
-                            related_article.title }}</a></h3>
+                    <h3 class="card-title"><a href="{% url 'publications:article_detail' pk=related_article.id %}">{{ related_article.title }}</a></h3>
                     <div class="card-tags">
                         {% for tag in related_article.tags.all %}
                         <span class="tag">{{ tag.name }}</span>
