@@ -156,7 +156,6 @@ class Profile(models.Model):
     industry = models.CharField(max_length=100, blank=True, help_text="Your field or industry.")
     bio = models.TextField(blank=True, help_text="A short professional summary.")
     
-    phone_number = models.CharField(max_length=20, blank=True, null=True)
     referral_code = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     referred_by = models.ForeignKey(
         User, 

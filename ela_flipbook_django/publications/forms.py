@@ -29,7 +29,7 @@ class ContributorForm(forms.ModelForm):
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ['job_title', 'job_role', 'company', 'industry', 'bio', 'phone_number']
+        fields = ['job_title', 'job_role', 'company', 'industry', 'bio']
         widgets = {
             'bio': forms.Textarea(attrs={'rows': 3}),
         }

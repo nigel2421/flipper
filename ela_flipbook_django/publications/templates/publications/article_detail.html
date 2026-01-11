@@ -44,6 +44,131 @@
         flex-grow: 1;
         max-width: 300px;
     }
+
+    /* === REVAMPED: Social Share Feature Styles === */
+    .social-share-section {
+        position: relative;
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+
+    .main-share-btn {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: none;
+        font-size: 1rem;
+    }
+    .main-share-btn:hover {
+        background-color: #0056b3;
+    }
+
+    .share-options {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 100;
+        margin-top: 8px;
+        display: flex;
+        gap: 8px;
+        flex-wrap: nowrap;
+        align-items: center;
+    }
+
+    .share-options .share-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 5px;
+        color: white;
+        text-decoration: none;
+        border: none;
+        transition: opacity 0.2s;
+        height: 40px; /* Uniform height */
+    }
+     .share-options .share-btn:hover {
+        opacity: 0.85;
+    }
+
+
+    /* Icon-only buttons */
+    .share-options a.share-btn {
+        flex: 0 0 40px; /* Fixed width for icons */
+        font-size: 1.1rem;
+    }
+
+    /* Brand Colors */
+    .share-btn.twitter { background-color: #1DA1F2; }
+    .share-btn.facebook { background-color: #1877F2; }
+    .share-btn.linkedin { background-color: #0A66C2; }
+    .share-btn.whatsapp { background-color: #25D366; }
+
+    /* Copy Button Specifics */
+    .share-btn.copy-link {
+        flex-grow: 1; /* Allows it to take more space */
+        padding: 8px 15px;
+        background-color: #6c757d;
+        cursor: pointer;
+        gap: 8px;
+        font-size: 0.9rem;
+    }
+    .share-btn.copy-link .fa-link {
+        font-size: 1.1rem;
+    }
+
+     .share-btn.copy-link:disabled {
+        background-color: #28a745; /* Green when copied */
+        cursor: default;
+        opacity: 1;
+    }
+
+
+    /* === NEW: Mobile Responsive Styles === */
+    @media (max-width: 500px) {
+        .social-share-section {
+            width: 100%;
+        }
+        .main-share-btn {
+            width: 100%;
+            justify-content: center;
+        }
+        .share-options {
+            width: 100%;
+            box-sizing: border-box;
+            flex-wrap: wrap; /* Allow wrapping */
+            gap: 10px; /* Add more space between buttons */
+        }
+
+        /* General style for all share buttons on mobile */
+        .share-options .share-btn {
+            height: 50px; /* Make all buttons taller */
+            border-radius: 8px; /* Consistent rectangular shape */
+        }
+
+        /* 4 icon buttons on the top row */
+        .share-options a.share-btn {
+            flex-basis: calc(25% - 8px); /* Adjust for the new gap */
+            font-size: 1.8rem; /* Make icons much bigger */
+        }
+
+        /* Copy button on its own row */
+        .share-btn.copy-link {
+            flex-basis: 100%;
+            margin-top: 0; /* Gap property handles spacing now */
+            font-size: 1.1rem; /* Slightly larger text */
+        }
+    }
+
 </style>
 <div class="container article-detail-container">
     <!-- Back button using JavaScript history -->
@@ -62,8 +187,9 @@
                     </a>
                     {% endif %}
                     <span>By:
-                        <a href="{% url 'publications:author_detail' pk=article.author.pk %}">{{ article.author.name
-                            }}</a>
+                        <a href="{% url 'publications:author_detail' pk=article.author.pk %}">
+                            {{ article.author.name }}
+                        </a>
                     </span>
                 </span>
                 {% endif %}
@@ -95,31 +221,31 @@
                 {% endfor %}
             </div>
 
-            <!-- === NEW: Social Share Buttons === -->
+            <!-- === REVAMPED: Social Share Feature === -->
             <div class="social-share-section">
-                <span>Share this article:</span>
-                <div class="share-buttons">
-                    <!-- This button will trigger the device's native share dialog -->
-                    <button id="native-share-btn" class="share-btn native-share" aria-label="Share this article"
-                        style="display: none;"><i class="fa fa-share-alt"></i> Share...</button>
-
-                    {% url 'publications:article_detail' pk=article.pk as article_path %}
-                    <div id="legacy-share-buttons" style="display: flex; gap: inherit;">
-                        {% with share_url=request.build_absolute_uri|add:article_path %}
-                        <a href="https://twitter.com/intent/tweet?url={{ share_url|urlencode }}&text={{ article.title|urlencode }}"
-                            target="_blank" class="share-btn twitter" aria-label="Share on Twitter"><i
-                                class="fab fa-twitter"></i></a>
-                        <a href="https://www.facebook.com/sharer/sharer.php?u={{ share_url|urlencode }}" target="_blank"
-                            class="share-btn facebook" aria-label="Share on Facebook"><i
-                                class="fab fa-facebook-f"></i></a>
-                        <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ share_url|urlencode }}&title={{ article.title|urlencode }}&summary={{ article.excerpt|urlencode }}"
-                            target="_blank" class="share-btn linkedin" aria-label="Share on LinkedIn"><i
-                                class="fab fa-linkedin-in"></i></a>
-                        <button id="copy-link-btn" class="share-btn copy-link" data-url="{{ share_url }}"
-                            aria-label="Copy link"><i class="fa fa-link"></i></button>
-                        {% endwith %}
-                    </div>
+                <button id="main-share-btn" class="main-share-btn">
+                    <i class="fa fa-share-alt"></i>
+                    <span>Share</span>
+                </button>
+                <div id="share-options" style="display: none;">
+                    {% with share_url=request.build_absolute_uri %}
+                    <a href="https://twitter.com/intent/tweet?url={{ share_url|urlencode }}&text={{ article.title|urlencode }}"
+                        target="_blank" class="share-btn twitter" aria-label="Share on Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="https://www.facebook.com/sharer/sharer.php?u={{ share_url|urlencode }}" target="_blank"
+                        class="share-btn facebook" aria-label="Share on Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ share_url|urlencode }}&title={{ article.title|urlencode }}&summary={{ article.excerpt|urlencode }}"
+                        target="_blank" class="share-btn linkedin" aria-label="Share on LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="https://wa.me/?text={{ article.title|urlencode }}%20{{ share_url|urlencode }}" target="_blank" class="share-btn whatsapp" aria-label="Share on WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                    <button id="copy-link-btn" class="share-btn copy-link" data-url="{{ share_url }}"
+                        aria-label="Copy link">
+                        <i class="fa fa-link"></i>
+                        <span>Copy Link</span>
+                    </button>
+                    {% endwith %}
                 </div>
+            </div>
+
+
         </header>
 
         <!-- Cover Image -->
@@ -191,7 +317,7 @@
                 <span class="star" data-value="1">&#9733;</span>
                 <span class="star" data-value="2">&#9733;</span>
                 <span class="star" data-value="3">&#9733;</span>
-                <span class="star" data-value="4">&#9733;</span>
+                <span class="star" a-value="4">&#9733;</span>
                 <span class="star" data-value="5">&#9733;</span>
             </div>
             <button type="submit" name="rating_submit" class="submit-btn" style="margin-top: 15px;">Submit
@@ -256,6 +382,49 @@
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const mainShareBtn = document.getElementById('main-share-btn');
+            const shareOptions = document.getElementById('share-options');
+
+            mainShareBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent click from bubbling up to document
+                const isHidden = shareOptions.style.display === 'none' || shareOptions.style.display === '';
+                shareOptions.style.display = isHidden ? 'flex' : 'none';
+            });
+
+            // Close dropdown if clicking outside
+            document.addEventListener('click', (e) => {
+                if (!mainShareBtn.contains(e.target) && !shareOptions.contains(e.target)) {
+                    shareOptions.style.display = 'none';
+                }
+            });
+
+
+            const copyBtn = document.getElementById('copy-link-btn');
+            const originalCopyContent = copyBtn.innerHTML;
+
+            copyBtn.addEventListener('click', function () {
+                const urlToCopy = this.getAttribute('data-url');
+                const button = this;
+
+                navigator.clipboard.writeText(urlToCopy).then(() => {
+                    button.innerHTML = '<i class="fa fa-check"></i> Copied';
+                    button.disabled = true;
+
+                    setTimeout(() => {
+                        button.innerHTML = originalCopyContent;
+                        button.disabled = false;
+                    }, 2500);
+                }).catch(err => {
+                    console.error('Failed to copy link: ', err);
+                    button.innerHTML = '<span>Error</span>';
+                    setTimeout(() => {
+                        button.innerHTML = originalCopyContent;
+                    }, 2000);
+                });
+            });
+        });
+
         document.addEventListener('DOMContentLoaded', function () {
             const playBtn = document.getElementById('play-tts-btn');
             const pauseBtn = document.getElementById('pause-tts-btn');
@@ -323,234 +492,6 @@
                 };
             } else {
                 ttsSection.innerHTML = '<p>Sorry, your browser does not support the text-to-speech feature.</p>';
-            }
-        });
-
-        document.addEventListener('DOMContentLoaded', function () {
-            const mainCommentForm = document.getElementById('comment-form');
-            const mainFormHeader = document.getElementById('comment-form-header');
-            const mainCancelBtn = document.getElementById('cancel-reply-btn');
-            const parentIdInput = mainCommentForm.querySelector('input[name="parent_id"]');
-
-            let activeReplyForm = null; // To keep track of the currently active reply form
-
-            // Function to reset the main comment form
-            function resetMainCommentForm() {
-                parentIdInput.value = '';
-                mainFormHeader.innerText = 'Leave a Comment';
-                mainCancelBtn.style.display = 'none';
-                mainCommentForm.style.display = 'block'; // Ensure main form is visible
-                // Clear any text in the main form's textarea if needed
-                const mainTextarea = mainCommentForm.querySelector('textarea[name="text"]');
-                if (mainTextarea) {
-                    mainTextarea.value = '';
-                }
-            }
-
-            // Initial state: ensure main form is visible and reset
-            resetMainCommentForm();
-
-            document.querySelectorAll('.reply-btn').forEach(button => {
-                button.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    const commentId = this.getAttribute('data-comment-id');
-                    const replyFormContainer = document.getElementById(`reply-form-container-${commentId}`);
-
-                    // If there's an active reply form, remove it
-                    if (activeReplyForm) {
-                        activeReplyForm.remove();
-                        activeReplyForm = null;
-                    }
-
-                    // If clicking the same reply button, just close the form
-                    if (replyFormContainer.querySelector('.comment-form')) {
-                        return;
-                    }
-
-                    // Clone the main comment form
-                    const newReplyForm = mainCommentForm.cloneNode(true);
-                    newReplyForm.id = `reply-form-${commentId}`;
-                    newReplyForm.classList.add('nested-reply-form'); // Add a class for styling if needed
-                    newReplyForm.style.display = 'block'; // Ensure it's visible
-
-                    // Update parent_id in the cloned form
-                    const newParentIdInput = newReplyForm.querySelector('input[name="parent_id"]');
-                    if (newParentIdInput) {
-                        newParentIdInput.value = commentId;
-                    }
-
-                    // Update header
-                    const newFormHeader = newReplyForm.querySelector('#comment-form-header');
-                    if (newFormHeader) {
-                        newFormHeader.id = `reply-form-header-${commentId}`; // Change ID to avoid duplicates
-                        newFormHeader.innerText = `Replying to ${this.closest('.comment').querySelector('.comment-meta strong').innerText}`;
-                    }
-
-                    // Clear textarea content
-                    const newTextarea = newReplyForm.querySelector('textarea[name="text"]');
-                    if (newTextarea) {
-                        newTextarea.value = '';
-                    }
-
-                    // Modify the cancel button
-                    const newCancelBtn = newReplyForm.querySelector('#cancel-reply-btn');
-                    if (newCancelBtn) {
-                        newCancelBtn.id = `cancel-reply-btn-${commentId}`; // Change ID to avoid duplicates
-                        newCancelBtn.style.display = 'block';
-                        newCancelBtn.onclick = function (cancelEvent) {
-                            cancelEvent.preventDefault();
-                            newReplyForm.remove();
-                            activeReplyForm = null;
-                            resetMainCommentForm(); // Show main form again
-                        };
-                    }
-
-                    // Hide the main comment form when a reply form is active
-                    mainCommentForm.style.display = 'none';
-
-                    // Insert the new form
-                    replyFormContainer.appendChild(newReplyForm);
-                    newReplyForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    activeReplyForm = newReplyForm;
-                });
-            });
-
-            // Original cancel button for the main form
-            mainCancelBtn.addEventListener('click', function (e) {
-                e.preventDefault();
-                resetMainCommentForm();
-            });
-        });
-
-        // --- NEW: WebSocket for Real-time Comment Likes ---
-        const articleId = "{{ article.id }}"; // Get the article ID from Django context
-        const commentSocket = new WebSocket(
-            'ws://' + window.location.host +
-            '/ws/comments/' + articleId + '/'
-        );
-
-        commentSocket.onmessage = function (e) {
-            const data = JSON.parse(e.data);
-            const commentId = data.comment_id; // Correctly get comment_id
-            const likeCount = data.like_count; // Correctly get like_count
-
-            // Find the specific like button and update its count for all users.
-            // We do NOT update the 'liked' class here, as that is user-specific
-            // and handled by the fetch request for the user who initiated the action.
-            const likeButton = document.querySelector(`.like-btn[data-comment-id="${commentId}"]`);
-            if (likeButton) {
-                const likeCountSpan = likeButton.querySelector('.like-count');
-                if (likeCountSpan) { likeCountSpan.textContent = likeCount; }
-            }
-        };
-
-        commentSocket.onclose = function (e) {
-            console.error('Comment socket closed unexpectedly');
-        };
-        // --- NEW: Script for Copy Link Button ---
-        document.getElementById('copy-link-btn').addEventListener('click', function () {
-            const urlToCopy = this.getAttribute('data-url');
-            navigator.clipboard.writeText(urlToCopy).then(() => {
-                // Optional: Provide feedback to the user
-                const originalIcon = this.innerHTML;
-                this.innerHTML = '<i class="fa fa-check"></i>';
-                setTimeout(() => {
-                    this.innerHTML = originalIcon;
-                }, 2000); // Revert back after 2 seconds
-            }).catch(err => {
-                console.error('Failed to copy link: ', err);
-                alert('Failed to copy link.');
-            });
-        });
-
-        // --- NEW: Script for Native Web Share API ---
-        document.addEventListener('DOMContentLoaded', function () {
-            const nativeShareBtn = document.getElementById('native-share-btn');
-            const legacyShareContainer = document.getElementById('legacy-share-buttons');
-            const copyBtn = document.getElementById('copy-link-btn');
-
-            const shareData = {
-                title: '{{ article.title|escapejs }}',
-                text: '{{ article.excerpt|striptags|truncatewords:25|escapejs }}',
-                url: copyBtn.getAttribute('data-url') // Reuse the URL from the copy button
-            };
-
-            // Check if the Web Share API is supported by the browser
-            if (navigator.share) {
-                // If supported, show the native share button and hide the legacy ones
-                nativeShareBtn.style.display = 'inline-flex';
-                legacyShareContainer.style.display = 'none';
-
-                nativeShareBtn.addEventListener('click', async () => {
-                    try {
-                        await navigator.share(shareData);
-                        console.log('Article shared successfully');
-                    } catch (err) {
-                        console.error('Error sharing:', err);
-                    }
-                });
-            }
-            // If navigator.share is not supported, the legacy buttons will remain visible by default.
-        });
-
-        // --- NEW: Script for Comment Likes ---
-        document.querySelectorAll('.like-btn').forEach(button => {
-            button.addEventListener('click', function () {
-                const commentId = this.dataset.commentId;
-                const url = `/publications/comment/${commentId}/like/`;
-
-                fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': '{{ csrf_token }}',
-                        'Content-Type': 'application/json'
-                    },
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        // This part now only runs for the user who clicked the button.
-                        // It provides instant UI feedback for them.
-                        this.classList.toggle('liked', data.liked);
-
-                        const likeCountSpan = this.querySelector('.like-count');
-                        if (likeCountSpan) { likeCountSpan.textContent = data.like_count; }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        // Optionally, show an error message to the user
-                    });
-            });
-        });
-
-        // --- NEW: Reading Progress Bar Logic ---
-        document.addEventListener('DOMContentLoaded', function () {
-            const progressBarContainer = document.querySelector('.progress-container');
-            const progressBar = document.getElementById('progressBar');
-            const articleContent = document.querySelector('.article-content');
-
-            // Only run this logic if all required elements are on the page
-            if (progressBarContainer && progressBar && articleContent) {
-                // 1. Make the progress bar visible on the article page
-                progressBarContainer.style.display = 'block';
-
-                // 2. Function to calculate and update the progress
-                const updateProgressBar = () => {
-                    const contentRect = articleContent.getBoundingClientRect();
-                    const viewportHeight = window.innerHeight;
-
-                    // Calculate how much of the article is visible
-                    const visibleHeight = Math.min(contentRect.bottom, viewportHeight) - Math.max(contentRect.top, 0);
-
-                    // Calculate total scrolled distance within the article
-                    const scrolled = viewportHeight - contentRect.top;
-                    const totalScrollableHeight = articleContent.offsetHeight + viewportHeight;
-
-                    const progress = (scrolled / totalScrollableHeight) * 100;
-                    progressBar.style.width = Math.min(Math.max(progress, 0), 100) + '%';
-                };
-
-                // 3. Listen for scroll events to update the bar
-                window.addEventListener('scroll', updateProgressBar);
             }
         });
     </script>

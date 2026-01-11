@@ -1,13 +1,11 @@
 {% extends "publications/base.html" %}
-{% load i18n socialaccount %}  <-- ADDED: Loads socialaccount tags
+{% load i18n socialaccount %}
 
 {% block head_title %}{% trans "Sign In" %}{% endblock %}
 
 {% block content %}
 <div class="login-container">
-    <div class="split-login-box"> <!-- Use the split layout -->
-
-        <!-- Column 1: Social Sign-in -->
+    <div class="split-login-box"> 
         <div class="social-login-column">
             <h1>Sign Up or Log In with:</h1>
             
@@ -16,45 +14,6 @@
              <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google logo">
                           Google
             </a>
-
-            <p class="separator-line"><span>OR</span></p>
-
-            <!--<h2 class="email-login-header">Sign in with Email</h2>-->
-        </div>
-
-        <!-- Column 2: The Main Email Form -->
-        <div class="email-form-column">
-            <h4 class="main-header">Login to Your Account</h4>
-            <p class="sub-header">Welcome back! Please enter your details.</p>
-
-            <form class="login-form" id="login_form" method="post" action="{% url 'account_login' %}">
-                {% csrf_token %}
-                
-                <!-- NEW: Error display and form groups for styling -->
-                {% if form.non_field_errors %}
-                    <div class="error-list non-field-errors">
-                        {% for error in form.non_field_errors %}
-                            <p>{{ error }}</p>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-
-                <div class="form-group">
-                    <label for="{{ form.login.id_for_label }}">Email:</label>
-                    {{ form.login }}
-                </div>
-                
-                <div class="form-group">
-                    <label for="{{ form.password.id_for_label }}">Password:</label>
-                    {{ form.password }}
-                </div>
-                
-                <button type="submit" class="submit-btn">Log In</button>
-            </form>
-            
-            <p class="auth-links">
-                Don't have an account? <a href="{% provider_login_url 'google' %}" class="google-btn">Sign Up</a>
-            </p>
         </div>
     </div>
 </div>

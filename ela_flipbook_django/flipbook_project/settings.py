@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-k@d95k@5!n9@&h&s*v^$@8&m!%2*#@c$v&d%d(e@#@b&b!@'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     'press.businessmatters.co.ke',
@@ -134,17 +134,14 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-# Allauth core settings for email-based authentication
-ACCOUNT_LOGIN_METHODS = ['email']
-ACCOUNT_SIGNUP_FIELDS = ['email']
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 SOCIALACCOUNT_ADAPTER = 'publications.adapter.CustomSocialAccountAdapter'
 
 
 # Redirects and URLs
-LOGIN_URL = '/accounts/login/' 
-LOGIN_REDIRECT_URL = '/'
+LOGIN_URL = '/accounts/login/'
 LOGOUT_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/'
 
 
 # Allauth Social Settings

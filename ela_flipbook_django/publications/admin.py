@@ -10,6 +10,8 @@ from django.http import HttpResponse
 # Import allauth models and admin for customization
 from allauth.account.models import EmailAddress
 from allauth.account.admin import EmailAddressAdmin as AllauthEmailAddressAdmin
+from allauth.socialaccount.models import SocialAccount
+from allauth.socialaccount.admin import SocialAccountAdmin
 
 # Import your project's models
 from .models import Contributor, Magazine, Article, Profile, Event, Author, Tag, Rating, Comment, CommentReport
@@ -226,3 +228,15 @@ class ContributorAdmin(admin.ModelAdmin):
     list_display = ('full_name', 'email', 'submission_type', 'subject', 'submitted_at')
     list_filter = ('submission_type', 'submitted_at')
     search_fields = ('full_name', 'email', 'subject', 'message')
+
+# --- NEW: Social Account Admin ---
+class CustomSocialAccountAdmin(SocialAccountAdmin):
+    list_display = ('user', 'provider', 'uid', 'get_user_email')
+    search_fields = ('user__username', 'user__email')
+
+    def get_user_email(self, obj):
+        return obj.user.email
+    get_user_email.short_description = 'Email'
+
+admin.site.unregister(SocialAccount)
+admin.site.register(SocialAccount, CustomSocialAccountAdmin)
