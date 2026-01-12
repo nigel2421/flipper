@@ -7,38 +7,19 @@ import string
 
 class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
 
-    def save_user(self, request, sociallogin, form=None):
+    def populate_user(self, request, sociallogin, data):
         """
-        Saves a new user instance, populating email, first_name, and last_name
-        from the social account's extra_data.
-        This is called when a user signs up via a social provider.
+        Populates user fields from social account data.
         """
-        # Get the user instance and social provider data
-        user = sociallogin.user
-        extra_data = sociallogin.account.extra_data
+        user = super().populate_user(request, sociallogin, data)
 
-        # Populate user fields from social data if they are empty
-        if not user.email and 'email' in extra_data:
-            user.email = extra_data['email']
-            
-        if not user.first_name and 'given_name' in extra_data:
-            user.first_name = extra_data['given_name']
-            
-        if not user.last_name and 'family_name' in extra_data:
-            user.last_name = extra_data['family_name']
+        if not user.first_name and 'first_name' in data:
+            user.first_name = data['first_name']
+        if not user.last_name and 'last_name' in data:
+            user.last_name = data['last_name']
+        if not user.email and 'email' in data:
+            user.email = data['email']
 
-        # Generate a unique username
-        user.username = self.generate_unique_username(user.email)
-        
-        # Set a random, unusable password for social-only users
-        user.set_unusable_password()
-
-        # Save the user model with the new data
-        user.save()
-        
-        # Connect the social account to the user
-        sociallogin.save(request)
-        
         return user
 
     def generate_unique_username(self, email):
