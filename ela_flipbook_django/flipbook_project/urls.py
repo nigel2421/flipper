@@ -5,17 +5,16 @@ from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.static import serve
-from publications.views import CustomSignupView
-from django.views.generic import RedirectView 
+from django.views.generic import RedirectView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    
+
     path("ckeditor5/", include('django_ckeditor_5.urls')),
 
     # 1. Sign-Up is immediately redirected to the Google login flow.
     path("accounts/signup/",
-         RedirectView.as_view(url='/accounts/google/login/', permanent=False), 
+         RedirectView.as_view(url='/accounts/google/login/', permanent=False),
          name="account_signup"
     ),
 

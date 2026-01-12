@@ -1,41 +1,48 @@
 # publications/forms.py
 
 from django import forms
-from .models import Contributor, Profile
+from .models import Magazine, Article, Comment, Rating, Profile, Contributor
 
-class RatingForm(forms.Form):
-    # The score will be set by JavaScript, so we use a hidden input.
-    score = forms.IntegerField(widget=forms.HiddenInput(), min_value=1, max_value=5)
-
-
-class CommentForm(forms.Form):
-    text = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 4}),
-        label='Add a comment:'
-    )
-    # Hidden field to store the ID of the parent comment for replies
-    parent_id = forms.IntegerField(widget=forms.HiddenInput(), required=False)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['text'].widget.attrs.update({'class': 'comment-textarea'})
-
-
-class ContributorForm(forms.ModelForm):
+class MagazineForm(forms.ModelForm):
     class Meta:
-        model = Contributor
-        fields = ['full_name', 'email', 'phone_number', 'country', 'field_or_industry', 'submission_type', 'subject', 'message', 'attachment']
+        model = Magazine
+        fields = ['title', 'excerpt', 'pdf_file', 'cover_image']
+
+class ArticleForm(forms.ModelForm):
+    class Meta:
+        model = Article
+        fields = ['title', 'excerpt', 'content', 'cover_image', 'tags', 'is_featured', 'is_editors_pick']
+
+class CommentForm(forms.ModelForm):
+    parent_id = forms.IntegerField(widget=forms.HiddenInput, required=False)
+
+    class Meta:
+        model = Comment
+        fields = ['text', 'parent_id']
+        widgets = {
+            'text': forms.Textarea(attrs={
+                'rows': 3,
+                'placeholder': 'Add a comment...'
+            })
+        }
+
+class RatingForm(forms.ModelForm):
+    class Meta:
+        model = Rating
+        fields = ['score']
 
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ['job_title', 'job_role', 'company', 'industry', 'bio']
+        fields = ['bio', 'job_title', 'job_role', 'company', 'industry']
         widgets = {
-            'bio': forms.Textarea(attrs={'rows': 3}),
+            'bio': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Tell us about yourself...'}),
         }
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Add CSS classes for styling
-        for field in self.fields:
-            self.fields[field].widget.attrs.update({'class': 'form-control'})
+
+class ContributorForm(forms.ModelForm):
+    class Meta:
+        model = Contributor
+        fields = ['full_name', 'email', 'submission_type', 'subject', 'message', 'field_or_industry']
+        widgets = {
+            'message': forms.Textarea(attrs={'rows': 6}),
+        }

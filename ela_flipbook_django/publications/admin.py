@@ -80,7 +80,7 @@ def export_users_with_details_csv(modeladmin, request, queryset):
     # Header Row
     writer.writerow([
         'Username', 'Email', 'First Name', 'Last Name', 'Date Joined', 'Last Login',
-        'Job Title', 'Job Role', 'Company', 'Industry', 'Bio', 'Phone Number',
+        'Job Title', 'Job Role', 'Company', 'Industry', 'Bio', 
         'Referral Count'
     ])
 
@@ -106,11 +106,10 @@ def export_users_with_details_csv(modeladmin, request, queryset):
                 profile.company,
                 profile.industry,
                 profile.bio,
-                profile.phone_number,
                 user.referrals.count() # Count number of profiles referring to this user
             ])
         else:
-            row.extend(['-', '-', '-', '-', '-', '-', 0])
+            row.extend(['-', '-', '-', '-', '-', 0])
             
         writer.writerow(row)
 

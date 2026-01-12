@@ -117,7 +117,7 @@
     .share-btn.copy-link {
         flex-grow: 1; /* Allows it to take more space */
         padding: 8px 15px;
-        background-color: #6c757d;
+        background-color: #17a2b8; /* Changed to a more visible teal color */
         cursor: pointer;
         gap: 8px;
         font-size: 0.9rem;
@@ -176,7 +176,7 @@
 
     <article>
         <header class="article-header">
-            <h1>{{ article.title }}</h1>
+            <h1 id="article-title">{{ article.title }}</h1>
             <div class="article-meta">
                 {% if article.author %}
                 <span class="author-byline">
@@ -187,7 +187,7 @@
                     </a>
                     {% endif %}
                     <span>By:
-                        <a href="{% url 'publications:author_detail' pk=article.author.pk %}">
+                        <a href="{% url 'publications:author_detail' pk=article.author.pk %}" id="article-author-link">
                             {{ article.author.name }}
                         </a>
                     </span>
@@ -404,22 +404,24 @@
             const originalCopyContent = copyBtn.innerHTML;
 
             copyBtn.addEventListener('click', function () {
-                const urlToCopy = this.getAttribute('data-url');
-                const button = this;
+                const title = document.getElementById('article-title').innerText;
+                const author = document.getElementById('article-author-link').innerText;
+                const url = this.getAttribute('data-url');
+                const textToCopy = `${title}\nBy: ${author}\n${url}`;
 
-                navigator.clipboard.writeText(urlToCopy).then(() => {
-                    button.innerHTML = '<i class="fa fa-check"></i> Copied';
-                    button.disabled = true;
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    copyBtn.innerHTML = '<i class="fa fa-check"></i> Copied';
+                    copyBtn.disabled = true;
 
                     setTimeout(() => {
-                        button.innerHTML = originalCopyContent;
-                        button.disabled = false;
+                        copyBtn.innerHTML = originalCopyContent;
+                        copyBtn.disabled = false;
                     }, 2500);
                 }).catch(err => {
                     console.error('Failed to copy link: ', err);
-                    button.innerHTML = '<span>Error</span>';
+                    copyBtn.innerHTML = '<span>Error</span>';
                     setTimeout(() => {
-                        button.innerHTML = originalCopyContent;
+                        copyBtn.innerHTML = originalCopyContent;
                     }, 2000);
                 });
             });

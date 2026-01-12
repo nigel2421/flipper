@@ -14,7 +14,6 @@ from django.core.cache import cache
 import random 
 from .models import Magazine, Article, Event, Profile, Tag, Author # Import new models
 from django.db.models import Q, Avg
-from .forms import RatingForm, CommentForm, ContributorForm
 from django.db.models.functions import ExtractYear
 from django.http import JsonResponse, HttpResponseRedirect
 from allauth.account.views import SignupView # Import the original SignupView
@@ -120,6 +119,7 @@ def articles_view(request):
 def article_detail_view(request, pk):
     """ Renders a single web article page. """
     article = get_object_or_404(Article, pk=pk)
+    from .forms import RatingForm, CommentForm
 
     user_rating = None
     if request.user.is_authenticated:
@@ -327,6 +327,7 @@ def subscribe_view(request):
     return render(request, 'publications/subscribe.html')
 
 def contributors_view(request):
+    from .forms import ContributorForm
     if request.method == 'POST':
         form = ContributorForm(request.POST, request.FILES)
         if form.is_valid():
