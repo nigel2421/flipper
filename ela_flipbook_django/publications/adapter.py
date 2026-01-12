@@ -33,10 +33,15 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         """
         user = super().populate_user(request, sociallogin, data)
 
-        if not user.first_name and 'first_name' in data:
-            user.first_name = data['first_name']
-        if not user.last_name and 'last_name' in data:
-            user.last_name = data['last_name']
+        # Get the first and last name from the social account
+        first_name = sociallogin.account.extra_data.get('given_name')
+        last_name = sociallogin.account.extra_data.get('family_name')
+
+        # Populate the user model with the new data
+        if first_name and not user.first_name:
+            user.first_name = first_name
+        if last_name and not user.last_name:
+            user.last_name = last_name
         if not user.email and 'email' in data:
             user.email = data['email']
 

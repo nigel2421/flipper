@@ -138,6 +138,18 @@ ACCOUNT_SIGNUP_FORM_CLASS = 'publications.custom_auth_forms.CustomSignupForm'
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 SOCIALACCOUNT_ADAPTER = 'publications.adapter.CustomSocialAccountAdapter'
 
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        }
+    }
+}
+
 
 # Redirects and URLs
 LOGIN_URL = '/accounts/login/'
