@@ -7,6 +7,26 @@ import string
 
 class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
 
+    def pre_social_login(self, request, sociallogin):
+        """
+        Invoked just after a user successfully authenticates via a
+        social provider, but before the login is actually processed
+        (and before a man-to-many relationship has been created).
+        """
+        # Get the user instance from the social login
+        user = sociallogin.user
+
+        # Ensure first_name and last_name are never None
+        if user.first_name is None:
+            user.first_name = ''
+        if user.last_name is None:
+            user.last_name = ''
+
+        # If the username is somehow empty, generate a unique one
+        if not user.username:
+            user.username = self.generate_unique_username(user.email)
+
+
     def populate_user(self, request, sociallogin, data):
         """
         Populates user fields from social account data.
