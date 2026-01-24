@@ -234,13 +234,14 @@ class Contributor(models.Model):
 
     full_name = models.CharField(max_length=100)
     email = models.EmailField()
-    phone_number = models.CharField(max_length=20)
-    country = models.CharField(max_length=100)
+    phone_number = models.CharField(max_length=20, blank=True)
+    country = models.CharField(max_length=100, blank=True)
     field_or_industry = models.CharField(max_length=100)
     submission_type = models.CharField(max_length=20, choices=SUBMISSION_TYPE_CHOICES, default='general')
     subject = models.CharField(max_length=200)
     message = models.TextField()
     attachment = models.FileField(upload_to='contributor_submissions/', blank=True, null=True)
+    terms_and_conditions = models.BooleanField(default=False)
     submitted_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

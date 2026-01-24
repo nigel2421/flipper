@@ -21,4 +21,5 @@ urlpatterns = [
     path('subscribe/', views.subscribe_view, name='subscribe'),
     path('contributors/', views.contributors_view, name='contributors'),
     path('submission-successful/', views.submission_successful_view, name='submission_successful'),
+    path('submit/', views.submit_contribution_view, name='submit_contribution'),
 ]

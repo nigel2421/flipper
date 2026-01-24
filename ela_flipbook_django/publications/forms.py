@@ -42,7 +42,11 @@ class ProfileForm(forms.ModelForm):
 class ContributorForm(forms.ModelForm):
     class Meta:
         model = Contributor
-        fields = ['full_name', 'email', 'submission_type', 'subject', 'message', 'field_or_industry']
+        fields = ['full_name', 'email', 'submission_type', 'subject', 'message', 'field_or_industry', 'attachment', 'terms_and_conditions']
         widgets = {
             'message': forms.Textarea(attrs={'rows': 6}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super(ContributorForm, self).__init__(*args, **kwargs)
+        self.fields['message'].required = False

@@ -328,15 +328,19 @@ def subscribe_view(request):
 
 def contributors_view(request):
     from .forms import ContributorForm
-    if request.method == 'POST':
-        form = ContributorForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-            return redirect('publications:submission_successful')
-    else:
-        form = ContributorForm()
-
+    form = ContributorForm()
     return render(request, 'publications/contributors.html', {'form': form})
 
 def submission_successful_view(request):
     return render(request, 'publications/submission_successful.html')
+
+def submit_contribution_view(request):
+    from .forms import ContributorForm
+    if request.method == 'POST':
+        form = ContributorForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return JsonResponse({'status': 'success', 'message': 'Your contribution has been submitted successfully!'})
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Please correct the errors below.', 'errors': form.errors.get_json_data()})
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
