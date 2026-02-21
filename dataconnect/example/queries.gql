@@ -1,0 +1,75 @@
+query ListPublicFlipbooks @auth(level: PUBLIC, insecureReason: "This operation is safe to expose to the public as it only lists public flipbooks.") {
+  flipbooks(where: {isPublic: {eq: true}}) {
+    id
+    title
+    description
+    framesPerSecond
+    createdAt
+    updatedAt
+    author {
+      displayName
+    }
+  }
+}
+
+query GetMyFlipbooks @auth(level: USER) {
+  flipbooks(where: {authorId: {eq_expr: "auth.uid"}}) {
+    id
+    title
+    isPublic
+    createdAt
+    updatedAt
+  }
+}
+
+mutation CreateFlipbook($title: String!, $description: String, $framesPerSecond: Int, $isPublic: Boolean!) @auth(level: USER) {
+  flipbook_insert(data: {
+    title: $title,
+    description: $description,
+    framesPerSecond: $framesPerSecond,
+    isPublic: $isPublic,
+    authorId_expr: "auth.uid",
+    createdAt_expr: "request.time",
+    updatedAt_expr: "request.time"
+  }) {
+    id
+  }
+}
+
+query GetFlipbookDetails($id: UUID!) @auth(level: USER_ANON, insecureReason: "This operation is safe to expose to all logged in users and anonymous users as it requires a specific flipbook ID and does not expose sensitive user data.") {
+  flipbook(id: $id) {
+    id
+    title
+    description
+    framesPerSecond
+    isPublic
+    createdAt
+    updatedAt
+    author {
+      id
+      displayName
+      bio
+    }
+    frames(orderBy: [{position: ASC}]) {
+      id
+      imageUrl
+      caption
+      position
+    }
+    comments {
+      id
+      content
+      createdAt
+      user {
+        id
+        displayName
+      }
+    }
+    likes_on_flipbook {
+      user {
+        id
+        displayName
+      }
+    }
+  }
+}

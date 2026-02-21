@@ -1,0 +1,38 @@
+type User @table {
+  displayName: String!
+  createdAt: Timestamp!
+  email: String
+  photoUrl: String
+  bio: String
+}
+
+type Flipbook @table {
+  title: String!
+  isPublic: Boolean!
+  createdAt: Timestamp!
+  updatedAt: Timestamp!
+  description: String
+  framesPerSecond: Int
+  author: User
+}
+
+type Frame @table {
+  imageUrl: String!
+  position: Int!
+  createdAt: Timestamp!
+  caption: String
+  flipbook: Flipbook
+}
+
+type Comment @table {
+  content: String!
+  createdAt: Timestamp!
+  user: User
+  flipbook: Flipbook
+}
+
+type Like @table(key: ["user", "flipbook"]) {
+  createdAt: Timestamp!
+  user: User!
+  flipbook: Flipbook!
+}

@@ -3,26 +3,19 @@
 from django.db import migrations
 
 def add_site_data(apps, schema_editor):
-    Site = apps.get_model('sites', 'Site')
-    # Remove any site that has this domain but is NOT pk=1 to avoid IntegrityError
-    Site.objects.filter(domain='127.0.0.1:8000').exclude(pk=1).delete()
-    
-    Site.objects.update_or_create(
-        pk=1,
-        defaults={
-            'domain': '127.0.0.1:8000',
-            'name': 'localhost'
-        }
-    )
+    # This migration previously contained data operations that could overwrite
+    # production settings. It has been modified to be a no-op.
+    # The management command 'ensure_site' is the correct way to manage site data.
+    pass
 
 def remove_site_data(apps, schema_editor):
-    Site = apps.get_model('sites', 'Site')
-    Site.objects.filter(pk=1).delete()
+    # This function is the reverse of the above, and is also a no-op.
+    pass
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('publications', '0004_customuser'),
+        ('publications', '0001_initial'),
         ('sites', '0002_alter_domain_unique'),
     ]
 

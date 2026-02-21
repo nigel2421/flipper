@@ -43,7 +43,7 @@ def home_view(request):
         visitor_count = random.randint(10, 73)
         cache.set('visitor_count', visitor_count, timeout=4 * 60 * 60)
 
-    key_event = Event.objects.filter(event_date__gte=timezone.now().date()).order_by('event_date').first()
+    key_event = Event.objects.filter(date__gte=timezone.now().date()).order_by('date').first()
 
     context = {
         'all_publications': all_publications,
@@ -212,7 +212,7 @@ def author_detail_view(request, pk):
 
 def events_view(request):
     today = timezone.now().date()
-    events = Event.objects.filter(event_date__gte=today)
+    events = Event.objects.filter(date__gte=today)
     context = {
         'events': events,
     }

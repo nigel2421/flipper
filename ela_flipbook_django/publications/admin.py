@@ -186,8 +186,8 @@ class ArticleAdmin(admin.ModelAdmin):
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
-    list_display = ('title', 'event_date')
-    fields = ('title', 'event_date', 'poster', 'caption')
+    list_display = ('title', 'date')
+    fields = ('title', 'date', 'poster', 'caption')
 
 # --- Custom User Admin with Profile Inline and CSV Export ---
 class ProfileInline(admin.StackedInline):

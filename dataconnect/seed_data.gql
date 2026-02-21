@@ -1,0 +1,76 @@
+mutation SeedData @transaction @auth(expr: "auth.token.admin == true", insecureReason: "Seed data mutation, only accessible by admins.") {
+  user_insertMany(data: [
+    {
+      id: "a1a1a1a1-a1a1-a1a1-a1a1-a1a1a1a1a1a1",
+      displayName: "Creator User",
+      email: "creator@example.com",
+      createdAt: "2023-01-01T00:00:00Z"
+    },
+    {
+      id: "b2b2b2b2-b2b2-b2b2-b2b2-b2b2b2b2b2b2",
+      displayName: "Liker User",
+      email: "liker@example.com",
+      createdAt: "2023-01-02T00:00:00Z"
+    }
+  ])
+  flipbook_insertMany(data: [
+    {
+      id: "c3c3c3c3-c3c3-c3c3-c3c3-c3c3c3c3c3c3",
+      authorId: "a1a1a1a1-a1a1-a1a1-a1a1-a1a1a1a1a1a1",
+      title: "My First Flipbook",
+      description: "A simple flipbook about a bouncing ball.",
+      framesPerSecond: 12,
+      isPublic: true,
+      createdAt: "2023-01-03T00:00:00Z",
+      updatedAt: "2023-01-03T00:00:00Z"
+    },
+    {
+      id: "d4d4d4d4-d4d4-d4d4-d4d4-d4d4d4d4d4d4",
+      authorId: "a1a1a1a1-a1a1-a1a1-a1a1-a1a1a1a1a1a1",
+      title: "Another Creation",
+      description: "A short animation of a stick figure.",
+      framesPerSecond: 10,
+      isPublic: false,
+      createdAt: "2023-01-04T00:00:00Z",
+      updatedAt: "2023-01-04T00:00:00Z"
+    }
+  ])
+  frame_insertMany(data: [
+    {
+      flipbookId: "c3c3c3c3-c3c3-c3c3-c3c3-c3c3c3c3c3c3",
+      imageUrl: "https://example.com/frame1.png",
+      position: 1,
+      caption: "Ball starts",
+      createdAt: "2023-01-03T00:00:01Z"
+    },
+    {
+      flipbookId: "c3c3c3c3-c3c3-c3c3-c3c3-c3c3c3c3c3c3",
+      imageUrl: "https://example.com/frame2.png",
+      position: 2,
+      caption: "Ball in air",
+      createdAt: "2023-01-03T00:00:02Z"
+    },
+    {
+      flipbookId: "d4d4d4d4-d4d4-d4d4-d4d4-d4d4d4d4d4d4",
+      imageUrl: "https://example.com/frameA.png",
+      position: 1,
+      caption: "Figure standing",
+      createdAt: "2023-01-04T00:00:01Z"
+    }
+  ])
+  comment_insertMany(data: [
+    {
+      flipbookId: "c3c3c3c3-c3c3-c3c3-c3c3-c3c3c3c3c3c3",
+      userId: "b2b2b2b2-b2b2-b2b2-b2b2-b2b2b2b2b2b2",
+      content: "Great flipbook!",
+      createdAt: "2023-01-05T00:00:00Z"
+    }
+  ])
+  like_insertMany(data: [
+    {
+      userId: "b2b2b2b2-b2b2-b2b2-b2b2-b2b2b2b2b2b2",
+      flipbookId: "c3c3c3c3-c3c3-c3c3-c3c3-c3c3c3c3c3c3",
+      createdAt: "2023-01-06T00:00:00Z"
+    }
+  ])
+}
