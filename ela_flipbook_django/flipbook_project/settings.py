@@ -27,15 +27,7 @@ SECRET_KEY = 'django-insecure-k@d95k@5!n9@&h&s*v^$@8&m!%2*#@c$v&d%d(e@#@b&b!@'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [
-    'press.businessmatters.co.ke',
-    'businessmatters.co.ke',
-    '127.0.0.1',
-    'localhost',
-    'www.businessmatters.co.ke',
-    # Add the development server host
-    '8000-firebase-flippergit-1764678684466.cluster-cbeiita7rbe7iuwhvjs5zww2i4.cloudworkstations.dev',
-]
+ALLOWED_HOSTS = ['*']
 
 CSRF_TRUSTED_ORIGINS = [
     'https://8000-firebase-flippergit-1764678684466.cluster-cbeiita7rbe7iuwhvjs5zww2i4.cloudworkstations.dev',
