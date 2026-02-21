@@ -94,8 +94,13 @@ WSGI_APPLICATION = 'flipbook_project.wsgi.application'
 # --- DATABASE CONFIGURATION ---
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'flipbook_db',            # <-- Change to your DB name
+        'USER': 'businessmatters',               # <-- Change to your DB user
+        'PASSWORD': 'q1w2e3r4t5y.', # <-- Change to your DB password
+        
+        # This HOST string tells Cloud Run to connect using the secure internal socket
+        'HOST': '/cloudsql/flipbookwebsite:europe-west1:flipper-fdc',
     }
 }
 
