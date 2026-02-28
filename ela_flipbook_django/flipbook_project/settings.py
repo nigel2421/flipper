@@ -36,12 +36,13 @@ ALLOWED_HOSTS = [
     # Add the development server host
     '8000-firebase-flippergit-1764678684466.cluster-cbeiita7rbe7iuwhvjs5zww2i4.cloudworkstations.dev',
     'idx-flippergit-09470411-122195396017.africa-south1.run.app',
-    'idx-flippergit-09470411-cydpcotz4q-bq.a.run.app/',
+    'idx-flippergit-09470411-cydpcotz4q-bq.a.run.app',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     'https://8000-firebase-flippergit-1764678684466.cluster-cbeiita7rbe7iuwhvjs5zww2i4.cloudworkstations.dev',
     'https://idx-flippergit-09470411-122195396017.africa-south1.run.app',
+    'https://idx-flippergit-09470411-cydpcotz4q-bq.a.run.app',
 ]
 
 SITE_ID = 1
@@ -103,17 +104,27 @@ WSGI_APPLICATION = 'flipbook_project.wsgi.application'
 
 
 # --- DATABASE CONFIGURATION ---
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'flipbook_db',            # <-- Change to your DB name
-        'USER': 'businessmatters',               # <-- Change to your DB user
-        'PASSWORD': 'q1w2e3r4t5y.', # <-- Change to your DB password
-        
-        # This HOST string tells Cloud Run to connect using the secure internal socket
-        'HOST': '/cloudsql/flipbookwebsite:europe-west1:flipper-fdc',
+if os.environ.get('GAE_APPLICATION'):
+    # Running on production, use Cloud SQL
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'flipbook_db',            # <-- Change to your DB name
+            'USER': 'businessmatters',               # <-- Change to your DB user
+            'PASSWORD': 'q1w2e3r4t5y.', # <-- Change to your DB password
+            
+            # This HOST string tells Cloud Run to connect using the secure internal socket
+            'HOST': '/cloudsql/flipbookwebsite:europe-west1:flipper-fdc',
+        }
     }
-}
+else:
+    # Running locally, use SQLite
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 
@@ -148,6 +159,11 @@ SOCIALACCOUNT_ADAPTER = 'publications.adapter.CustomSocialAccountAdapter'
 
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
+        'APP': {
+            'client_id': os.environ.get('GOOGLE_CLIENT_ID'),
+            'secret': os.environ.get('GOOGLE_SECRET'),
+            'key': ''
+        },
         'SCOPE': [
             'profile',
             'email',
