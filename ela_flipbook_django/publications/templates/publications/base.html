@@ -1,4 +1,4 @@
-{% load static %}
+cd {% load static %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -19,6 +19,28 @@
         gtag('js', new Date());
 
         gtag('config', 'G-9KLM4PD706');
+    </script>
+
+    <!-- Firebase Configuration -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAgfKSEiivyXSGQIh36lxKR3hzKpxy7zXc",
+            authDomain: "flipbookwebsite.firebaseapp.com",
+            projectId: "flipbookwebsite",
+            storageBucket: "flipbookwebsite.firebasestorage.app",
+            messagingSenderId: "122195396017",
+            appId: "1:122195396017:web:bde1dcfe9159a4445da990"
+        };
+
+        // Initialize Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
     </script>
 
     <!-- Main Stylesheet -->
