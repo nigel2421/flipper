@@ -250,3 +250,17 @@ class Contributor(models.Model):
 
     class Meta:
         ordering = ['-submitted_at']
+
+# --- NEW: Sponsor Model ---
+class Sponsor(models.Model):
+    name = models.CharField(max_length=100)
+    logo = models.ImageField(upload_to='sponsors/')
+    is_active = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=0, help_text="Order in which the sponsor appears (lower is earlier).")
+
+    class Meta:
+        ordering = ['order', 'name']
+
+    def __str__(self):
+        return self.name
+

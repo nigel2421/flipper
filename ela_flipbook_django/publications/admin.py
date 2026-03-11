@@ -14,7 +14,7 @@ from allauth.socialaccount.models import SocialAccount
 from allauth.socialaccount.admin import SocialAccountAdmin
 
 # Import your project's models
-from .models import Contributor, Magazine, Article, Profile, Event, Author, Tag, Rating, Comment, CommentReport
+from .models import Contributor, Magazine, Article, Profile, Event, Author, Tag, Rating, Comment, CommentReport, Sponsor
 
 
 # --- Custom Admin Action to Export User Emails ---
@@ -227,6 +227,14 @@ class ContributorAdmin(admin.ModelAdmin):
     list_display = ('full_name', 'email', 'submission_type', 'subject', 'submitted_at')
     list_filter = ('submission_type', 'submitted_at')
     search_fields = ('full_name', 'email', 'subject', 'message')
+
+# --- NEW: Sponsor Admin ---
+@admin.register(Sponsor)
+class SponsorAdmin(admin.ModelAdmin):
+    list_display = ('name', 'is_active', 'order')
+    list_filter = ('is_active',)
+    search_fields = ('name',)
+    list_editable = ('is_active', 'order')
 
 # --- NEW: Social Account Admin ---
 class CustomSocialAccountAdmin(SocialAccountAdmin):

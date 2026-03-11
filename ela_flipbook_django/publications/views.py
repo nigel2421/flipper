@@ -12,7 +12,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.models import User
 from django.core.cache import cache
 import random 
-from .models import Magazine, Article, Event, Profile, Tag, Author # Import new models
+from .models import Magazine, Article, Event, Profile, Tag, Author, Sponsor # Import new models
 from django.db.models import Q, Avg
 from django.db.models.functions import ExtractYear
 from django.http import JsonResponse, HttpResponseRedirect
@@ -44,6 +44,7 @@ def home_view(request):
         cache.set('visitor_count', visitor_count, timeout=4 * 60 * 60)
 
     key_event = Event.objects.filter(date__gte=timezone.now().date()).order_by('date').first()
+    sponsors = Sponsor.objects.filter(is_active=True).order_by('order')
 
     context = {
         'all_publications': all_publications,
@@ -52,6 +53,7 @@ def home_view(request):
         'subscribers_count': subscribers_count,
         'visitor_count': visitor_count,
         'key_event': key_event,
+        'sponsors': sponsors,
     }
     return render(request, 'publications/home.html', context)
 

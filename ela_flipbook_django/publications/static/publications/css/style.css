@@ -1427,6 +1427,59 @@ main>.container {
     font-size: 1.1rem;
 }
 
+/* --- Sponsors Marquee Section --- */
+.sponsors-section {
+    padding-bottom: 40px;
+    border-top: 1px solid #333;
+}
+
+.marquee-container {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    background-color: var(--card-bg);
+    padding: 20px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.marquee-track {
+    display: flex;
+    width: calc(250px * 10); /* Fallback width, adjust depending on number */
+    animation: scroll-left 30s linear infinite;
+    align-items: center;
+}
+
+.marquee-track:hover {
+    animation-play-state: paused;
+}
+
+.sponsor-logo {
+    flex: 0 0 250px; /* Fixed width for each sponsor slot */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0 20px;
+}
+
+.sponsor-logo img {
+    max-width: 150px;
+    max-height: 80px;
+    object-fit: contain;
+    filter: grayscale(100%) opacity(0.7); /* Professional dark mode look */
+    transition: filter 0.3s ease, transform 0.3s ease;
+}
+
+.sponsor-logo img:hover {
+    filter: grayscale(0%) opacity(1);
+    transform: scale(1.05);
+}
+
+@keyframes scroll-left {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(calc(-250px * 5)); /* Adjust based on sponsor count */ }
+}
+
 /* ==========================================================================
    6. RESPONSIVENESS (MEDIA QUERIES)
    ========================================================================== */
@@ -1445,6 +1498,9 @@ main>.container {
         /* Create a stacking context */
         z-index: 5;
         /* Ensure content is above images */
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Center content on mobile */
     }
 
     .hero-images {
@@ -1452,6 +1508,7 @@ main>.container {
         margin-top: 80px;
         /* Increased margin for more space */
         height: 350px;
+        order: -1; /* Keep images below text on mobile if content order is changed, but we want it below the text */
     }
 
     .hero-subheadline {
@@ -1461,6 +1518,11 @@ main>.container {
 
     .publications-grid {
         grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .hero-stats-container {
+        order: 3; /* Push stats below images on mobile since they are both within hero-container */
+        margin-top: 60px;
     }
 }
 
@@ -1540,6 +1602,7 @@ main>.container {
         height: 280px;
         position: relative;
         display: block;
+        margin-top: 40px;
     }
 
     .hero-image-wrapper {

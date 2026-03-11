@@ -19,34 +19,9 @@
                 <p class="hero-tagline">Entrepreneurship | Leadership | Strategy</p>
                 <h1 class="hero-headline">Unlock Financial Success and Sustainability</h1>
                 <p class="hero-subheadline">Subscribe now to our magazine and start building your business today!</p>
-                <a href="{% url 'account_signup' %}" class="hero-subscribe-button">Subscribe Now</a>
-                
-                <!-- === MOVED STATS CARD SECTION FOR DESKTOP === -->
-                <div class="stats-card-container hero-stats-container">
-                    <!-- Site Visitors -->
-                    <div class="stat-card">
-                        <h3 class="stat-title">Visitors Online</h3>
-                        <p class="stat-number" data-target="{{ visitor_count }}">{{ visitor_count }}</p>
-                    </div>
-
-                    <!-- Number of Subscribers -->
-                    <div class="stat-card">
-                        <h3 class="stat-title">Subscribers</h3>
-                        <p class="stat-number" data-target="{{ subscribers_count }}">{{ subscribers_count }}</p>
-                    </div>
-
-                    <!-- Key Events -->
-                    <div class="stat-card">
-                        <h3 class="stat-title">Next Event</h3>
-                        {% if key_event %}
-                            <p class="stat-number event-title">{{ key_event.title }}</p>
-                            <p class="stat-description">On {{ key_event.date|date:"F j, Y" }}</p>
-                        {% else %}
-                            <p class="stat-description">No upcoming events.</p>
-                        {% endif %}
-                    </div>
-                </div>
+                <a href="{% url 'account_signup' %}" class="hero-subscribe-button d-inline-block">Subscribe Now</a>
             </div>
+            
             <div class="hero-images">
                 <!-- This loop dynamically displays the 3 most recent covers -->
                 {% for pub in latest_publications %}
@@ -58,6 +33,32 @@
                         {% endif %}
                     </a>
                 {% endfor %}
+            </div>
+            
+            <!-- === STATS CARD SECTION === -->
+            <div class="stats-card-container hero-stats-container">
+                <!-- Site Visitors -->
+                <div class="stat-card">
+                    <h3 class="stat-title">Visitors Online</h3>
+                    <p class="stat-number" data-target="{{ visitor_count }}">{{ visitor_count }}</p>
+                </div>
+
+                <!-- Number of Subscribers -->
+                <div class="stat-card">
+                    <h3 class="stat-title">Subscribers</h3>
+                    <p class="stat-number" data-target="{{ subscribers_count }}">{{ subscribers_count }}</p>
+                </div>
+
+                <!-- Key Events -->
+                <div class="stat-card">
+                    <h3 class="stat-title">Next Event</h3>
+                    {% if key_event %}
+                        <p class="stat-number event-title">{{ key_event.title }}</p>
+                        <p class="stat-description">On {{ key_event.date|date:"F j, Y" }}</p>
+                    {% else %}
+                        <p class="stat-description">No upcoming events.</p>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </section>
@@ -132,5 +133,29 @@
         </div>
         <a href="{% url 'publications:articles' %}" class="show-more-btn">Show More Articles</a>
     </div>
+
+    <!-- === NEW: OUR SPONSORS MARQUEE SECTION === -->
+    {% if sponsors %}
+    <section class="sponsors-section">
+        <div class="container text-center">
+            <h2 style="color: var(--text-dark); margin-bottom: 25px; margin-top: 50px;">Our Sponsors</h2>
+        </div>
+        <div class="marquee-container">
+            <div class="marquee-track">
+                <!-- Double loop to ensure smooth scrolling without gaps -->
+                {% for sponsor in sponsors %}
+                    <div class="sponsor-logo">
+                        <img src="{{ sponsor.logo.url }}" alt="{{ sponsor.name }} Logo">
+                    </div>
+                {% endfor %}
+                {% for sponsor in sponsors %}
+                    <div class="sponsor-logo">
+                        <img src="{{ sponsor.logo.url }}" alt="{{ sponsor.name }} Logo">
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
 
 {% endblock %}
