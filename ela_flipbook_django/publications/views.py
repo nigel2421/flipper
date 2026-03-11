@@ -221,6 +221,9 @@ def events_view(request):
 def contact_view(request):
     return render(request, 'publications/contact.html')
 
+def about_us_view(request):
+    return render(request, 'publications/about_us.html')
+
 @login_required
 def profile_view(request):
     user = request.user

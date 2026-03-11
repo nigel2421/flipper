@@ -20,6 +20,32 @@
                 <h1 class="hero-headline">Unlock Financial Success and Sustainability</h1>
                 <p class="hero-subheadline">Subscribe now to our magazine and start building your business today!</p>
                 <a href="{% url 'account_signup' %}" class="hero-subscribe-button">Subscribe Now</a>
+                
+                <!-- === MOVED STATS CARD SECTION FOR DESKTOP === -->
+                <div class="stats-card-container hero-stats-container">
+                    <!-- Site Visitors -->
+                    <div class="stat-card">
+                        <h3 class="stat-title">Visitors Online</h3>
+                        <p class="stat-number" data-target="{{ visitor_count }}">{{ visitor_count }}</p>
+                    </div>
+
+                    <!-- Number of Subscribers -->
+                    <div class="stat-card">
+                        <h3 class="stat-title">Subscribers</h3>
+                        <p class="stat-number" data-target="{{ subscribers_count }}">{{ subscribers_count }}</p>
+                    </div>
+
+                    <!-- Key Events -->
+                    <div class="stat-card">
+                        <h3 class="stat-title">Next Event</h3>
+                        {% if key_event %}
+                            <p class="stat-number event-title">{{ key_event.title }}</p>
+                            <p class="stat-description">On {{ key_event.date|date:"F j, Y" }}</p>
+                        {% else %}
+                            <p class="stat-description">No upcoming events.</p>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
             <div class="hero-images">
                 <!-- This loop dynamically displays the 3 most recent covers -->
@@ -36,35 +62,14 @@
         </div>
     </section>
 
-    <!-- === NEW: STATS CARD SECTION === -->
-    <div class="container">
-        <div class="stats-card-container">
-            <!-- Site Visitors -->
-            <div class="stat-card">
-                <h3 class="stat-title">Visitors Online</h3>
-                <p class="stat-number" data-target="{{ visitor_count }}">{{ visitor_count }}</p>
-                <p class="stat-description">Currently browsing articles and events.</p>
-            </div>
-
-            <!-- Number of Subscribers -->
-            <div class="stat-card">
-                <h3 class="stat-title">Subscribers</h3>
-                <p class="stat-number" data-target="{{ subscribers_count }}">{{ subscribers_count }}</p>
-                <p class="stat-description">Join our growing community of readers.</p>
-            </div>
-
-            <!-- Key Events -->
-            <div class="stat-card">
-                <h3 class="stat-title">Next Event</h3>
-                {% if key_event %}
-                    <p class="stat-number event-title">{{ key_event.title }}</p>
-                    <p class="stat-description">On {{ key_event.event_date|date:"F j, Y" }}</p>
-                {% else %}
-                    <p class="stat-description">No upcoming events scheduled. Stay tuned!</p>
-                {% endif %}
-            </div>
-        </div>
-    </div>
+    <!-- === NEW: ABOUT US SNIPPET SECTION === -->
+    <section class="about-snippet-section container text-center">
+        <h2>About Business Matters Africa</h2>
+        <p class="about-snippet-text">
+            We are an independent, premium business magazine delivering in-depth, contextually grounded insights for Africa's high-calibre leaders, founders, and investors. We deliberately position ourselves against the tide of superficial business content, focusing on depth, intellectual courage, and African realities.
+        </p>
+        <a href="{% url 'publications:about_us' %}" class="hero-subscribe-button" style="background-color: transparent; border-color: var(--primary-blue); color: var(--text-light); margin-top: 15px;">Read Our Full Story</a>
+    </section>
 
     <!-- PUBLICATIONS GRID SECTION -->
     <div class="container">
