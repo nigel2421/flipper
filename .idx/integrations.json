@@ -4,5 +4,6 @@
     "region": "africa-south1",
     "sourceFlag": "--source ela_flipbook_django",
     "allowUnauthenticatedInvocationsFlag": "--allow-unauthenticated"
-  }
+  },
+  "gemini_api": {}
 }
