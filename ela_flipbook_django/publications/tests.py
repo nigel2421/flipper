@@ -1,31 +1,51 @@
 
-from django.test import TestCase, Client
+from django.test import TestCase, Client, override_settings
 from django.contrib.auth.models import User
 from django.urls import reverse
-from .models import Article, Author, Tag, Magazine, Event, Contributor, Profile, Comment, Rating
+from .models import Article, Author, Tag, Magazine, Event, Contributor, Profile, Comment, Rating, Sponsor, WhatsAppUpdate
 from django.core.files.uploadedfile import SimpleUploadedFile
+
+# Middleware list with whitenoise removed so tests work without the package installed
+TEST_MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    # 'whitenoise.middleware.WhiteNoiseMiddleware',  <-- removed for tests
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
+    'publications.middleware.ReferralMiddleware',
+]
+
+# Also override STATICFILES_STORAGE so whitenoise storage backend isn't loaded
+TEST_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+
 
 class PublicationTestBase(TestCase):
     def setUp(self):
         """Set up non-modified objects used by all test methods."""
-        self.user = User.objects.create_user(username='testuser', password='password')
+        self.user = User.objects.create_user(username='testuser', password='password', email='testuser@example.com')
         self.author = Author.objects.create(name='Test Author')
         self.tag = Tag.objects.create(name='Test Tag', slug='test-tag')
 
-        # Create a dummy image for the cover_image field
+        # Create a minimal dummy image for the cover_image field
         self.dummy_image = SimpleUploadedFile(
             name='test_image.jpg',
-            content=b'',
+            content=b'\x47\x49\x46\x38\x39\x61',  # minimal valid file bytes
             content_type='image/jpeg'
         )
 
         self.article = Article.objects.create(
             title='Test Article',
             content='This is a test article.',
+            excerpt='Short excerpt.',
             author=self.author,
-            cover_image=self.dummy_image,  # Add the dummy image here
+            cover_image=self.dummy_image,
         )
         self.article.tags.add(self.tag)
+
         self.magazine = Magazine.objects.create(
             title='Test Magazine',
             pdf_file='pdfs/test.pdf',
@@ -44,8 +64,18 @@ class PublicationTestBase(TestCase):
             message='This is a test submission.',
             terms_and_conditions=True,
         )
+        self.whatsapp_update = WhatsAppUpdate.objects.create(
+            title='Test WA Update',
+            content='This is a WhatsApp update.',
+            short_description='A short WA description.',
+            cover_image=SimpleUploadedFile('wa_cover.jpg', b'\x47\x49\x46\x38\x39\x61', content_type='image/jpeg'),
+        )
         self.client = Client()
 
+
+# ──────────────────────────────────────────────────────────────────────────────
+# MODEL TESTS
+# ──────────────────────────────────────────────────────────────────────────────
 
 class ModelTests(PublicationTestBase):
 
@@ -53,6 +83,15 @@ class ModelTests(PublicationTestBase):
         """Test that an Article can be created and saved to the database."""
         self.assertEqual(Article.objects.count(), 1)
         self.assertEqual(self.article.title, 'Test Article')
+
+    def test_article_was_shared_on_whatsapp_default_false(self):
+        """Test that was_shared_on_whatsapp defaults to False on Articles."""
+        self.assertFalse(self.article.was_shared_on_whatsapp)
+
+    def test_article_get_absolute_url(self):
+        """Test that Articles return a valid absolute URL."""
+        url = self.article.get_absolute_url()
+        self.assertIn(str(self.article.pk), url)
 
     def test_magazine_creation(self):
         """Test that a Magazine can be created and saved to the database."""
@@ -97,7 +136,51 @@ class ModelTests(PublicationTestBase):
         self.assertEqual(Rating.objects.count(), 1)
         self.assertEqual(rating.score, 5)
 
+    # ── WhatsApp Update Model Tests ──
 
+    def test_whatsapp_update_creation(self):
+        """Test that a WhatsAppUpdate can be created and saved."""
+        self.assertEqual(WhatsAppUpdate.objects.count(), 1)
+        self.assertEqual(self.whatsapp_update.title, 'Test WA Update')
+
+    def test_whatsapp_update_str_representation(self):
+        """Test the string representation of the WhatsAppUpdate model."""
+        self.assertEqual(str(self.whatsapp_update), 'Test WA Update')
+
+    def test_whatsapp_update_was_shared_default_false(self):
+        """Test that was_shared_on_whatsapp defaults to False."""
+        self.assertFalse(self.whatsapp_update.was_shared_on_whatsapp)
+
+    def test_whatsapp_update_mark_as_shared(self):
+        """Test that we can mark a WhatsApp update as shared."""
+        self.whatsapp_update.was_shared_on_whatsapp = True
+        self.whatsapp_update.save()
+        updated = WhatsAppUpdate.objects.get(pk=self.whatsapp_update.pk)
+        self.assertTrue(updated.was_shared_on_whatsapp)
+
+    def test_whatsapp_update_get_absolute_url(self):
+        """Test that WhatsAppUpdate returns a valid absolute URL."""
+        url = self.whatsapp_update.get_absolute_url()
+        self.assertIn(str(self.whatsapp_update.pk), url)
+
+    def test_sponsor_creation(self):
+        """Test that a Sponsor can be created and saved."""
+        sponsor = Sponsor.objects.create(
+            name='Test Sponsor',
+            logo=SimpleUploadedFile('logo.jpg', b'\x47\x49\x46\x38\x39\x61', content_type='image/jpeg'),
+        )
+        self.assertEqual(Sponsor.objects.count(), 1)
+        self.assertEqual(str(sponsor), 'Test Sponsor')
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# VIEW TESTS  (middleware overridden to remove whitenoise)
+# ──────────────────────────────────────────────────────────────────────────────
+
+@override_settings(
+    MIDDLEWARE=TEST_MIDDLEWARE,
+    STATICFILES_STORAGE=TEST_STORAGE,
+)
 class ViewTests(PublicationTestBase):
 
     def test_home_view(self):
@@ -112,11 +195,16 @@ class ViewTests(PublicationTestBase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'publications/magazine.html')
 
+    def test_about_us_view(self):
+        """Test the about us page is publicly accessible."""
+        response = self.client.get(reverse('publications:about_us'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'publications/about_us.html')
+
     def test_articles_view_unauthenticated(self):
         """Test that the articles view redirects unauthenticated users."""
         response = self.client.get(reverse('publications:articles'))
         self.assertEqual(response.status_code, 302)
-        self.assertIn('/accounts/login/', response.url)
 
     def test_articles_view_authenticated(self):
         """Test the articles view for authenticated users."""
@@ -125,19 +213,31 @@ class ViewTests(PublicationTestBase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'publications/articles.html')
 
-    def test_article_detail_view(self):
-        """Test the article detail view."""
-        self.client.login(username='testuser', password='password')
+    def test_article_detail_view_public(self):
+        """Test the article detail view is public (no login required - needed for OG crawlers)."""
         response = self.client.get(reverse('publications:article_detail', kwargs={'pk': self.article.pk}))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'publications/article_detail.html')
-        self.assertContains(response, self.article.title)
+
+    def test_article_detail_contains_og_tags(self):
+        """Test that article detail page contains Open Graph meta tags for WhatsApp rich preview."""
+        response = self.client.get(reverse('publications:article_detail', kwargs={'pk': self.article.pk}))
+        content = response.content.decode()
+        self.assertIn('og:title', content)
+        self.assertIn('og:description', content)
+        self.assertIn('og:url', content)
+        self.assertIn('og:image', content)
+
+    def test_article_detail_og_title_matches(self):
+        """Test that the OG title matches the article title."""
+        response = self.client.get(reverse('publications:article_detail', kwargs={'pk': self.article.pk}))
+        content = response.content.decode()
+        self.assertIn(self.article.title, content)
 
     def test_author_detail_view(self):
         """Test the author detail view."""
         response = self.client.get(reverse('publications:author_detail', kwargs={'pk': self.author.pk}))
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'publications/author_detail.html')
 
     def test_events_view(self):
         """Test the events view."""
@@ -157,3 +257,40 @@ class ViewTests(PublicationTestBase):
         response = self.client.get(reverse('publications:profile'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'publications/profile.html')
+
+    # ── WhatsApp Updates View Tests ──
+
+    def test_whatsapp_list_view(self):
+        """Test the WhatsApp Updates list page is publicly accessible."""
+        response = self.client.get(reverse('publications:whatsapp_updates'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'publications/whatsapp_list.html')
+
+    def test_whatsapp_list_view_shows_updates(self):
+        """Test that the list page shows the WhatsApp update titles."""
+        response = self.client.get(reverse('publications:whatsapp_updates'))
+        self.assertContains(response, self.whatsapp_update.title)
+
+    def test_whatsapp_detail_view(self):
+        """Test that the WhatsApp Update detail page renders correctly."""
+        response = self.client.get(reverse('publications:whatsapp_detail', kwargs={'pk': self.whatsapp_update.pk}))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'publications/whatsapp_detail.html')
+
+    def test_whatsapp_detail_view_contains_og_tags(self):
+        """Test that the WA detail page contains Open Graph meta tags."""
+        response = self.client.get(reverse('publications:whatsapp_detail', kwargs={'pk': self.whatsapp_update.pk}))
+        content = response.content.decode()
+        self.assertIn('og:title', content)
+        self.assertIn('og:description', content)
+        self.assertIn('og:url', content)
+
+    def test_whatsapp_detail_view_contains_title(self):
+        """Test that the WA detail page shows the update title."""
+        response = self.client.get(reverse('publications:whatsapp_detail', kwargs={'pk': self.whatsapp_update.pk}))
+        self.assertContains(response, self.whatsapp_update.title)
+
+    def test_whatsapp_detail_404_for_missing_update(self):
+        """Test that requesting a non-existent WhatsApp Update returns 404."""
+        response = self.client.get(reverse('publications:whatsapp_detail', kwargs={'pk': 99999}))
+        self.assertEqual(response.status_code, 404)

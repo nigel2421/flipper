@@ -144,6 +144,10 @@ main>.container {
     color: var(--text-muted);
 }
 
+.text-center {
+    text-align: center !important;
+}
+
 .publications-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -309,6 +313,8 @@ main>.container {
 .hero-content {
     flex: 1;
     max-width: 50%;
+    position: relative;
+    z-index: 10; /* Ensure content and buttons are above absolutely positioned image wrappers */
 }
 
 .hero-tagline {
@@ -1250,6 +1256,373 @@ main>.container {
     border: none;
 }
 
+/* --- Hero Stats Container (Desktop layout) --- */
+.hero-stats-container {
+    margin-top: 40px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    position: relative;
+    z-index: 10;
+}
+.hero-stats-container .stat-card {
+    flex: 0 0 calc(50% - 15px); /* Two items per row with gap taken into account */
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: none;
+    padding: 15px;
+}
+.hero-stats-container .stat-card:nth-child(3) {
+    /* Center the third item below the first two */
+    flex: 0 0 calc(50% - 15px);
+}
+.hero-stats-container .stat-title {
+    color: var(--accent-yellow);
+    font-size: 0.85rem;
+    margin-bottom: 5px;
+}
+.hero-stats-container .stat-number {
+    font-size: 1.8rem;
+    color: #fff;
+    margin-bottom: 5px;
+}
+.hero-stats-container .stat-number.event-title {
+    font-size: 1.1rem;
+    min-height: auto;
+}
+.hero-stats-container .stat-description {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.8);
+}
+
+/* --- About Snippet Section --- */
+.about-snippet-section {
+    padding: 60px 20px 20px;
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.about-snippet-section h2 {
+    font-size: 2.2rem;
+    color: var(--text-dark);
+    margin-bottom: 20px;
+}
+.about-snippet-text {
+    font-size: 1.15rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+    margin-bottom: 30px;
+}
+
+/* --- About Us Redesign (Socialy Inspired) --- */
+.about-hero-section {
+    background-color: var(--accent-yellow);
+    color: #000;
+    padding: 80px 20px 40px;
+    position: relative;
+    overflow: hidden;
+}
+
+.about-hero-section h1 {
+    font-size: 4rem;
+    font-weight: 800;
+    margin-bottom: 20px;
+    letter-spacing: -1px;
+    color: #000;
+}
+
+.about-hero-section .subtitle {
+    font-size: 1.25rem;
+    max-width: 600px;
+    margin: 0 auto;
+    opacity: 0.8;
+}
+
+.about-decor {
+    position: absolute;
+    opacity: 0.2;
+    pointer-events: none;
+}
+
+.decor-1 { top: 20%; left: 10%; font-size: 2rem; }
+.decor-2 { top: 40%; right: 15%; font-size: 1.5rem; }
+.decor-3 { bottom: 10%; left: 20%; font-size: 1rem; }
+
+/* About Gallery */
+.about-gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-top: 0;
+    padding: 0 40px;
+    position: relative;
+    z-index: 10;
+}
+
+.gallery-item {
+    border-radius: 12px;
+    overflow: hidden;
+    height: 300px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    transition: transform 0.3s ease;
+}
+
+.gallery-item:hover {
+    transform: translateY(-10px);
+}
+
+.gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Split Content */
+.about-split-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    padding: 80px 40px;
+    align-items: start;
+}
+
+.split-left h2 {
+    font-size: 2.8rem;
+    line-height: 1.2;
+    margin-bottom: 30px;
+    color: var(--text-dark);
+}
+
+.split-right p {
+    font-size: 1.15rem;
+    color: var(--text-muted);
+    line-height: 1.8;
+}
+
+/* Feature Portrait & Quote */
+.about-founder-highlight {
+    display: flex;
+    gap: 80px;
+    padding: 80px 40px;
+    align-items: center;
+}
+
+.founder-image-wrapper {
+    flex: 1;
+    position: relative;
+}
+
+.founder-image-wrapper img {
+    width: 100%;
+    border-radius: 15px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+}
+
+.quote-box {
+    position: static;
+    bottom: auto;
+    right: auto;
+    background: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    max-width: 100%;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    color: #000;
+    border-left: 4px solid var(--accent-yellow);
+}
+
+.quote-box blockquote {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    border: none;
+    padding: 0;
+}
+
+.quote-box .author-name {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+/* Common Section Headers */
+.about-section-header {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto 60px;
+}
+
+.about-section-header h2 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+}
+
+/* Modern Tables */
+.modern-table-container {
+    overflow-x: auto;
+    margin: 40px 0;
+}
+
+.modern-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--card-bg);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.modern-table th {
+    background: rgba(255,255,255,0.03);
+    padding: 20px;
+    text-align: left;
+    color: var(--accent-yellow);
+    font-size: 1.1rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.modern-table td {
+    padding: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    vertical-align: top;
+    color: var(--text-light);
+    line-height: 1.6;
+}
+
+.modern-table tr:last-child td {
+    border-bottom: none;
+}
+
+.modern-table .icon-cell {
+    width: 50px;
+    color: var(--primary-blue);
+    font-size: 1.25rem;
+}
+
+/* Value Pillars */
+.about-values-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    padding: 60px 40px;
+}
+
+.value-pillar {
+    text-align: center;
+}
+
+.value-icon {
+    width: 80px;
+    height: 80px;
+    background: var(--accent-yellow);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 2rem;
+    color: #000;
+}
+
+.value-pillar h3 {
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+    color: var(--text-dark);
+}
+
+.value-pillar p {
+    color: var(--text-muted);
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .about-gallery-grid {
+        grid-template-columns: repeat(2, 1fr);
+        padding: 0 20px;
+    }
+    .about-split-content, .about-founder-highlight {
+        grid-template-columns: 1fr;
+        flex-direction: column;
+        gap: 40px;
+        padding: 60px 20px;
+    }
+    .about-hero-section h1 { font-size: 3rem; }
+    .about-values-row { grid-template-columns: 1fr; }
+    .quote-box {
+        position: static;
+        margin: 20px auto 0;
+    }
+}
+
+/* --- About Us Page (Old styles - keeping for compatibility or cleaning up later) --- */
+.about-us-container {
+    max-width: 1200px; /* Increased from 1000 */
+    margin: 40px auto;
+}
+
+
+/* --- Sponsors Marquee Section --- */
+.sponsors-section {
+    padding-bottom: 40px;
+    border-top: 1px solid #333;
+}
+
+.marquee-container {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    background-color: var(--card-bg);
+    padding: 20px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.marquee-track {
+    display: flex;
+    width: fit-content;
+    animation: scroll-left 40s linear infinite;
+}
+
+.marquee-track:hover {
+    animation-play-state: paused;
+}
+
+.marquee-content {
+    display: flex;
+    width: max-content;
+}
+
+.sponsor-logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0 40px;
+}
+
+.sponsor-logo img {
+    height: 80px;
+    width: auto;
+    max-width: 150px;
+    object-fit: contain;
+    filter: grayscale(100%) opacity(0.7); /* Professional dark mode look */
+    transition: filter 0.3s ease, transform 0.3s ease;
+}
+
+.sponsor-logo img:hover {
+    filter: grayscale(0%) opacity(1);
+    transform: scale(1.05);
+}
+
+@keyframes scroll-left {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); } 
+}
+
 /* ==========================================================================
    6. RESPONSIVENESS (MEDIA QUERIES)
    ========================================================================== */
@@ -1268,6 +1641,9 @@ main>.container {
         /* Create a stacking context */
         z-index: 5;
         /* Ensure content is above images */
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Center content on mobile */
     }
 
     .hero-images {
@@ -1275,6 +1651,7 @@ main>.container {
         margin-top: 80px;
         /* Increased margin for more space */
         height: 350px;
+        order: -1; /* Keep images below text on mobile if content order is changed, but we want it below the text */
     }
 
     .hero-subheadline {
@@ -1284,6 +1661,11 @@ main>.container {
 
     .publications-grid {
         grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .hero-stats-container {
+        order: 3; /* Push stats below images on mobile since they are both within hero-container */
+        margin-top: 60px;
     }
 }
 
@@ -1342,9 +1724,19 @@ main>.container {
     }
 
     /* Stats Card on Tablet */
-    .stats-card-container {
-        grid-template-columns: 1fr;
-        /* Stack cards vertically */
+    .hero-stats-container {
+        flex-direction: column;
+        align-items: center;
+    }
+    .hero-stats-container .stat-card {
+        flex: 0 0 auto;
+        width: 100%;
+        max-width: 300px;
+    }
+    .hero-stats-container .stat-card:nth-child(3) {
+        flex: 0 0 auto;
+        width: 100%;
+        max-width: 300px;
     }
 }
 
@@ -1363,6 +1755,7 @@ main>.container {
         height: 280px;
         position: relative;
         display: block;
+        margin-top: 40px;
     }
 
     .hero-image-wrapper {

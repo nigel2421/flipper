@@ -60,6 +60,7 @@ class Article(models.Model):
     view_count = models.PositiveIntegerField(default=0, editable=False)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     summary = models.TextField(blank=True, null=True, help_text="AI-generated summary of the article content.")
+    was_shared_on_whatsapp = models.BooleanField(default=False, help_text="Tracks if this article has been shared on WhatsApp.")
 
     def __str__(self):
         return self.title
@@ -263,4 +264,24 @@ class Sponsor(models.Model):
 
     def __str__(self):
         return self.name
+
+class WhatsAppUpdate(models.Model):
+    title = models.CharField(max_length=200)
+    cover_image = models.ImageField(upload_to='whatsapp_covers/')
+    content = CKEditor5Field('Content', config_name='article')
+    short_description = models.TextField(blank=True, help_text="A short snippet for social previews.")
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    was_shared_on_whatsapp = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.title
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('publications:whatsapp_detail', kwargs={'pk': self.pk})
+
+    class Meta:
+        ordering = ['-uploaded_at']
+        verbose_name = "WhatsApp Update"
+        verbose_name_plural = "WhatsApp Updates"
 

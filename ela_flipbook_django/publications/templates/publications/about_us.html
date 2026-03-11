@@ -15,6 +15,9 @@
     </div>
 </section>
 
+<!-- Spacer to prevent gallery from overlapping hero text -->
+<div style="height: 40px; background: #0b0e2c;"></div>
+
 <!-- Gallery Section -->
 <div class="about-gallery-grid">
     <div class="gallery-item">
@@ -31,10 +34,17 @@
     </div>
 </div>
 
-<!-- Core Narrative / History -->
+
+<!-- Core Narrative: Title + Quote first, then narrative text -->
 <section class="container about-split-content">
     <div class="split-left">
         <h2>We provide substance over superficiality</h2>
+
+        <!-- Quote card moved directly below the title -->
+        <div class="quote-box" style="margin-top: 30px;">
+            <blockquote>"Empowering the next generation of African leaders with intellectual clarity."</blockquote>
+            <p class="author-name">BMA Team</p>
+        </div>
     </div>
     <div class="split-right">
         <p>Launched in November 2025, we deliberately position ourselves against the tide of superficial business content: no clickbait lists, no recycled generic advice, no obsession with viral trends. Instead, every edition focuses on depth — exploring the psychology of power, succession in family enterprises, and contrarian strategies that win in volatile markets.</p>
@@ -42,14 +52,10 @@
     </div>
 </section>
 
-<!-- Founder Highlight SECTION -->
+<!-- Founder Highlight SECTION (image + legacy copy) -->
 <section class="container about-founder-highlight">
     <div class="founder-image-wrapper">
         <img src="{% static 'publications/images/founder_portrait.png' %}" alt="Business Matters Africa Founder">
-        <div class="quote-box">
-            <blockquote>"Empowering the next generation of African leaders with intellectual clarity."</blockquote>
-            <p class="author-name">BMA Team</p>
-        </div>
     </div>
     <div class="founder-text-content">
         <h2>We empower leaders to build legacy</h2>

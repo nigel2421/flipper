@@ -12,7 +12,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.models import User
 from django.core.cache import cache
 import random 
-from .models import Magazine, Article, Event, Profile, Tag, Author, Sponsor # Import new models
+from .models import Magazine, Article, Event, Profile, Tag, Author, Sponsor, WhatsAppUpdate
 from django.db.models import Q, Avg
 from django.db.models.functions import ExtractYear
 from django.http import JsonResponse, HttpResponseRedirect
@@ -123,7 +123,7 @@ def articles_view(request):
     }
     return render(request, 'publications/articles.html', context)
 
-@login_required
+
 def article_detail_view(request, pk):
     """ Renders a single web article page. """
     article = get_object_or_404(Article, pk=pk)
@@ -154,25 +154,30 @@ def article_detail_view(request, pk):
             article.save(update_fields=['summary'])
             return HttpResponseRedirect(request.path_info)
 
-        rating_form = RatingForm(request.POST)
-        comment_form = CommentForm(request.POST)
+        if 'rating_submit' in request.POST:
+            if not request.user.is_authenticated:
+                 return HttpResponseRedirect(f"/accounts/login/?next={request.path}")
+            rating_form = RatingForm(request.POST)
+            if rating_form.is_valid():
+                score = int(rating_form.cleaned_data['score'])
+                article.ratings.update_or_create(user=request.user, defaults={'score': score})
+                return HttpResponseRedirect(request.path_info)
 
-        if 'rating_submit' in request.POST and rating_form.is_valid():
-            score = int(rating_form.cleaned_data['score'])
-            article.ratings.update_or_create(user=request.user, defaults={'score': score})
-            return HttpResponseRedirect(request.path_info)
-
-        elif 'comment_submit' in request.POST and comment_form.is_valid():
-            text = comment_form.cleaned_data['text']
-            parent_id = comment_form.cleaned_data.get('parent_id')
-            parent_comment = None
-            if parent_id:
-                try:
-                    parent_comment = article.comments.get(id=parent_id)
-                except article.comments.model.DoesNotExist:
-                    pass
-            article.comments.create(user=request.user, text=text, parent=parent_comment)
-            return HttpResponseRedirect(request.path_info)
+        elif 'comment_submit' in request.POST:
+            if not request.user.is_authenticated:
+                 return HttpResponseRedirect(f"/accounts/login/?next={request.path}")
+            comment_form = CommentForm(request.POST)
+            if comment_form.is_valid():
+                text = comment_form.cleaned_data['text']
+                parent_id = comment_form.cleaned_data.get('parent_id')
+                parent_comment = None
+                if parent_id:
+                    try:
+                        parent_comment = article.comments.get(id=parent_id)
+                    except article.comments.model.DoesNotExist:
+                        pass
+                article.comments.create(user=request.user, text=text, parent=parent_comment)
+                return HttpResponseRedirect(request.path_info)
     else:
         rating_form = RatingForm()
         comment_form = CommentForm()
@@ -355,3 +360,22 @@ def submit_contribution_view(request):
         else:
             return JsonResponse({'status': 'error', 'message': 'Please correct the errors below.', 'errors': form.errors.get_json_data()})
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
+
+def whatsapp_list_view(request):
+    """Displays a list of all WhatsApp Updates."""
+    updates = WhatsAppUpdate.objects.all().order_by('-uploaded_at')
+    paginator = Paginator(updates, 12)
+    page = request.GET.get('page')
+    try:
+        updates = paginator.page(page)
+    except PageNotAnInteger:
+        updates = paginator.page(1)
+    except EmptyPage:
+        updates = paginator.page(paginator.num_pages)
+    return render(request, 'publications/whatsapp_list.html', {'updates': updates})
+
+def whatsapp_detail_view(request, pk):
+    """Displays a single WhatsApp Update detail page."""
+    update = get_object_or_404(WhatsAppUpdate, pk=pk)
+    update.view_count = getattr(update, 'view_count', 0)  # safe fallback
+    return render(request, 'publications/whatsapp_detail.html', {'update': update})

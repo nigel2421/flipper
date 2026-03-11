@@ -14,7 +14,7 @@ from allauth.socialaccount.models import SocialAccount
 from allauth.socialaccount.admin import SocialAccountAdmin
 
 # Import your project's models
-from .models import Contributor, Magazine, Article, Profile, Event, Author, Tag, Rating, Comment, CommentReport, Sponsor
+from .models import Contributor, Magazine, Article, Profile, Event, Author, Tag, Rating, Comment, CommentReport, Sponsor, WhatsAppUpdate
 
 
 # --- Custom Admin Action to Export User Emails ---
@@ -227,6 +227,65 @@ class ContributorAdmin(admin.ModelAdmin):
     list_display = ('full_name', 'email', 'submission_type', 'subject', 'submitted_at')
     list_filter = ('submission_type', 'submitted_at')
     search_fields = ('full_name', 'email', 'subject', 'message')
+
+@admin.register(WhatsAppUpdate)
+class WhatsAppUpdateAdmin(admin.ModelAdmin):
+    list_display = ('title', 'uploaded_at', 'was_shared_on_whatsapp')
+    list_filter = ('was_shared_on_whatsapp', 'uploaded_at')
+    search_fields = ('title', 'content')
+    readonly_fields = ('whatsapp_share_text',)
+    fieldsets = (
+        (None, {
+            'fields': ('title', 'content', 'cover_image', 'was_shared_on_whatsapp')
+        }),
+        ('WhatsApp Update Station', {
+            'fields': ('whatsapp_share_text',),
+            'description': 'Copy this text to share the update on your WhatsApp Channel.'
+        }),
+    )
+
+    def whatsapp_share_text(self, obj):
+        if not obj.pk:
+            return "Save the update first to generate share text."
+        
+        from django.utils.html import format_html
+        share_url = obj.get_absolute_url() + "?utm_source=whatsapp"
+        
+        return format_html(
+            '<div style="display: flex; align-items: center; gap: 10px;">'
+            '<textarea id="whatsapp-share-content" readonly style="width: 100%; height: 60px; padding: 10px; border-radius: 4px; border: 1px solid #ccc;">'
+            '*{title}*\n\n{url}'
+            '</textarea>'
+            '<button type="button" class="button" id="copy-whatsapp-btn" style="background: #25D366; color: white; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer;">'
+            'Copy WhatsApp Text'
+            '</button>'
+            '</div>'
+            '<script>'
+            'document.getElementById("copy-whatsapp-btn").onclick = function() {{'
+            '  var textArea = document.getElementById("whatsapp-share-content");'
+            '  var headline = "{title}";'
+            '  var relativeUrl = "{url}";'
+            '  var absoluteUrl = window.location.origin + relativeUrl;'
+            '  var fullText = "*" + headline + "*\\n\\n" + absoluteUrl;'
+            '  '
+            '  navigator.clipboard.writeText(fullText).then(function() {{'
+            '    var btn = document.getElementById("copy-whatsapp-btn");'
+            '    var originalText = btn.innerText;'
+            '    btn.innerText = "COPIED!";'
+            '    btn.style.background = "#075E54";'
+            '    setTimeout(function() {{'
+            '      btn.innerText = originalText;'
+            '      btn.style.background = "#25D366";'
+            '    }}, 2000);'
+            '  }}).catch(function(err) {{'
+            '    alert("Could not copy text: ", err);'
+            '  }});'
+            '}}; '
+            '</script>',
+            title=obj.title,
+            url=share_url
+        )
+    whatsapp_share_text.short_description = "WhatsApp Share Station"
 
 # --- NEW: Sponsor Admin ---
 @admin.register(Sponsor)

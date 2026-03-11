@@ -5,7 +5,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Business Matters</title>
+    <title>{% block title %}Business Matters{% endblock %}</title>
+    {% block og_tags %}{% endblock %}
 
     <!-- Favicon Links -->
     <link rel="icon" href="{% static 'img/favicon.ico' %}" type="image/x-icon">
@@ -119,6 +120,7 @@
                 <a href="{% url 'publications:about_us' %}">About Us</a>
                 <a href="{% url 'publications:events' %}">Events</a>
                 <a href="{% url 'publications:articles' %}">Articles</a>
+                <a href="{% url 'publications:whatsapp_updates' %}"><i class="fab fa-whatsapp" style="color:#25D366;"></i> WA Updates</a>
                 <a href="{% url 'publications:contact' %}">Contacts</a>
                 <a href="{% url 'publications:contributors' %}">Contributors</a>
 
