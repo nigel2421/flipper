@@ -144,6 +144,10 @@ main>.container {
     color: var(--text-muted);
 }
 
+.text-center {
+    text-align: center !important;
+}
+
 .publications-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -309,6 +313,8 @@ main>.container {
 .hero-content {
     flex: 1;
     max-width: 50%;
+    position: relative;
+    z-index: 10; /* Ensure content and buttons are above absolutely positioned image wrappers */
 }
 
 .hero-tagline {
@@ -1253,17 +1259,24 @@ main>.container {
 /* --- Hero Stats Container (Desktop layout) --- */
 .hero-stats-container {
     margin-top: 40px;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 15px;
-    position: static;
+    position: relative;
+    z-index: 10;
 }
 .hero-stats-container .stat-card {
+    flex: 0 0 calc(50% - 15px); /* Two items per row with gap taken into account */
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
     box-shadow: none;
     padding: 15px;
+}
+.hero-stats-container .stat-card:nth-child(3) {
+    /* Center the third item below the first two */
+    flex: 0 0 calc(50% - 15px);
 }
 .hero-stats-container .stat-title {
     color: var(--accent-yellow);
@@ -1289,6 +1302,10 @@ main>.container {
     padding: 60px 20px 20px;
     max-width: 800px;
     margin: 0 auto;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 .about-snippet-section h2 {
     font-size: 2.2rem;
@@ -1581,9 +1598,19 @@ main>.container {
     }
 
     /* Stats Card on Tablet */
-    .stats-card-container {
-        grid-template-columns: 1fr;
-        /* Stack cards vertically */
+    .hero-stats-container {
+        flex-direction: column;
+        align-items: center;
+    }
+    .hero-stats-container .stat-card {
+        flex: 0 0 auto;
+        width: 100%;
+        max-width: 300px;
+    }
+    .hero-stats-container .stat-card:nth-child(3) {
+        flex: 0 0 auto;
+        width: 100%;
+        max-width: 300px;
     }
 }
 
