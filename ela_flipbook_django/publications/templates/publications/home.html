@@ -142,17 +142,22 @@
         </div>
         <div class="marquee-container">
             <div class="marquee-track">
-                <!-- Double loop to ensure smooth scrolling without gaps -->
-                {% for sponsor in sponsors %}
-                    <div class="sponsor-logo">
-                        <img src="{{ sponsor.logo.url }}" alt="{{ sponsor.name }} Logo">
-                    </div>
-                {% endfor %}
-                {% for sponsor in sponsors %}
-                    <div class="sponsor-logo">
-                        <img src="{{ sponsor.logo.url }}" alt="{{ sponsor.name }} Logo">
-                    </div>
-                {% endfor %}
+                <!-- First identical twin for seamless loop -->
+                <div class="marquee-content">
+                    {% for sponsor in sponsors %}
+                        <div class="sponsor-logo">
+                            <img src="{{ sponsor.logo.url }}" alt="{{ sponsor.name }} Logo">
+                        </div>
+                    {% endfor %}
+                </div>
+                <!-- Second identical twin -->
+                <div class="marquee-content" aria-hidden="true">
+                    {% for sponsor in sponsors %}
+                        <div class="sponsor-logo">
+                            <img src="{{ sponsor.logo.url }}" alt="{{ sponsor.name }} Logo">
+                        </div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
     </section>

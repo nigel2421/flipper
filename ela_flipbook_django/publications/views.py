@@ -44,7 +44,13 @@ def home_view(request):
         cache.set('visitor_count', visitor_count, timeout=4 * 60 * 60)
 
     key_event = Event.objects.filter(date__gte=timezone.now().date()).order_by('date').first()
-    sponsors = Sponsor.objects.filter(is_active=True).order_by('order')
+    
+    sponsors_qs = Sponsor.objects.filter(is_active=True).order_by('order')
+    sponsors = list(sponsors_qs)
+    if sponsors:
+        # Ensure there are enough logos to fill large screens before seamlessly repeating
+        multiplier = max(1, 15 // len(sponsors) + 1)
+        sponsors = sponsors * multiplier
 
     context = {
         'all_publications': all_publications,

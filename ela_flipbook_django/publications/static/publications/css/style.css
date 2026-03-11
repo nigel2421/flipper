@@ -1462,26 +1462,30 @@ main>.container {
 
 .marquee-track {
     display: flex;
-    width: calc(250px * 10); /* Fallback width, adjust depending on number */
-    animation: scroll-left 30s linear infinite;
-    align-items: center;
+    width: fit-content;
+    animation: scroll-left 40s linear infinite;
 }
 
 .marquee-track:hover {
     animation-play-state: paused;
 }
 
+.marquee-content {
+    display: flex;
+    width: max-content;
+}
+
 .sponsor-logo {
-    flex: 0 0 250px; /* Fixed width for each sponsor slot */
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 0 20px;
+    padding: 0 40px;
 }
 
 .sponsor-logo img {
+    height: 80px;
+    width: auto;
     max-width: 150px;
-    max-height: 80px;
     object-fit: contain;
     filter: grayscale(100%) opacity(0.7); /* Professional dark mode look */
     transition: filter 0.3s ease, transform 0.3s ease;
@@ -1494,7 +1498,7 @@ main>.container {
 
 @keyframes scroll-left {
     0% { transform: translateX(0); }
-    100% { transform: translateX(calc(-250px * 5)); /* Adjust based on sponsor count */ }
+    100% { transform: translateX(-50%); } 
 }
 
 /* ==========================================================================
