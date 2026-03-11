@@ -2,17 +2,14 @@
 { pkgs, ... }:
 
 let
-  # Function to parse requirements.txt and convert to a list of packages
-  pythonPackages = ps: with ps; [
-    (builtins.fromTOML (builtins.readFile ./requirements.txt))
-  ];
 in
 {
   # This list defines the tools for your development environment.
   packages = [
-    (pkgs.python3.withPackages pythonPackages)
+    pkgs.python3
     pkgs.postgresql_15 # Specifies the PostgreSQL package
   ];
+
 
   # This section defines the background services to run.
   services.postgresql = {
