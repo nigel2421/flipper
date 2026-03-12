@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
     'django_ckeditor_5',
+    'storages',
 ]
 
 MIDDLEWARE = [
@@ -231,11 +232,16 @@ STATICFILES_DIRS = [
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 
-# Base URL for serving user-uploaded media files
-MEDIA_URL = '/media/'
-
-# Absolute path to the directory for storing user-uploaded media files
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+if os.environ.get('GAE_APPLICATION'):
+    # Production: Use Google Cloud Storage for media files
+    DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
+    GS_BUCKET_NAME = 'businessmatters-media-bucket'
+    GS_DEFAULT_ACL = 'publicRead'
+    MEDIA_URL = f'https://storage.googleapis.com/{GS_BUCKET_NAME}/'
+else:
+    # Development: Use local file system for media files
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 
