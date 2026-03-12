@@ -180,6 +180,7 @@ class ModelTests(PublicationTestBase):
 @override_settings(
     MIDDLEWARE=TEST_MIDDLEWARE,
     STATICFILES_STORAGE=TEST_STORAGE,
+    SECURE_SSL_REDIRECT=False,
 )
 class ViewTests(PublicationTestBase):
 
