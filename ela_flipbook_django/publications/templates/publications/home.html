@@ -146,7 +146,7 @@
                 <div class="marquee-content">
                     {% for sponsor in sponsors %}
                         <div class="sponsor-logo">
-                            <img src="{{ sponsor.logo.url }}" alt="{{ sponsor.name }} Logo">
+                            <img src="{{ sponsor.logo.url }}" alt="{{ sponsor.name }} Logo" onerror="this.style.display='none'">
                         </div>
                     {% endfor %}
                 </div>
@@ -154,7 +154,7 @@
                 <div class="marquee-content" aria-hidden="true">
                     {% for sponsor in sponsors %}
                         <div class="sponsor-logo">
-                            <img src="{{ sponsor.logo.url }}" alt="{{ sponsor.name }} Logo">
+                            <img src="{{ sponsor.logo.url }}" alt="{{ sponsor.name }} Logo" onerror="this.style.display='none'">
                         </div>
                     {% endfor %}
                 </div>
