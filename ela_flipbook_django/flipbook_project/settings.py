@@ -381,3 +381,11 @@ CKEDITOR_5_CONFIGS = {
         }
     }
 }
+
+
+# Add this to your settings.py
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
+SECURE_SSL_REDIRECT = True
+
+# Add this to your settings.py
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
