@@ -8,6 +8,7 @@ in
   packages = [
     pkgs.python3
     pkgs.postgresql_15 # Specifies the PostgreSQL package
+    pkgs.google-cloud-sdk
   ];
 
 
