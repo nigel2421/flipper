@@ -1648,10 +1648,10 @@ main>.container {
 
     .hero-images {
         max-width: 100%;
-        margin-top: 80px;
-        /* Increased margin for more space */
+        margin-top: 40px;
+        /* Adjusted margin for better spacing */
         height: 350px;
-        order: -1; /* Keep images below text on mobile if content order is changed, but we want it below the text */
+        order: 2; /* Keep images below text on mobile */
     }
 
     .hero-subheadline {

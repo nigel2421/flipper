@@ -99,12 +99,13 @@
     .filter-form .filter-btn {
         width: 100%;
         padding: 10px;
-        background-color: #007bff;
+        background-color: var(--primary-blue);
         color: white;
         border: none;
         border-radius: 4px;
         cursor: pointer;
         margin-top: 10px;
+        font-weight: bold;
     }
 
     /* =================================== */
@@ -118,27 +119,48 @@
         display: flex;
         flex-direction: column;
         gap: 20px;
-        background: #007bff;
-        padding: 20px;
-        border-radius: 8px;
-        margin-bottom: 20px;
+        background: linear-gradient(135deg, var(--card-bg) 0%, #1e3a5f 100%);
+        padding: 25px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+    
+    .featured-content h2 {
+        color: var(--accent-yellow);
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 10px;
+    }
+
+    .featured-content h1 {
+        color: var(--text-dark);
+        font-size: 2.2rem;
+        margin-bottom: 15px;
+        line-height: 1.2;
     }
 
     .featured-image img {
         width: 100%;
         height: auto;
         border-radius: 8px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.5);
     }
 
-    @media (min-width: 768px) {
+    @media (min-width: 992px) {
         .featured-story {
             flex-direction: row;
+            align-items: center;
+            padding: 40px;
         }
         .featured-image {
             flex: 1;
         }
         .featured-content {
-            flex: 2;
+            flex: 1.5;
+            padding-left: 20px;
         }
     }
 
@@ -151,13 +173,14 @@
         bottom: 20px;
         right: 20px;
         z-index: 1001;
-        background-color: #007bff;
+        background-color: var(--primary-blue);
         color: white;
-        padding: 10px 15px;
+        padding: 12px 20px;
         border-radius: 50px;
-        border: none;
+        border: 1px solid rgba(255, 255, 255, 0.2);
         cursor: pointer;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+        font-weight: bold;
     }
 
     @media (max-width: 768px) {
@@ -268,13 +291,13 @@
             <div class="featured-content">
                 <h2>Featured Story of the Month</h2>
                 <h1>{{ featured_story.title }}</h1>
-                <p>{{ featured_story.excerpt|truncatewords:30 }}</p>
+                <p>{{ featured_story.excerpt|striptags|truncatewords:30 }}</p>
                 {% if featured_story.average_rating %}
                     <span class="average-rating">
                         Average Rating: {{ featured_story.average_rating|floatformat:1 }} / 5
                     </span>
                 {% endif %}
-                <a href="{% url 'publications:article_detail' pk=featured_story.id %}" class="hero-subscribe-button">Read &rarr;</a>
+                <a href="{% url 'publications:article_detail' slug=featured_story.slug %}" class="hero-subscribe-button">Read &rarr;</a>
             </div>
         </section>
         {% endif %}
@@ -286,12 +309,12 @@
             <div class="publications-grid">
                 {% for article in articles_in_publication %}
                     <div class="publication-card article-story-card">
-                        <a href="{% url 'publications:article_detail' pk=article.id %}" class="card-image-wrapper">
+                        <a href="{% url 'publications:article_detail' slug=article.slug %}" class="card-image-wrapper">
                             <img src="{{ article.cover_image.url }}" alt="Cover for {{ article.title }}">
                         </a>
                         <div class="card-content">
-                            <h3 class="card-title"><a href="{% url 'publications:article_detail' pk=article.id %}">{{ article.title }}</a></h3>
-                            <p class="card-excerpt">{{ article.excerpt|truncatewords:20 }}</p>
+                            <h3 class="card-title"><a href="{% url 'publications:article_detail' slug=article.slug %}">{{ article.title }}</a></h3>
+                            <p class="card-excerpt">{{ article.excerpt|striptags|truncatewords:20 }}</p>
                             <div class="card-tags">
                                 {% for tag in article.tags.all %}
                                     <span class="tag">{{ tag.name }}</span>
@@ -309,6 +332,8 @@
         {% empty %}
             <p class="no-publications">No articles match your filter.</p>
         {% endfor %}
+
+        {% include 'publications/_pagination.html' with page_obj=articles_paginated %}
     </main>
 
     <button id="filter-toggle-btn" class="filter-toggle-btn">

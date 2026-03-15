@@ -22,10 +22,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-k@d95k@5!n9@&h&s*v^$@8&m!%2*#@c$v&d%d(e@#@b&b!@'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-k@d95k@5!n9@&h&s*v^$@8&m!%2*#@c$v&d%d(e@#@b&b!@')
+if os.environ.get('GAE_APPLICATION') and not os.environ.get('SECRET_KEY'):
+    raise ValueError("SECRET_KEY must be set in production")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = not os.environ.get('PRODUCTION')
 
 ALLOWED_HOSTS = [
     'press.businessmatters.co.ke',
@@ -118,6 +120,10 @@ if os.environ.get('GAE_APPLICATION'):
             'HOST': '/cloudsql/flipbookwebsite:europe-west1:flipper-fdc',
         }
     }
+    # Check if we are running locally but want to connect to production DB via proxy
+    if os.name == 'nt' or os.environ.get('USE_DB_PROXY'):
+        DATABASES['default']['HOST'] = '127.0.0.1'
+        DATABASES['default']['PORT'] = '5432'
 else:
     # Running locally, use SQLite
     DATABASES = {
@@ -155,16 +161,16 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 ACCOUNT_SIGNUP_FORM_CLASS = 'publications.custom_auth_forms.CustomSignupForm'
-ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 SOCIALACCOUNT_ADAPTER = 'publications.adapter.CustomSocialAccountAdapter'
 
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
-        'APP': {
-            'client_id': os.environ.get('GOOGLE_CLIENT_ID'),
-            'secret': os.environ.get('GOOGLE_SECRET'),
-            'key': ''
-        },
         'SCOPE': [
             'profile',
             'email',
@@ -217,31 +223,73 @@ USE_TZ = True
 
 # --- STATIC FILES & MEDIA CONFIGURATION ---
 
-# Base URL for serving static files (e.g., CSS, JavaScript, images)
 STATIC_URL = '/static/'
-
-# Absolute path to the directory where collectstatic will gather static files
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_collected')
-
-# Directories where Django will look for static files
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
 
-# Enable WhiteNoise's GZip compression and caching
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
-
-
-if os.environ.get('GAE_APPLICATION'):
+if os.environ.get('PRODUCTION'):
     # Production: Use Google Cloud Storage for media files
-    DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
     GS_BUCKET_NAME = 'businessmatters-media-bucket'
-    GS_DEFAULT_ACL = 'publicRead'
+    GS_DEFAULT_ACL = None
+    GS_QUERYSTRING_AUTH = False  # Generate clean URLs matching the public bucket
     MEDIA_URL = f'https://storage.googleapis.com/{GS_BUCKET_NAME}/'
+
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+        },
+    }
+
+    # Security Cookies
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_SSL_REDIRECT = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
+
+    # Enable database caching for production
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+            'LOCATION': 'django_cache_table',
+        }
+    }
+    
+    # WhiteNoise optimization: cache static files for 1 year
+    WHITENOISE_MAX_AGE = 31536000
+
+    # Cloud Logging
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'handlers': {
+            'console': {
+                'class': 'logging.StreamHandler',
+            },
+        },
+        'root': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+    }
 else:
     # Development: Use local file system for media files
     MEDIA_URL = '/media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+        },
+    }
 
 
 
@@ -387,11 +435,3 @@ CKEDITOR_5_CONFIGS = {
         }
     }
 }
-
-
-# Add this to your settings.py
-ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
-SECURE_SSL_REDIRECT = True
-
-# Add this to your settings.py
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

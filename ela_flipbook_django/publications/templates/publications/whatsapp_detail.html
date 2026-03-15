@@ -9,7 +9,7 @@
 <meta property="og:description" content="{{ update.short_description|truncatechars:160 }}">
 <meta property="og:url" content="{{ request.build_absolute_uri }}">
 {% if update.cover_image %}
-<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ update.cover_image.url }}">
+<meta property="og:image" content="{% if '://' in update.cover_image.url %}{{ update.cover_image.url }}{% else %}{{ request.scheme }}://{{ request.get_host }}{{ update.cover_image.url }}{% endif %}">
 {% endif %}
 <meta property="og:site_name" content="Business Matters Africa">
 {% endblock %}

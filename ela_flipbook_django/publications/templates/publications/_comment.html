@@ -9,19 +9,23 @@
 
     <!-- Reply Button -->
     <div class="comment-actions">
-        <a href="#comment-form" class="reply-btn" data-comment-id="{{ comment.id }}">Reply</a>
+        <a href="#comment-form" class="reply-btn" data-comment-id="{{ comment.id }}">
+            <i class="fas fa-reply"></i> Reply
+        </a>
 
         <!-- Like Button -->
         <button class="like-btn {% if request.user in comment.likes.all %}liked{% endif %}" data-comment-id="{{ comment.id }}">
-            <i class="fa fa-thumbs-up"></i> Like
+            <i class="fas fa-heart"></i>
             <span class="like-count">{{ comment.like_count }}</span>
         </button>
 
         {% if request.user.is_authenticated and request.user != comment.user %}
             <form action="{% url 'publications:report_comment' pk=comment.id %}" method="post" style="display: inline;">
                 {% csrf_token %}
-                <input type="hidden" name="reason" value="Inappropriate content"> {# You could make this a modal for user input #}
-                <button type="submit" class="report-btn">Report</button>
+                <input type="hidden" name="reason" value="Inappropriate content">
+                <button type="submit" class="report-btn">
+                    <i class="fas fa-flag"></i> Report
+                </button>
             </form>
         {% endif %}
     </div>

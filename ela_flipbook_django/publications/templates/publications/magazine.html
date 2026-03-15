@@ -9,7 +9,7 @@
 
     <div class="publications-grid">
         {% for pub in publications %}
-            <a href="{% url 'publications:detail' pk=pub.id %}" class="publication-card">
+            <a href="{% url 'publications:detail' slug=pub.slug %}" class="publication-card">
                 <div class="card-image-wrapper">
                     {% if pub.cover_image %}
                         <img src="{{ pub.cover_image.url }}" alt="Cover for {{ pub.title }}">
@@ -26,4 +26,6 @@
             <p class="no-publications">No publications are available at the moment.</p>
         {% endfor %}
     </div>
+
+    {% include 'publications/_pagination.html' with page_obj=publications %}
 {% endblock %}

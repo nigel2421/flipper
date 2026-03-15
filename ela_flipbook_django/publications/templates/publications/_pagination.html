@@ -1,0 +1,53 @@
+{% if page_obj.has_other_pages %}
+<div class="pagination-wrapper text-center" style="margin: 40px 0;">
+    <div class="premium-pagination">
+        {% if page_obj.has_previous %}
+            <a href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.year %}&year={{ request.GET.year }}{% endif %}{% if request.GET.tag %}&tag={{ request.GET.tag }}{% endif %}" class="page-link">&laquo;&laquo;</a>
+            <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.year %}&year={{ request.GET.year }}{% endif %}{% if request.GET.tag %}&tag={{ request.GET.tag }}{% endif %}" class="page-link">&laquo;</a>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+                <span class="page-link active">{{ num }}</span>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <a href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.year %}&year={{ request.GET.year }}{% endif %}{% if request.GET.tag %}&tag={{ request.GET.tag }}{% endif %}" class="page-link">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.year %}&year={{ request.GET.year }}{% endif %}{% if request.GET.tag %}&tag={{ request.GET.tag }}{% endif %}" class="page-link">&raquo;</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.year %}&year={{ request.GET.year }}{% endif %}{% if request.GET.tag %}&tag={{ request.GET.tag }}{% endif %}" class="page-link">&raquo;&raquo;</a>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .premium-pagination {
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
+    }
+    .page-link {
+        padding: 8px 16px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: var(--text-light);
+        text-decoration: none;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        backdrop-filter: blur(5px);
+    }
+    .page-link:hover {
+        background: var(--primary-blue);
+        color: white;
+        border-color: var(--primary-blue);
+    }
+    .page-link.active {
+        background: var(--accent-yellow);
+        color: var(--dark-bg);
+        border-color: var(--accent-yellow);
+        font-weight: bold;
+    }
+</style>
+{% endif %}

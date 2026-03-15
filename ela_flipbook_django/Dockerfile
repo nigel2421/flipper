@@ -17,6 +17,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of your app's source code
 COPY . .
 
-# Run Gunicorn server (Matches what you had in your Procfile)
-# Note: Cloud Run injects the $PORT environment variable automatically
-CMD python manage.py migrate && exec gunicorn flipbook_project.wsgi --bind 0.0.0.0:$PORT --workers 1 --threads 8 --timeout 0
+# Collect static files. We pass dummy env vars so settings.py doesn't crash during build.
+RUN SECRET_KEY=dummy-key-for-build python manage.py collectstatic --noinput
+
+# Copy entrypoint script and make it executable
+COPY startup.sh .
+RUN chmod +x startup.sh
+
+# Run startup script on container start (runs migrations then starts Gunicorn)
+CMD ["./startup.sh"]

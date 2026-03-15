@@ -21,13 +21,6 @@ from django.core.mail import send_mail
 
 # === CLASS-BASED VIEWS (for advanced features) ===
 
-# --- NEW: Custom Signup View to capture the referral code ---
-class CustomSignupView(SignupView):
-    def get(self, request, *args, **kwargs):
-        referral_code = request.GET.get('ref')
-        if referral_code:
-            request.session['referral_code'] = str(referral_code)
-        return super().get(request, *args, **kwargs)
 
 # === FUNCTION-BASED VIEWS (for pages) ===
 
@@ -35,7 +28,9 @@ def home_view(request):
     """ Renders the homepage with the hero banner and publication grid. """
     all_publications = Magazine.objects.all()
     latest_publications = Magazine.objects.order_by('-uploaded_at')[:3]
-    top_articles = Article.objects.order_by('-view_count')[:5]
+    top_articles = Article.objects.select_related('author').prefetch_related('tags').annotate(
+        avg_rating=Avg('ratings__score')
+    ).order_by('-view_count')[:5]
 
     subscribers_count = User.objects.count() + 610
     visitor_count = cache.get('visitor_count')
@@ -65,7 +60,16 @@ def home_view(request):
 
 def magazine_view(request):
     """ Renders the magazine page with a grid of all publications. """
-    publications = Magazine.objects.all()
+    publications_list = Magazine.objects.all().order_by('-uploaded_at')
+    paginator = Paginator(publications_list, 12)
+    page = request.GET.get('page')
+    try:
+        publications = paginator.page(page)
+    except PageNotAnInteger:
+        publications = paginator.page(1)
+    except EmptyPage:
+        publications = paginator.page(paginator.num_pages)
+
     context = {
         'publications': publications
     }
@@ -74,7 +78,9 @@ def magazine_view(request):
 @login_required
 def articles_view(request):
     """ Renders the web articles archive page with filtering and grouping. """
-    articles = Article.objects.all().order_by('-uploaded_at')
+    articles = Article.objects.select_related('author').prefetch_related('tags').annotate(
+        avg_rating=Avg('ratings__score')
+    ).all().order_by('-uploaded_at')
 
     # Get filter parameters
     query = request.GET.get('q')
@@ -101,9 +107,19 @@ def articles_view(request):
     if featured_story:
         articles = articles.exclude(pk=featured_story.pk)
 
-    # --- CORRECTED: Group articles by publication ---
+    # --- Pagination ---
+    paginator = Paginator(articles, 12)
+    page = request.GET.get('page')
+    try:
+        articles_paginated = paginator.page(page)
+    except PageNotAnInteger:
+        articles_paginated = paginator.page(1)
+    except EmptyPage:
+        articles_paginated = paginator.page(paginator.num_pages)
+
+    # --- Group articles by publication ---
     articles_by_publication = {}
-    for article in articles:
+    for article in articles_paginated:
         # Since there's no direct foreign key, we can't group by a related object.
         # Instead, we'll create a single group for all articles.
         publication_name = "All Articles"
@@ -113,6 +129,7 @@ def articles_view(request):
 
     context = {
         'articles_by_publication': articles_by_publication,
+        'articles_paginated': articles_paginated, # For pagination links
         'featured_story': featured_story,
         'all_tags': Tag.objects.all(),
         'year_list': Article.objects.dates('uploaded_at', 'year', order='DESC'),
@@ -124,9 +141,9 @@ def articles_view(request):
     return render(request, 'publications/articles.html', context)
 
 
-def article_detail_view(request, pk):
+def article_detail_view(request, slug):
     """ Renders a single web article page. """
-    article = get_object_or_404(Article, pk=pk)
+    article = get_object_or_404(Article, slug=slug)
     from .forms import RatingForm, CommentForm
 
     user_rating = None
@@ -135,7 +152,10 @@ def article_detail_view(request, pk):
         if rating_obj:
             user_rating = rating_obj.score
 
-    top_level_comments_list = article.comments.filter(parent__isnull=True).order_by('-created_at')
+    top_level_comments_list = article.comments.filter(parent__isnull=True)\
+                                     .select_related('user')\
+                                     .prefetch_related('replies', 'replies__user', 'liked_by')\
+                                     .order_by('-created_at')
     paginator = Paginator(top_level_comments_list, 10)
     page = request.GET.get('page')
     try:
@@ -198,6 +218,7 @@ def article_detail_view(request, pk):
         related_articles = Article.objects.filter(tags__in=article_tags_ids)\
                                           .exclude(pk=article.pk)\
                                           .annotate(common_tag_count=Count('tags'))\
+                                          .prefetch_related('tags')\
                                           .order_by('-common_tag_count', '-uploaded_at')[:4]
 
     context = {
@@ -253,8 +274,8 @@ def profile_view(request):
     else:
         form = ProfileForm(instance=profile)
     
-    signup_url = reverse('account_signup')
-    referral_link = f"{request.build_absolute_uri(signup_url)}?ref={profile.referral_code}"
+    home_url = reverse('publications:home')
+    referral_link = f"{request.build_absolute_uri(home_url)}?ref={profile.referral_code}"
     referral_count = user.referrals.count()
     referrer = profile.referred_by
     
@@ -267,16 +288,16 @@ def profile_view(request):
     return render(request, 'publications/profile.html', context)
 
 @login_required
-def publication_detail_view(request, pk):
-    publication = get_object_or_404(Magazine, pk=pk)
+def publication_detail_view(request, slug):
+    publication = get_object_or_404(Magazine, slug=slug)
     context = {
         'publication': publication
     }
     return render(request, 'publications/publication_detail.html', context)
 
 @login_required
-def pdf_viewer_view(request, pk):
-    publication = get_object_or_404(Magazine, pk=pk)
+def pdf_viewer_view(request, slug):
+    publication = get_object_or_404(Magazine, slug=slug)
     context = {
         'publication': publication
     }
@@ -374,8 +395,8 @@ def whatsapp_list_view(request):
         updates = paginator.page(paginator.num_pages)
     return render(request, 'publications/whatsapp_list.html', {'updates': updates})
 
-def whatsapp_detail_view(request, pk):
+def whatsapp_detail_view(request, slug):
     """Displays a single WhatsApp Update detail page."""
-    update = get_object_or_404(WhatsAppUpdate, pk=pk)
+    update = get_object_or_404(WhatsAppUpdate, slug=slug)
     update.view_count = getattr(update, 'view_count', 0)  # safe fallback
     return render(request, 'publications/whatsapp_detail.html', {'update': update})

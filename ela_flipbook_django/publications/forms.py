@@ -30,6 +30,9 @@ class RatingForm(forms.ModelForm):
     class Meta:
         model = Rating
         fields = ['score']
+        widgets = {
+            'score': forms.HiddenInput(),
+        }
 
 class ProfileForm(forms.ModelForm):
     class Meta:

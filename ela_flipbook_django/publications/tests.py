@@ -295,3 +295,132 @@ class ViewTests(PublicationTestBase):
         """Test that requesting a non-existent WhatsApp Update returns 404."""
         response = self.client.get(reverse('publications:whatsapp_detail', kwargs={'pk': 99999}))
         self.assertEqual(response.status_code, 404)
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# AUTHENTICATION & MIDDLEWARE TESTS
+# ──────────────────────────────────────────────────────────────────────────────
+
+from .adapter import CustomSocialAccountAdapter
+from .custom_auth_forms import CustomSignupForm
+from .middleware import ReferralMiddleware
+from django.test import RequestFactory
+from django.contrib.sessions.middleware import SessionMiddleware
+from unittest.mock import MagicMock
+
+class MockSocialLogin:
+    def __init__(self, user, extra_data=None):
+        self.user = user
+        self.account = MagicMock()
+        self.account.extra_data = extra_data or {}
+
+class AuthLogicTests(TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+        self.adapter = CustomSocialAccountAdapter(request=None)
+
+    def test_pre_social_login_fixes_none_names(self):
+        """Test that pre_social_login converts None names to empty strings."""
+        user = User(email='test@example.com')
+        user.first_name = None
+        user.last_name = None
+        sociallogin = MockSocialLogin(user=user)
+        request = self.factory.get('/')
+        
+        self.adapter.pre_social_login(request, sociallogin)
+        self.assertEqual(user.first_name, '')
+        self.assertEqual(user.last_name, '')
+        self.assertTrue(user.username.startswith('test'))
+
+    def test_populate_user_extracts_names(self):
+        """Test that populate_user pulls names from Google extra_data."""
+        user = User(email='new@example.com')
+        extra_data = {'given_name': 'Jane', 'family_name': 'Doe'}
+        sociallogin = MockSocialLogin(user=user)
+        sociallogin.account.extra_data = extra_data
+        request = self.factory.get('/')
+        
+        populated_user = self.adapter.populate_user(request, sociallogin, data={})
+        self.assertEqual(populated_user.first_name, 'Jane')
+        self.assertEqual(populated_user.last_name, 'Doe')
+
+    def test_generate_unique_username(self):
+        """Test unique username generation."""
+        username = self.adapter.generate_unique_username('john.smith@example.com')
+        self.assertEqual(username, 'johnsmith')
+        
+        User.objects.create(username='johnsmith')
+        username_collision = self.adapter.generate_unique_username('john.smith@example.com')
+        self.assertEqual(username_collision, 'johnsmith1')
+
+
+class CustomSignupFormTests(TestCase):
+    def test_signup_form_saves_names(self):
+        """Test the custom signup form correctly applies cleaned data to the user."""
+        form = CustomSignupForm(data={'first_name': 'Alice', 'last_name': 'Wonderland'})
+        self.assertTrue(form.is_valid())
+        
+        user = User.objects.create(username='alice', email='alice@example.com')
+        request = RequestFactory().get('/')
+        
+        updated_user = form.signup(request, user)
+        self.assertEqual(updated_user.first_name, 'Alice')
+        self.assertEqual(updated_user.last_name, 'Wonderland')
+
+
+class MiddlewareTests(TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+        def get_response(request):
+            return MagicMock(status_code=200)
+        self.middleware = ReferralMiddleware(get_response)
+
+    def test_referral_middleware_stores_code_for_anonymous(self):
+        """Test that an anonymous user passing ?ref stores it in the session."""
+        request = self.factory.get('/?ref=mycode123')
+        request.user = MagicMock(is_authenticated=False)
+        middleware = SessionMiddleware(MagicMock())
+        middleware.process_request(request)
+        request.session.save()
+        
+        self.middleware(request)
+        self.assertEqual(request.session.get('referral_code'), 'mycode123')
+
+    def test_referral_middleware_ignores_authenticated(self):
+        """Test that an authenticated user's session is not modified."""
+        request = self.factory.get('/?ref=newcode')
+        request.user = MagicMock(is_authenticated=True)
+        middleware = SessionMiddleware(MagicMock())
+        middleware.process_request(request)
+        request.session.save()
+        
+        self.middleware(request)
+        self.assertNotIn('referral_code', request.session)
+
+# ──────────────────────────────────────────────────────────────────────────────
+# FORM COMPONENT TESTS
+# ──────────────────────────────────────────────────────────────────────────────
+from .forms import ContributorForm, CommentForm
+
+class FormTests(TestCase):
+    def test_contributor_form_makes_message_optional(self):
+        """Test that __init__ correctly alters the 'message' field to be non-required."""
+        form = ContributorForm(data={
+            'full_name': 'Jane Doe',
+            'email': 'jane@example.com',
+            'submission_type': 'article',
+            'subject': 'My Submission',
+            'field_or_industry': 'Tech',
+            'terms_and_conditions': True
+            # Omitting message explicitly
+        })
+        self.assertTrue(form.is_valid(), form.errors)
+
+    def test_comment_form_validation(self):
+        """Test validation requires text for comments."""
+        form = CommentForm(data={'text': ''})
+        self.assertFalse(form.is_valid())
+        self.assertIn('text', form.errors)
+        
+        valid_form = CommentForm(data={'text': 'Great article!'})
+        self.assertTrue(valid_form.is_valid())

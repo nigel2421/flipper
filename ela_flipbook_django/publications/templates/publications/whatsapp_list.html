@@ -146,7 +146,7 @@
     {% if updates.object_list %}
     <div class="wa-grid">
         {% for update in updates %}
-        <a href="{% url 'publications:whatsapp_detail' pk=update.pk %}" class="wa-card">
+        <a href="{% url 'publications:whatsapp_detail' slug=update.slug %}" class="wa-card">
             {% if update.cover_image %}
             <img src="{{ update.cover_image.url }}" alt="{{ update.title }}" class="wa-card-image">
             {% endif %}

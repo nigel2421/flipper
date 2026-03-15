@@ -1,19 +1,91 @@
 {% extends "publications/base.html" %}
 
 {% block content %}
-<div class="login-container">
-    <div class="login-box">
-        <h1>Create a New Account</h1>
-        <p>Join us to access all publications.</p>
+<div class="auth-page-wrapper">
+    <div class="premium-auth-card">
+        <div class="auth-header">
+            <h1>Create Account</h1>
+            <p>Join Business Matters Africa to access our premium library.</p>
+        </div>
         
-        <form class="login-form" id="signup_form" method="POST" action="{% url 'account_signup' %}">
+        <form class="premium-auth-form" id="signup_form" method="POST" action="{% url 'account_signup' %}">
             {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit" class="submit-btn">Sign Up</button>
-            <p class="auth-links">
-                Already have an account? <a href="{% url 'account_login' %}">Log In</a>
-            </p>
+            <div class="form-fields">
+                {{ form.as_p }}
+            </div>
+            <button type="submit" class="premium-submit-btn">Create Account</button>
         </form>
+
+        <div class="auth-divider">
+            <span>Already have an account?</span>
+        </div>
+        
+        <div class="auth-footer">
+            <a href="{% url 'account_login' %}" class="secondary-auth-btn">Log In Instead</a>
+        </div>
     </div>
 </div>
+
+<style>
+    .auth-page-wrapper {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+    }
+    .premium-auth-card {
+        background: var(--card-bg);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 40px;
+        width: 100%;
+        max-width: 450px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(20px);
+    }
+    .auth-header { text-align: center; margin-bottom: 30px; }
+    .auth-header h1 { font-size: 2rem; color: var(--text-dark); margin-bottom: 10px; }
+    .auth-header p { color: var(--text-muted); }
+    
+    .form-fields p { margin-bottom: 15px; }
+    .form-fields label { display: block; margin-bottom: 5px; color: var(--text-light); font-size: 0.9rem; }
+    .form-fields input {
+        width: 100%;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        color: white;
+        transition: border-color 0.3s ease;
+    }
+    .form-fields input:focus { border-color: var(--primary-blue); outline: none; }
+
+    .premium-submit-btn {
+        width: 100%;
+        padding: 14px;
+        background: var(--primary-blue);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 20px;
+    }
+    .premium-submit-btn:hover { background: #2980b9; transform: translateY(-2px); }
+
+    .auth-divider { margin: 30px 0; text-align: center; position: relative; color: var(--text-muted); font-size: 0.85rem; }
+    .auth-footer { text-align: center; }
+    .secondary-auth-btn {
+        display: inline-block;
+        padding: 10px 20px;
+        color: var(--text-light);
+        text-decoration: none;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    .secondary-auth-btn:hover { background: rgba(255, 255, 255, 0.05); border-color: var(--text-light); }
+</style>
 {% endblock %}

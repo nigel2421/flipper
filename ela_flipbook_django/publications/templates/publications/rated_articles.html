@@ -15,12 +15,12 @@
             {% for rating in user_ratings %}
                 {% with article=rating.article %}
                 <div class="publication-card article-story-card">
-                    <a href="{% url 'publications:article_detail' pk=article.id %}" class="card-image-wrapper">
+                    <a href="{% url 'publications:article_detail' slug=article.slug %}" class="card-image-wrapper">
                         <img src="{{ article.cover_image.url }}" alt="Cover for {{ article.title }}">
                     </a>
                     <div class="card-content">
-                        <h3 class="card-title"><a href="{% url 'publications:article_detail' pk=article.id %}">{{ article.title }}</a></h3>
-                        <p class="card-excerpt">{{ article.excerpt|truncatewords:20 }}</p>
+                        <h3 class="card-title"><a href="{% url 'publications:article_detail' slug=article.slug %}">{{ article.title }}</a></h3>
+                        <p class="card-excerpt">{{ article.excerpt|striptags|truncatewords:20 }}</p>
                         <div class="card-tags">
                             {% for tag in article.tags.all %}
                                 <span class="tag">{{ tag.name }}</span>

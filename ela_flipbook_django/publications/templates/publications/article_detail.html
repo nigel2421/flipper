@@ -11,261 +11,254 @@
 <meta property="og:description" content="{{ article.excerpt|striptags|truncatechars:160 }}">
 <meta property="og:url" content="{{ request.build_absolute_uri }}">
 {% if article.cover_image %}
-<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ article.cover_image.url }}">
+<meta property="og:image" content="{% if '://' in article.cover_image.url %}{{ article.cover_image.url }}{% else %}{{ request.scheme }}://{{ request.get_host }}{{ article.cover_image.url }}{% endif %}">
 {% endif %}
 <meta property="og:site_name" content="Business Matters Africa">
 {% endblock %}
 
 {% block content %}
 <style>
-    .text-to-speech-section {
-        background-color: #1c1379;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        padding: 20px;
+    /* =================================== */
+    /*  MAGAZINE STYLE REDESIGN            */
+    /* =================================== */
+    .article-detail-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 40px 20px;
+        background: #0d0b33; /* Ensuring consistency with the brand */
+        color: #f8f9fa;
+    }
+
+    .magazine-hero {
+        display: flex;
+        flex-direction: row;
+        gap: 30px;
+        margin-bottom: 40px;
+        align-items: flex-start;
+    }
+
+    .magazine-image-wrapper {
+        flex: 0 0 40%;
+        max-width: 400px;
+        position: relative;
+    }
+
+    .magazine-image-wrapper img {
+        width: 100%;
+        height: auto;
+        border-radius: 4px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .magazine-content-wrapper {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .magazine-title {
+        font-family: 'Playfair Display', serif; /* Assuming a premium serif might be available or fallback */
+        font-size: 3rem;
+        line-height: 1.1;
+        margin-bottom: 20px;
+        color: #fff;
+        font-weight: 800;
+        letter-spacing: -1px;
+    }
+
+    .magazine-meta-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        font-size: 0.9rem;
+        color: #b0b0b0;
+        margin-bottom: 25px;
+        align-items: center;
+    }
+
+    .author-badge {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(255,255,255,0.05);
+        padding: 5px 12px;
+        border-radius: 50px;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .author-avatar-small {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    /* Compact TTS Button */
+    .compact-tts-section {
         margin-bottom: 25px;
     }
 
-    #tts-controls {
-        display: flex;
-        gap: 10px;
+    .tts-trigger-btn {
+        background: linear-gradient(135deg, #1c1379 0%, #3a2db0 100%);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 50px;
+        font-weight: 600;
+        display: inline-flex;
         align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(28, 19, 121, 0.4);
     }
 
+    .tts-trigger-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(28, 19, 121, 0.6);
+        background: linear-gradient(135deg, #24189e 0%, #4a3bc7 100%);
+    }
+
+    .tts-expanded-controls {
+        margin-top: 15px;
+        background: rgba(255,255,255,0.05);
+        padding: 15px;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    /* Main Article Typography */
+    .article-content {
+        font-family: 'Inter', sans-serif;
+        font-size: 1.15rem;
+        line-height: 1.8;
+        color: #e0e0e0;
+    }
+
+    .article-content p {
+        margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .magazine-hero {
+            flex-direction: column;
+        }
+        .magazine-image-wrapper {
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+        .magazine-title {
+            font-size: 2.2rem;
+        }
+    }
+
+    /* Existing TTS styles maintained but adjusted */
     #tts-controls .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        padding: 10px 15px;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 1rem;
-    }
-
-    #tts-status {
-        font-style: italic;
-        color: #555;
-    }
-
-    .voice-selection {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    #voice-select {
-        flex-grow: 1;
-        max-width: 300px;
-    }
-
-    /* === REVAMPED: Social Share Feature Styles === */
-    .social-share-section {
-        position: relative;
-        margin-top: 20px;
-        margin-bottom: 20px;
-    }
-
-    .main-share-btn {
-        background-color: #007bff;
-        color: white;
-        padding: 10px 15px;
-        border-radius: 5px;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        border: none;
-        font-size: 1rem;
-    }
-    .main-share-btn:hover {
-        background-color: #0056b3;
-    }
-
-    .share-options {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        background-color: #fff;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        padding: 10px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        z-index: 100;
-        margin-top: 8px;
-        display: flex;
-        gap: 8px;
-        flex-wrap: nowrap;
-        align-items: center;
-    }
-
-    .share-options .share-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 5px;
-        color: white;
-        text-decoration: none;
-        border: none;
-        transition: opacity 0.2s;
-        height: 40px; /* Uniform height */
-    }
-     .share-options .share-btn:hover {
-        opacity: 0.85;
-    }
-
-
-    /* Icon-only buttons */
-    .share-options a.share-btn {
-        flex: 0 0 40px; /* Fixed width for icons */
-        font-size: 1.1rem;
-    }
-
-    /* Brand Colors */
-    .share-btn.twitter { background-color: #1DA1F2; }
-    .share-btn.facebook { background-color: #1877F2; }
-    .share-btn.linkedin { background-color: #0A66C2; }
-    .share-btn.whatsapp { background-color: #25D366; }
-
-    /* Copy Button Specifics */
-    .share-btn.copy-link {
-        flex-grow: 1; /* Allows it to take more space */
         padding: 8px 15px;
-        background-color: #17a2b8; /* Changed to a more visible teal color */
+        border-radius: 4px;
+        border: none;
+        color: white;
         cursor: pointer;
-        gap: 8px;
-        font-size: 0.9rem;
     }
-    .share-btn.copy-link .fa-link {
-        font-size: 1.1rem;
-    }
+    .btn-primary { background: #007bff; }
+    .btn-secondary { background: #6c757d; }
+    .btn-danger { background: #dc3545; }
 
-     .share-btn.copy-link:disabled {
-        background-color: #28a745; /* Green when copied */
-        cursor: default;
-        opacity: 1;
+    /* Share button styling for the new look */
+    .share-container-magazine {
+        margin-top: 10px;
     }
 
-
-    /* === NEW: Mobile Responsive Styles === */
-    @media (max-width: 500px) {
-        .social-share-section {
-            width: 100%;
-        }
-        .main-share-btn {
-            width: 100%;
-            justify-content: center;
-        }
-        .share-options {
-            width: 100%;
-            box-sizing: border-box;
-            flex-wrap: wrap; /* Allow wrapping */
-            gap: 10px; /* Add more space between buttons */
-        }
-
-        /* General style for all share buttons on mobile */
-        .share-options .share-btn {
-            height: 50px; /* Make all buttons taller */
-            border-radius: 8px; /* Consistent rectangular shape */
-        }
-
-        /* 4 icon buttons on the top row */
-        .share-options a.share-btn {
-            flex-basis: calc(25% - 8px); /* Adjust for the new gap */
-            font-size: 1.8rem; /* Make icons much bigger */
-        }
-
-        /* Copy button on its own row */
-        .share-btn.copy-link {
-            flex-basis: 100%;
-            margin-top: 0; /* Gap property handles spacing now */
-            font-size: 1.1rem; /* Slightly larger text */
-        }
-    }
-
+    .text-to-speech-section { display: none; } /* Hide the old block */
 </style>
+
 <div class="container article-detail-container">
-    <!-- Back button using JavaScript history -->
-    <a href="javascript:history.back()" class="back-link">&larr; Back</a>
+    <a href="javascript:history.back()" class="back-link" style="margin-bottom: 30px; display: inline-block; color: #b0b0b0; text-decoration: none;">&larr; Back to Library</a>
 
     <article>
-        <header class="article-header">
-            <h1 id="article-title">{{ article.title }}</h1>
-            <div class="article-meta">
-                {% if article.author %}
-                <span class="author-byline">
-                    {% if article.author.profile_photo %}
-                    <a href="{% url 'publications:author_detail' pk=article.author.pk %}">
-                        <img src="{{ article.author.profile_photo.url }}" alt="Photo of {{ article.author.name }}"
-                            class="author-avatar-inline">
+        <!-- MAGAZINE HERO SECTION -->
+        <div class="magazine-hero">
+            <!-- Cover Image Tucked Top Left -->
+            {% if article.cover_image %}
+            <div class="magazine-image-wrapper">
+                <img src="{{ article.cover_image.url }}" alt="Cover for {{ article.title }}">
+            </div>
+            {% endif %}
+
+            <div class="magazine-content-wrapper">
+                <!-- AUDIO PLAYER BUTTON (Above title for easy access as requested) -->
+                <div class="compact-tts-section">
+                    <button id="tts-main-toggle" class="tts-trigger-btn">
+                        <i class="fas fa-volume-up"></i>
+                        <span>Listen to this Article</span>
+                    </button>
+                    
+                    <div id="tts-expanded-controls" class="tts-expanded-controls" style="display: none;">
+                        <div id="tts-controls">
+                            <button id="play-tts-btn" class="btn btn-primary"><i class="fas fa-play"></i> Play</button>
+                            <button id="pause-tts-btn" class="btn btn-secondary" style="display: none;"><i class="fas fa-pause"></i> Pause</button>
+                            <button id="stop-tts-btn" class="btn btn-danger" style="display: none;"><i class="fas fa-stop"></i> Stop</button>
+                        </div>
+                        <div id="tts-status" style="margin-top: 10px; font-size: 0.85rem;"></div>
+                        <div class="voice-selection" style="margin-top: 10px; font-size: 0.85rem;">
+                            <label for="voice-select">Voice:</label>
+                            <select id="voice-select" class="form-control" style="background: #222; color: #fff; border: 1px solid #444; padding: 2px 5px;"></select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TITLE ADJACENT TO IMAGE -->
+                <h1 id="article-title" class="magazine-title">{{ article.title }}</h1>
+
+                <!-- META INFO -->
+                <div class="magazine-meta-container">
+                    {% if article.author %}
+                    <a href="{% url 'publications:author_detail' pk=article.author.pk %}" class="author-badge" style="text-decoration: none; color: inherit;">
+                        {% if article.author.profile_photo %}
+                        <img src="{{ article.author.profile_photo.url }}" alt="{{ article.author.name }}" class="author-avatar-small">
+                        {% endif %}
+                        <span>{{ article.author.name }}</span>
                     </a>
                     {% endif %}
-                    <span>By:
-                        <a href="{% url 'publications:author_detail' pk=article.author.pk %}" id="article-author-link">
-                            {{ article.author.name }}
-                        </a>
+                    
+                    <span><i class="far fa-calendar-alt"></i> {{ article.uploaded_at|date:"M j, Y" }}</span>
+                    <span><i class="far fa-eye"></i> {{ article.view_count }}</span>
+                    
+                    {% if article.average_rating %}
+                    <span class="average-rating">
+                        <i class="fas fa-star" style="color: #ffc107;"></i>
+                        {{ article.average_rating|floatformat:1 }}
                     </span>
-                </span>
-                {% endif %}
-                <span><i class="fas fa-calendar-alt"></i> Published: {{ article.uploaded_at|date:"F j, Y" }}</span>
-                <span><i class="fas fa-eye"></i> {{ article.view_count }} Views</span>
-                {% if article.average_rating %}
-                <span class="average-rating">
-                    <span class="rating-stars">
-                        {% with rating=article.average_rating %}
-                        {% if rating >= 1 %}<i class="fas fa-star"></i>{% elif rating >= 0.5 %}<i
-                            class="fas fa-star-half-alt"></i>{% else %}<i class="far fa-star"></i>{% endif %}
-                        {% if rating >= 2 %}<i class="fas fa-star"></i>{% elif rating >= 1.5 %}<i
-                            class="fas fa-star-half-alt"></i>{% else %}<i class="far fa-star"></i>{% endif %}
-                        {% if rating >= 3 %}<i class="fas fa-star"></i>{% elif rating >= 2.5 %}<i
-                            class="fas fa-star-half-alt"></i>{% else %}<i class="far fa-star"></i>{% endif %}
-                        {% if rating >= 4 %}<i class="fas fa-star"></i>{% elif rating >= 3.5 %}<i
-                            class="fas fa-star-half-alt"></i>{% else %}<i class="far fa-star"></i>{% endif %}
-                        {% if rating >= 5 %}<i class="fas fa-star"></i>{% elif rating >= 4.5 %}<i
-                            class="fas fa-star-half-alt"></i>{% else %}<i class="far fa-star"></i>{% endif %}
-                        {% endwith %}
-                    </span>
-                    ({{ article.average_rating|floatformat:1 }})
-                </span>
-                {% endif %}
-            </div>
-            <div class="card-tags">
-                {% for tag in article.tags.all %}
-                <span class="tag">{{ tag.name }}</span>
-                {% endfor %}
-            </div>
+                    {% endif %}
+                </div>
 
-            <!-- === REVAMPED: Social Share Feature === -->
-            <div class="social-share-section">
-                <button id="main-share-btn" class="main-share-btn">
-                    <i class="fa fa-share-alt"></i>
-                    <span>Share</span>
-                </button>
-                <div id="share-options" style="display: none;">
-                    {% with share_url=request.build_absolute_uri %}
-                    <a href="https://twitter.com/intent/tweet?url={{ share_url|urlencode }}&text={{ article.title|urlencode }}"
-                        target="_blank" class="share-btn twitter" aria-label="Share on Twitter"><i class="fab fa-twitter"></i></a>
-                    <a href="https://www.facebook.com/sharer/sharer.php?u={{ share_url|urlencode }}" target="_blank"
-                        class="share-btn facebook" aria-label="Share on Facebook"><i class="fab fa-facebook-f"></i></a>
-                    <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ share_url|urlencode }}&title={{ article.title|urlencode }}&summary={{ article.excerpt|urlencode }}"
-                        target="_blank" class="share-btn linkedin" aria-label="Share on LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-                    <a href="https://wa.me/?text={{ article.title|urlencode }}%20{{ share_url|urlencode }}" target="_blank" class="share-btn whatsapp" aria-label="Share on WhatsApp"><i class="fab fa-whatsapp"></i></a>
-                    <button id="copy-link-btn" class="share-btn copy-link" data-url="{{ share_url }}"
-                        aria-label="Copy link">
-                        <i class="fa fa-link"></i>
-                        <span>Copy Link</span>
+                <div class="card-tags">
+                    {% for tag in article.tags.all %}
+                    <span class="tag">{{ tag.name }}</span>
+                    {% endfor %}
+                </div>
+
+                <!-- SHARE DROPDOWN INTEGRATION -->
+                <div class="social-share-section share-container-magazine">
+                    <button id="main-share-btn" class="main-share-btn" style="padding: 8px 12px; font-size: 0.9rem;">
+                        <i class="fa fa-share-alt"></i> Share
                     </button>
-                    {% endwith %}
+                    <div id="share-options" style="display: none;">
+                        {% with share_url=request.build_absolute_uri %}
+                        <a href="https://twitter.com/intent/tweet?url={{ share_url|urlencode }}&text={{ article.title|urlencode }}" target="_blank" class="share-btn twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="https://www.facebook.com/sharer/sharer.php?u={{ share_url|urlencode }}" target="_blank" class="share-btn facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ share_url|urlencode }}&title={{ article.title|urlencode }}" target="_blank" class="share-btn linkedin"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="https://wa.me/?text={{ article.title|urlencode }}%20{{ share_url|urlencode }}" target="_blank" class="share-btn whatsapp"><i class="fab fa-whatsapp"></i></a>
+                        <button id="copy-link-btn" class="share-btn copy-link" data-url="{{ share_url }}">
+                            <i class="fa fa-link"></i>
+                        </button>
+                        {% endwith %}
+                    </div>
                 </div>
             </div>
-
-
-        </header>
-
-        <!-- Cover Image -->
-        {% if article.cover_image %}
-        <img src="{{ article.cover_image.url }}" alt="Cover for {{ article.title }}" class="article-cover-image">
-        {% endif %}
+        </div>
 
         <!-- Text-to-Speech Section -->
         <div class="text-to-speech-section">
@@ -296,16 +289,16 @@
     {% if related_articles %}
     <div class="related-articles-section">
         <h3>Related Articles</h3>
-        <div class="publications-grid">
+        <div class="publications-grid mobile-carousel">
             {% for related_article in related_articles %}
             <div class="publication-card article-story-card">
-                <a href="{% url 'publications:article_detail' pk=related_article.id %}" class="card-image-wrapper">
+                <a href="{% url 'publications:article_detail' slug=related_article.slug %}" class="card-image-wrapper">
                     {% if related_article.cover_image %}
                     <img src="{{ related_article.cover_image.url }}" alt="Cover for {{ related_article.title }}">
                     {% endif %}
                 </a>
                 <div class="card-content">
-                    <h3 class="card-title"><a href="{% url 'publications:article_detail' pk=related_article.id %}">{{ related_article.title }}</a></h3>
+                    <h3 class="card-title"><a href="{% url 'publications:article_detail' slug=related_article.slug %}">{{ related_article.title }}</a></h3>
                     <div class="card-tags">
                         {% for tag in related_article.tags.all %}
                         <span class="tag">{{ tag.name }}</span>
@@ -331,7 +324,7 @@
                 <span class="star" data-value="1">&#9733;</span>
                 <span class="star" data-value="2">&#9733;</span>
                 <span class="star" data-value="3">&#9733;</span>
-                <span class="star" a-value="4">&#9733;</span>
+                <span class="star" data-value="4">&#9733;</span>
                 <span class="star" data-value="5">&#9733;</span>
             </div>
             <button type="submit" name="rating_submit" class="submit-btn" style="margin-top: 15px;">Submit
@@ -397,59 +390,69 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // --- SHARE BUTTON LOGIC ---
             const mainShareBtn = document.getElementById('main-share-btn');
             const shareOptions = document.getElementById('share-options');
 
-            mainShareBtn.addEventListener('click', (e) => {
-                e.stopPropagation(); // Prevent click from bubbling up to document
-                const isHidden = shareOptions.style.display === 'none' || shareOptions.style.display === '';
-                shareOptions.style.display = isHidden ? 'flex' : 'none';
-            });
+            if (mainShareBtn && shareOptions) {
+                mainShareBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const isHidden = shareOptions.style.display === 'none' || shareOptions.style.display === '';
+                    shareOptions.style.display = isHidden ? 'flex' : 'none';
+                });
 
-            // Close dropdown if clicking outside
-            document.addEventListener('click', (e) => {
-                if (!mainShareBtn.contains(e.target) && !shareOptions.contains(e.target)) {
-                    shareOptions.style.display = 'none';
-                }
-            });
-
+                document.addEventListener('click', (e) => {
+                    if (!mainShareBtn.contains(e.target) && !shareOptions.contains(e.target)) {
+                        shareOptions.style.display = 'none';
+                    }
+                });
+            }
 
             const copyBtn = document.getElementById('copy-link-btn');
-            const originalCopyContent = copyBtn.innerHTML;
+            if (copyBtn) {
+                const originalCopyContent = copyBtn.innerHTML;
+                copyBtn.addEventListener('click', function () {
+                    const title = document.getElementById('article-title').innerText;
+                    const url = this.getAttribute('data-url');
+                    const textToCopy = `${title}\n${url}`;
 
-            copyBtn.addEventListener('click', function () {
-                const title = document.getElementById('article-title').innerText;
-                const author = document.getElementById('article-author-link').innerText;
-                const url = this.getAttribute('data-url');
-                const textToCopy = `${title}\nBy: ${author}\n${url}`;
+                    navigator.clipboard.writeText(textToCopy).then(() => {
+                        copyBtn.innerHTML = '<i class="fa fa-check"></i>';
+                        copyBtn.disabled = true;
 
-                navigator.clipboard.writeText(textToCopy).then(() => {
-                    copyBtn.innerHTML = '<i class="fa fa-check"></i> Copied';
-                    copyBtn.disabled = true;
-
-                    setTimeout(() => {
-                        copyBtn.innerHTML = originalCopyContent;
-                        copyBtn.disabled = false;
-                    }, 2500);
-                }).catch(err => {
-                    console.error('Failed to copy link: ', err);
-                    copyBtn.innerHTML = '<span>Error</span>';
-                    setTimeout(() => {
-                        copyBtn.innerHTML = originalCopyContent;
-                    }, 2000);
+                        setTimeout(() => {
+                            copyBtn.innerHTML = originalCopyContent;
+                            copyBtn.disabled = false;
+                        }, 2500);
+                    });
                 });
-            });
-        });
+            }
 
-        document.addEventListener('DOMContentLoaded', function () {
+            // --- PREMIUM TTS TOGGLE LOGIC ---
+            const ttsToggle = document.getElementById('tts-main-toggle');
+            const ttsExpanded = document.getElementById('tts-expanded-controls');
+
+            if (ttsToggle && ttsExpanded) {
+                ttsToggle.addEventListener('click', () => {
+                    const isHidden = ttsExpanded.style.display === 'none';
+                    ttsExpanded.style.display = isHidden ? 'block' : 'none';
+                    ttsToggle.classList.toggle('active');
+                    if (isHidden) {
+                        ttsToggle.querySelector('span').textContent = 'Hide Controls';
+                    } else {
+                        ttsToggle.querySelector('span').textContent = 'Listen to this Article';
+                    }
+                });
+            }
+
+            // --- SPEECH ENGINE LOGIC ---
             const playBtn = document.getElementById('play-tts-btn');
             const pauseBtn = document.getElementById('pause-tts-btn');
             const stopBtn = document.getElementById('stop-tts-btn');
             const ttsStatus = document.getElementById('tts-status');
             const voiceSelect = document.getElementById('voice-select');
-            const ttsSection = document.querySelector('.text-to-speech-section');
 
-            if ('speechSynthesis' in window) {
+            if ('speechSynthesis' in window && playBtn) {
                 const articleContent = document.querySelector('.article-content').innerText;
                 let utterance = new SpeechSynthesisUtterance(articleContent);
                 let voices = [];
@@ -506,8 +509,6 @@
                     stopBtn.style.display = 'none';
                     ttsStatus.textContent = '';
                 };
-            } else {
-                ttsSection.innerHTML = '<p>Sorry, your browser does not support the text-to-speech feature.</p>';
             }
         });
     </script>

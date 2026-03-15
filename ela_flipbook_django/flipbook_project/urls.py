@@ -14,7 +14,7 @@ urlpatterns = [
 
     # 1. Sign-Up is immediately redirected to the Google login flow.
     path("accounts/signup/",
-         RedirectView.as_view(url='/accounts/google/login/', permanent=False),
+         RedirectView.as_view(url='/accounts/google/login/', permanent=False, query_string=True),
          name="account_signup"
     ),
 

@@ -25,7 +25,7 @@
             <div class="hero-images">
                 <!-- This loop dynamically displays the 3 most recent covers -->
                 {% for pub in latest_publications %}
-                    <a href="{% url 'publications:detail' pk=pub.id %}" class="hero-image-wrapper image-{{ forloop.counter }}">
+                    <a href="{% url 'publications:detail' slug=pub.slug %}" class="hero-image-wrapper image-{{ forloop.counter }}">
                         {% if pub.cover_image %}
                             <img src="{{ pub.cover_image.url }}" alt="Cover for {{ pub.title }}">
                         {% else %}
@@ -34,9 +34,13 @@
                     </a>
                 {% endfor %}
             </div>
-            
-            <!-- === STATS CARD SECTION === -->
-            <div class="stats-card-container hero-stats-container">
+        </div>
+    </section>
+
+    <!-- === TRUST & IMPACT BAR === -->
+    <section class="trust-impact-bar">
+        <div class="container">
+            <div class="stats-card-container">
                 <!-- Site Visitors -->
                 <div class="stat-card">
                     <h3 class="stat-title">Visitors Online</h3>
@@ -63,15 +67,6 @@
         </div>
     </section>
 
-    <!-- === NEW: ABOUT US SNIPPET SECTION === -->
-    <section class="about-snippet-section container text-center">
-        <h2>About Business Matters Africa</h2>
-        <p class="about-snippet-text">
-            We are an independent, premium business magazine delivering in-depth, contextually grounded insights for Africa's high-calibre leaders, founders, and investors. We deliberately position ourselves against the tide of superficial business content, focusing on depth, intellectual courage, and African realities.
-        </p>
-        <a href="{% url 'publications:about_us' %}" class="hero-subscribe-button" style="background-color: transparent; border-color: var(--primary-blue); color: var(--text-light); margin-top: 15px;">Read Our Full Story</a>
-    </section>
-
     <!-- PUBLICATIONS GRID SECTION -->
     <div class="container">
         <div class="publications-header">
@@ -80,7 +75,7 @@
 
         <div class="publications-grid">
             {% for pub in all_publications|slice:":4" %}
-                <a href="{% url 'publications:detail' pk=pub.id %}" class="publication-card">
+                <a href="{% url 'publications:detail' slug=pub.slug %}" class="publication-card">
                     <div class="card-image-wrapper">
                         {% if pub.cover_image %}
                             <img src="{{ pub.cover_image.url }}" alt="Cover for {{ pub.title }}">
@@ -109,12 +104,12 @@
         <div class="publications-grid">
             {% for article in top_articles|slice:":4" %}
                 <div class="publication-card article-story-card">
-                    <a href="{% url 'publications:article_detail' pk=article.id %}" class="card-image-wrapper">
+                    <a href="{% url 'publications:article_detail' slug=article.slug %}" class="card-image-wrapper">
                         <img src="{{ article.cover_image.url }}" alt="Cover for {{ article.title }}">
                     </a>
                     <div class="card-content">
-                        <h3 class="card-title"><a href="{% url 'publications:article_detail' pk=article.id %}">{{ article.title }}</a></h3>
-                        <p class="card-excerpt">{{ article.excerpt|truncatewords:20 }}</p>
+                        <h3 class="card-title"><a href="{% url 'publications:article_detail' slug=article.slug %}">{{ article.title }}</a></h3>
+                        <p class="card-excerpt">{{ article.excerpt|striptags|truncatewords:20 }}</p>
                         <div class="card-tags">
                             {% for tag in article.tags.all %}
                                 <span class="tag">{{ tag.name }}</span>
@@ -133,6 +128,15 @@
         </div>
         <a href="{% url 'publications:articles' %}" class="show-more-btn">Show More Articles</a>
     </div>
+
+    <!-- === NEW: ABOUT US SNIPPET SECTION === -->
+    <section class="about-snippet-section container text-center">
+        <h2>About Business Matters Africa</h2>
+        <p class="about-snippet-text">
+            We are an independent, premium business magazine delivering in-depth, contextually grounded insights for Africa's high-calibre leaders, founders, and investors. We deliberately position ourselves against the tide of superficial business content, focusing on depth, intellectual courage, and African realities.
+        </p>
+        <a href="{% url 'publications:about_us' %}" class="hero-subscribe-button" style="background-color: transparent; border-color: var(--primary-blue); color: var(--text-light); margin-top: 15px;">Read Our Full Story</a>
+    </section>
 
     <!-- === NEW: OUR SPONSORS MARQUEE SECTION === -->
     {% if sponsors %}

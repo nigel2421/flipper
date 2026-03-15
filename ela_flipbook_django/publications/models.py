@@ -6,6 +6,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django_ckeditor_5.fields import CKEditor5Field
 from django.contrib.auth.models import AbstractUser, PermissionsMixin
+from django.utils.text import slugify
 import uuid
 
 # --- NEW: Author Model ---
@@ -29,16 +30,31 @@ class Tag(models.Model):
 # --- Magazine Model (for Flipbooks) ---
 class Magazine(models.Model):
     title = models.CharField(max_length=200)
-    pdf_file = models.FileField(upload_to='pdfs/')
+    slug = models.SlugField(max_length=220, unique=True, blank=True)
+    pdf_file = models.FileField(upload_to='pdfs/', help_text="Note: PDFs should be less than 30 MBs.")
     cover_image = models.ImageField(upload_to='covers/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
-    
 
     # === NEW FIELDS ===
     excerpt = models.TextField(blank=True, help_text="A short summary for card previews.")
 
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base_slug = slugify(self.title)
+            slug = base_slug
+            counter = 1
+            while Magazine.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = slug
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.title
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('publications:detail', kwargs={'slug': self.slug})
 
     class Meta:
         ordering = ['-uploaded_at']
@@ -46,6 +62,7 @@ class Magazine(models.Model):
 # --- NEW: Article Model (for Web Articles) ---
 class Article(models.Model):
     title = models.CharField(max_length=200)
+    slug = models.SlugField(max_length=220, unique=True, blank=True)
     cover_image = models.ImageField(upload_to='article_covers/')
     # This field holds the actual text content of the article.
 
@@ -62,15 +79,29 @@ class Article(models.Model):
     summary = models.TextField(blank=True, null=True, help_text="AI-generated summary of the article content.")
     was_shared_on_whatsapp = models.BooleanField(default=False, help_text="Tracks if this article has been shared on WhatsApp.")
 
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base_slug = slugify(self.title)
+            slug = base_slug
+            counter = 1
+            while Article.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = slug
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.title
 
     def get_absolute_url(self):
         from django.urls import reverse
-        return reverse('publications:article_detail', kwargs={'pk': self.pk})
+        return reverse('publications:article_detail', kwargs={'slug': self.slug})
 
     @property
     def average_rating(self):
+        # Prefer annotated value from views if present (faster)
+        if hasattr(self, 'avg_rating'):
+            return self.avg_rating or 0
         from django.db.models import Avg
         return self.ratings.aggregate(Avg('score'))['score__avg'] or 0
 
@@ -267,18 +298,30 @@ class Sponsor(models.Model):
 
 class WhatsAppUpdate(models.Model):
     title = models.CharField(max_length=200)
+    slug = models.SlugField(max_length=220, unique=True, blank=True)
     cover_image = models.ImageField(upload_to='whatsapp_covers/')
     content = CKEditor5Field('Content', config_name='article')
     short_description = models.TextField(blank=True, help_text="A short snippet for social previews.")
     uploaded_at = models.DateTimeField(auto_now_add=True)
     was_shared_on_whatsapp = models.BooleanField(default=False)
 
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base_slug = slugify(self.title)
+            slug = base_slug
+            counter = 1
+            while WhatsAppUpdate.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = slug
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.title
 
     def get_absolute_url(self):
         from django.urls import reverse
-        return reverse('publications:whatsapp_detail', kwargs={'pk': self.pk})
+        return reverse('publications:whatsapp_detail', kwargs={'slug': self.slug})
 
     class Meta:
         ordering = ['-uploaded_at']

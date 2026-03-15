@@ -41,6 +41,24 @@
     var DFLIP = {
         libs: "{% static 'publications/dflip/libs/' %}"
     };
+    
+    // Options for the book initialized with ID 'df_manual_book'
+    var option_df_manual_book = {
+        onReady: function(flipbook) {
+            // Check if user is on a desktop (width > 768px for instance)
+            if (window.innerWidth > 768) {
+                setTimeout(function() {
+                    // Trigger the fullscreen button click
+                    if (flipbook.ui && flipbook.ui.fullScreen) {
+                        flipbook.ui.fullScreen.trigger('click');
+                    } else {
+                        // Fallback if the strict UI object isn't exposed
+                        $('.df-ui-btn.df-ui-fullscreen').click();
+                    }
+                }, 500); // 500ms slight delay to allow rendering to settle
+            }
+        }
+    };
 </script>
 
 <!-- dFlip JavaScript Library -->

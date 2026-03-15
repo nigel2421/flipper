@@ -30,8 +30,8 @@ def handle_referral_signup(sender, request, user, **kwargs):
                 user.profile.referred_by = referrer_profile.user
                 user.profile.save()
 
-        except Profile.DoesNotExist:
-            # The referral code is invalid, so do nothing.
+        except (Profile.DoesNotExist, ValueError):
+            # The referral code is invalid or not a valid UUID, so do nothing.
             pass
         finally:
             # Always remove the referral code from the session after processing

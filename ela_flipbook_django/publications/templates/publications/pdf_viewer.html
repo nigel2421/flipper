@@ -14,7 +14,7 @@
             It is highly compatible with all mobile devices and provides a clean, scrollable view.
         -->
         <iframe 
-            src="https://docs.google.com/gview?url={{ request.scheme }}://{{ request.get_host }}{{ publication.pdf_file.url }}&embedded=true" 
+            src="https://docs.google.com/gview?url={% if '://' in publication.pdf_file.url %}{{ publication.pdf_file.url }}{% else %}{{ request.scheme }}://{{ request.get_host }}{{ publication.pdf_file.url }}{% endif %}&embedded=true" 
             class="pdf-iframe" 
             title="{{ publication.title }}">
         </iframe>

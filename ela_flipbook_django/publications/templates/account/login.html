@@ -1,20 +1,113 @@
 {% extends "publications/base.html" %}
-{% load i18n socialaccount %}
+{% load i18n static socialaccount %}
 
 {% block head_title %}{% trans "Sign In" %}{% endblock %}
 
 {% block content %}
-<div class="login-container">
-    <div class="split-login-box"> 
-        <div class="social-login-column">
-            <h1>Sign Up or Log In with:</h1>
-            
-           <a href="{% provider_login_url 'google' %}" class="google-btn">
-
-             <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google logo">
-                          Google
+<div class="auth-page-wrapper">
+    <div class="premium-auth-card">
+        <div class="auth-header">
+            <img src="{% static 'publications/images/logo.png' %}" alt="BMA Logo" class="auth-logo" onerror="this.style.display='none'">
+            <h1>Welcome Back</h1>
+            <p>Sign in to access BMA's exclusive content library.</p>
+        </div>
+        
+        <div class="auth-social-actions">
+            <a href="{% provider_login_url 'google' %}" class="premium-google-btn">
+                <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google">
+                <span>Continue with Google</span>
             </a>
+        </div>
+        
+        <div class="auth-divider">
+            <span>Or securely with</span>
+        </div>
+        
+        <div class="auth-footer">
+            <p>New to BMA? <a href="{% url 'account_signup' %}">Create an account</a></p>
         </div>
     </div>
 </div>
+
+<style>
+    .auth-page-wrapper {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+    }
+    .premium-auth-card {
+        background: var(--card-bg);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 40px;
+        width: 100%;
+        max-width: 450px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(20px);
+        text-align: center;
+    }
+    .auth-logo {
+        width: 80px;
+        margin-bottom: 20px;
+    }
+    .auth-header h1 {
+        font-size: 2rem;
+        color: var(--text-dark);
+        margin-bottom: 10px;
+    }
+    .auth-header p {
+        color: var(--text-muted);
+        margin-bottom: 30px;
+    }
+    .premium-google-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        background: white;
+        color: #1f2937;
+        padding: 14px;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: 1px solid #e5e7eb;
+    }
+    .premium-google-btn:hover {
+        background: #f9fafb;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    .premium-google-btn img {
+        width: 24px;
+        height: 24px;
+    }
+    .auth-divider {
+        margin: 30px 0;
+        position: relative;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+    }
+    .auth-divider::before, .auth-divider::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        width: 30%;
+        height: 1px;
+        background: rgba(255, 255, 255, 0.1);
+    }
+    .auth-divider::before { left: 0; }
+    .auth-divider::after { right: 0; }
+    .auth-footer p {
+        margin-top: 20px;
+        font-size: 0.95rem;
+    }
+    .auth-footer a {
+        color: var(--primary-blue);
+        text-decoration: none;
+        font-weight: 600;
+    }
+</style>
 {% endblock content %}
