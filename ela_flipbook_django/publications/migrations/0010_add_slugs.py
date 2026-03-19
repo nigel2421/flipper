@@ -35,10 +35,12 @@ def populate_whatsapp_slugs(apps, schema_editor):
 
 def add_slug_columns_safe(apps, schema_editor):
     vendor = schema_editor.connection.vendor
+    print(f"\n[MIGRATION] Detected database vendor: {vendor}")
     
     tables = ['publications_magazine', 'publications_article', 'publications_whatsappupdate']
     
     if vendor == 'postgresql':
+        print(f"[MIGRATION] Running PostgreSQL-specific safe column addition...")
         for table in tables:
             schema_editor.execute(f"""
                 DO $$
@@ -52,6 +54,7 @@ def add_slug_columns_safe(apps, schema_editor):
                 END $$;
             """)
     elif vendor == 'sqlite':
+        print(f"[MIGRATION] Running SQLite-specific safe column addition...")
         for table in tables:
             # Check if column exists in SQLite
             cursor = schema_editor.connection.cursor()
@@ -59,10 +62,13 @@ def add_slug_columns_safe(apps, schema_editor):
             columns = [c[1] for c in cursor.fetchall()]
             if 'slug' not in columns:
                 schema_editor.execute(f"ALTER TABLE {table} ADD COLUMN slug varchar(220) NULL;")
+    else:
+        print(f"[MIGRATION] Vendor {vendor} not specifically handled, skipping raw SQL column addition.")
 
 def create_unique_indexes_safe(apps, schema_editor):
     vendor = schema_editor.connection.vendor
     if vendor == 'postgresql':
+        print(f"[MIGRATION] Creating unique indexes (PostgreSQL)...")
         schema_editor.execute("""
             CREATE UNIQUE INDEX IF NOT EXISTS publications_magazine_slug_unique
                 ON publications_magazine (slug) WHERE slug IS NOT NULL;
@@ -72,8 +78,7 @@ def create_unique_indexes_safe(apps, schema_editor):
                 ON publications_whatsappupdate (slug) WHERE slug IS NOT NULL;
         """)
     elif vendor == 'sqlite':
-        # AddField (Step 2 and 5) will handle state. 
-        # For database, we already added the column.
+        print(f"[MIGRATION] Creating unique indexes (SQLite)...")
         # SQLite IF NOT EXISTS for indexes
         schema_editor.execute("CREATE UNIQUE INDEX IF NOT EXISTS publications_magazine_slug_unique ON publications_magazine (slug);")
         schema_editor.execute("CREATE UNIQUE INDEX IF NOT EXISTS publications_article_slug_unique ON publications_article (slug);")

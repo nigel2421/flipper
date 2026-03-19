@@ -7,11 +7,15 @@ django.setup()
 from allauth.socialaccount.models import SocialApp
 from django.contrib.sites.models import Site
 
-# Credentials provided by user
-NEW_CLIENT_ID = '122195396017-l079mcubm8l0nhe4fl0m5smhj97v5poa.apps.googleusercontent.com'
-NEW_SECRET = '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'
+# Credentials provided by environment
+NEW_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '')
+NEW_SECRET = os.environ.get('GOOGLE_SECRET', '')
 
 def sync_oauth():
+    if not NEW_CLIENT_ID or not NEW_SECRET:
+        print("[ERROR] GOOGLE_CLIENT_ID and GOOGLE_SECRET must be set in .env")
+        return
+
     # 1. Update SocialApp
     app, created = SocialApp.objects.get_or_create(provider='google')
     app.name = 'Google'
