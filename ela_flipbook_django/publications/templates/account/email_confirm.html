@@ -1,0 +1,37 @@
+{% extends "publications/base.html" %}
+{% load i18n %}
+{% load account %}
+
+{% block title %}{% trans "Confirm Email Address" %}{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 600px; margin: 80px auto; padding: 40px; background: var(--card-bg); border-radius: 12px; border: 1px solid #333; text-align: center;">
+    <h1 style="color: var(--accent-yellow); margin-bottom: 20px;">{% trans "Confirm Email Address" %}</h1>
+
+    {% if confirmation %}
+        {% user_display confirmation.email_address.user as user_display %}
+        <p style="font-size: 1.1rem; line-height: 1.6; color: var(--text-light);">
+            {% blocktrans with confirmation.email_address.email as email %}Please confirm that <a href="mailto:{{ email }}">{{ email }}</a> is an email address for user {{ user_display }}.{% endblocktrans %}
+        </p>
+
+        <form method="post" action="{% url 'account_confirm_email' confirmation.key %}">
+            {% csrf_token %}
+            <button type="submit" class="hero-subscribe-button" style="margin-top: 20px; border: none; cursor: pointer;">
+                {% trans "Confirm" %}
+            </button>
+        </form>
+    {% else %}
+        {% url 'account_email' as email_url %}
+        <p style="color: var(--text-muted);">
+            {% blocktrans %}This e-mail confirmation link expired or is invalid. Please <a href="{{ email_url }}">issue a new e-mail confirmation request</a>.{% endblocktrans %}
+        </p>
+    {% endif %}
+
+    <div style="margin-top: 40px; border-top: 1px solid #333; padding-top: 20px;">
+        <p style="color: var(--text-muted); font-size: 0.9rem;">
+            {% trans "If you continue to face issues, please reach out to us at" %} 
+            <a href="mailto:support@businessmatters.co.ke" style="color: var(--accent-yellow);">support@businessmatters.co.ke</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

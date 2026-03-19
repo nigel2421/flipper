@@ -1,0 +1,4 @@
+Searching for any working generative model...
+Testing models/gemini-2.5-flash... SUCCESS!
+
+FOUND WORKING MODEL: gemini-2.5-flash

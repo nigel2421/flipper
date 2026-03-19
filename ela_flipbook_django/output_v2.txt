@@ -1,0 +1,14 @@
+System check identified some issues:
+
+WARNINGS:
+?: settings.ACCOUNT_AUTHENTICATION_METHOD is deprecated, use: settings.ACCOUNT_LOGIN_METHODS = {'email'}
+?: settings.ACCOUNT_EMAIL_REQUIRED is deprecated, use: settings.ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
+?: settings.ACCOUNT_USERNAME_REQUIRED is deprecated, use: settings.ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
+Found 2 articles to process.
+[1/2] Processing: Reimagining Africa's Role in The Future Global Tech Economy...
+Error generating summary with Google Generative AI: 404 models/gemini-2.0-flash-exp is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+Failed to generate summary for: Reimagining Africa's Role in The Future Global Tech Economy. Response: Error: Could not generate summary.
+[2/2] Processing: Who Gets to Build? Gender and Power in KenyaÆs Tech Economy...
+Error generating summary with Google Generative AI: 404 models/gemini-2.0-flash-exp is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+Failed to generate summary for: Who Gets to Build? Gender and Power in KenyaÆs Tech Economy. Response: Error: Could not generate summary.
+Generation process completed.

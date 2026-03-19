@@ -56,6 +56,46 @@ main>.container {
     padding-bottom: 40px;
 }
 
+/* --- Premium Messages --- */
+.message-container {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+}
+
+.message {
+    pointer-events: auto;
+    background: rgba(23, 42, 69, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: var(--text-dark);
+    padding: 15px 25px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    border-left: 4px solid var(--primary-blue);
+    min-width: 300px;
+    max-width: 450px;
+    animation: slideInRight 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+.message.success { border-left-color: #2ecc71; }
+.message.error { border-left-color: #e74c3c; }
+.message.warning { border-left-color: #f1c40f; }
+.message.info { border-left-color: #3498db; }
+
 /* ==========================================================================
    2. HEADER & NAVIGATION
    ========================================================================== */
@@ -115,6 +155,57 @@ main>.container {
     background-color: var(--text-dark);
 }
 
+/* --- Navigation Dropdown --- */
+.nav-item-dropdown {
+    position: relative;
+}
+
+.nav-link-with-icon {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    display: none;
+    background-color: var(--card-bg);
+    min-width: 180px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+    border-radius: 8px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 1002;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 10px 0;
+}
+
+/* Show on hover for desktop */
+@media (min-width: 993px) {
+    .nav-item-dropdown:hover .dropdown-menu {
+        display: block;
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+}
+
+.dropdown-item {
+    padding: 10px 20px;
+    color: var(--text-light) !important;
+    display: block;
+    transition: background 0.3s ease;
+}
+
+.dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--accent-yellow) !important;
+}
+
 /* ==========================================================================
    3. FOOTER
    ========================================================================== */
@@ -153,12 +244,34 @@ main>.container {
     text-align: center !important;
 }
 
-/* --- Publications & Articles Grid (Desktop) --- */
+/* --- Publications & Articles Grid --- */
 .publications-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 40px;
     margin-top: 40px;
+}
+
+/* Desktop: 4 columns */
+@media (min-width: 993px) {
+    .publications-grid {
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 40px !important;
+    }
+}
+
+/* Mobile: Stacked blocks with spaces */
+@media (max-width: 992px) {
+    .publications-grid:not(.mobile-carousel) {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 30px !important;
+        align-items: center;
+    }
+    
+    .publications-grid:not(.mobile-carousel) .publication-card {
+        width: 100% !important;
+        max-width: 500px;
+        margin-bottom: 0 !important;
+    }
 }
 
 /* --- Horizontal Carousel (Mobile Snap) --- */
@@ -373,10 +486,7 @@ main>.container {
 
 .hero-subscribe-button {
     display: inline-block;
-    background-color: var(--accent-yellow)
-        /* publications/static/publications/css/style.css */
-
-    ;
+    background-color: var(--accent-yellow);
     color: var(--text-dark);
     border: 2px solid var(--accent-yellow);
     padding: 12px 30px;
@@ -392,17 +502,25 @@ main>.container {
     color: #000;
 }
 
+.mobile-only-btn-wrapper {
+    display: none !important;
+}
+
+.desktop-only-btn {
+    display: inline-block !important;
+}
+
 .hero-images {
     flex: 1;
     position: relative;
-    height: 400px;
+    height: 500px;
     max-width: 50%;
+    margin-left: auto;
 }
 
 .hero-image-wrapper {
     position: absolute;
-    width: 250px;
-    height: auto;
+    width: 280px; /* Slightly larger for desktop */
     border: 4px solid #fff;
     border-radius: 4px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
@@ -421,86 +539,105 @@ main>.container {
     border-radius: 2px;
 }
 
-.hero-images .image-1 {
-    z-index: 3;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) rotate(5deg);
-}
+.hero-images .image-1 { z-index: 3; top: 10%; left: 35% !important; transform: rotate(5deg); }
+.hero-images .image-2 { z-index: 2; top: 15%; left: 15% !important; transform: rotate(-3deg); }
+.hero-images .image-3 { z-index: 1; top: 20%; left: -5% !important; transform: rotate(-10deg); }
 
-.hero-images .image-2 {
-    z-index: 2;
-    top: 50%;
-    left: 35%;
-    transform: translate(-50%, -50%) rotate(-8deg);
-}
-
-.hero-images .image-3 {
-    z-index: 1;
-    top: 50%;
-    left: 65%;
-    transform: translate(-50%, -50%) rotate(12deg);
-}
-
-/* Move Mobile Overrides here to ensure they win the cascade */
 @media (max-width: 992px) {
     .hero-banner {
-        padding: 50px 0 30px !important;
+        padding: 40px 0 !important;
     }
 
     .hero-banner .hero-container {
+        display: flex !important;
         flex-direction: column !important;
+        align-items: center !important;
         text-align: center !important;
-        gap: 30px !important;
+        gap: 0 !important;
     }
     
     .hero-banner .hero-content {
         max-width: 100% !important;
-        margin-bottom: 20px !important;
+        margin-bottom: 10px !important;
+        display: block !important;
+        visibility: visible !important;
     }
 
     .hero-banner .hero-headline {
-        font-size: 2rem !important;
+        font-size: 1.8rem !important;
+        display: block !important;
+        visibility: visible !important;
     }
-    
-    .hero-banner .hero-images {
-        width: 100% !important;
-        height: auto !important;
-        max-width: 100% !important;
-        display: flex !important;
-        flex-direction: row !important;
-        justify-content: center !important;
-        align-items: center !important;
-        gap: 15px !important;
-        position: relative !important;
-        padding: 20px 0 !important;
-        margin: 20px 0 !important;
-        top: auto !important;
-        left: auto !important;
-        transform: none !important;
-    }
-    
-    .hero-banner .hero-image-wrapper {
-        position: relative !important;
-        width: 28% !important;
-        max-width: 110px !important;
-        margin: 0 !important;
-        top: auto !important;
-        left: auto !important;
-        transform: none !important;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.3) !important;
-    }
-    
-    .hero-banner .hero-images .image-1 { transform: rotate(3deg) !important; z-index: 3 !important; }
-    .hero-banner .hero-images .image-2 { transform: rotate(-5deg) !important; z-index: 2 !important; }
-    .hero-banner .hero-images .image-3 { transform: rotate(7deg) !important; z-index: 1 !important; }
 
-    /* Ensure specific image classes don't maintain desktop absolute positioning */
-    .hero-banner .hero-images [class*="image-"] {
+    .hero-banner .hero-subheadline {
+        display: block !important;
+        visibility: visible !important;
+    }
+    
+    .hero-banner .hero-images, 
+    .hero-banner .hero-container .hero-images {
+        display: block !important;
+        order: 2 !important;
+        width: 100% !important;
+        height: 320px !important; 
+        min-height: 320px !important;
+        max-width: 100% !important;
         position: relative !important;
-        top: auto !important;
-        left: auto !important;
-        transform: none !important;
+        margin: 10px auto 20px !important; 
+        overflow: visible !important;
+        clear: both !important;
+    }
+
+    .hero-banner .hero-image-wrapper {
+        position: absolute !important;
+        width: 130px !important;
+        height: auto !important;
+        margin: 0 !important;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.4) !important;
+        left: 50% !important;
+    }
+
+    .hero-banner .hero-images .image-1 { left: 50% !important; top: 140px !important; margin-left: 35px !important; transform: translate(-50%, -50%) rotate(5deg) !important; z-index: 3 !important; }
+    .hero-banner .hero-images .image-2 { left: 50% !important; top: 140px !important; margin-left: 0px !important; transform: translate(-50%, -50%) rotate(-3deg) !important; z-index: 2 !important; }
+    .hero-banner .hero-images .image-3 { left: 50% !important; top: 140px !important; margin-left: -35px !important; transform: translate(-50%, -50%) rotate(-10deg) !important; z-index: 1 !important; }
+
+    .hero-banner .hero-images [class*="image-"] {
+        max-width: none !important; 
+    }
+
+    .desktop-only, .desktop-only-btn {
+        display: none !important;
+        visibility: hidden !important;
+        height: 0 !important;
+        width: 0 !important;
+        overflow: hidden !important;
+        position: absolute !important;
+        pointer-events: none !important;
+        opacity: 0 !important;
+    }
+
+    .mobile-only-btn-wrapper,
+    .hero-banner .hero-container .mobile-only-btn-wrapper {
+        order: 3 !important;
+        display: block !important;
+        margin: 0px auto 30px !important; 
+        width: 100% !important;
+        position: relative !important;
+        z-index: 50 !important;
+        clear: both !important;
+        text-align: center !important;
+    }
+    
+    /* Ensure the stats bar stays clear and button is below */
+    .trust-impact-bar,
+    .hero-banner .hero-container .trust-impact-bar {
+        order: 4 !important;
+        position: relative !important;
+        z-index: 10 !important; 
+        clear: both !important;
+        margin-top: 100px !important; 
+        background: var(--primary-dark) !important;
+        display: flex !important;
     }
 }
 
@@ -520,7 +657,7 @@ main>.container {
 /* --- NEW: Stats Card Section --- */
 .trust-impact-bar {
     background-color: var(--dark-bg);
-    padding: 20px 0 40px;
+    padding: 10px 0 20px;
 }
 
 .stats-card-container {
@@ -1832,46 +1969,6 @@ main>.container {
    ========================================================================== */
 
 /* For Tablets */
-@media (max-width: 992px) {
-    .hero-container {
-        flex-direction: column;
-        text-align: center;
-    }
-
-    /* --- THIS IS THE FIX FOR THE OVERLAP --- */
-    .hero-content {
-        max-width: 100%;
-        position: relative;
-        /* Create a stacking context */
-        z-index: 5;
-        /* Ensure content is above images */
-        display: flex;
-        flex-direction: column;
-        align-items: center; /* Center content on mobile */
-    }
-
-    .hero-images {
-        max-width: 100%;
-        margin-top: 40px;
-        /* Adjusted margin for better spacing */
-        height: 350px;
-        order: 2; /* Keep images below text on mobile */
-    }
-
-    .hero-subheadline {
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    .publications-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-    
-    .hero-stats-container {
-        order: 3; /* Push stats below images on mobile since they are both within hero-container */
-        margin-top: 60px;
-    }
-}
 
 /* For smaller tablets and large phones */
 @media (max-width: 768px) {
@@ -1886,6 +1983,7 @@ main>.container {
         left: -100%;
         top: 0;
         flex-direction: column;
+        align-items: center; /* Center items horizontally */
         background-color: var(--dark-bg);
         width: 100%;
         height: 100vh;
@@ -2046,6 +2144,18 @@ main>.container {
 .article-content h5,
 .article-content h6 {
     color: var(--text-light) !important;
+}
+
+@media (max-width: 992px) {
+    .dropdown-menu {
+        display: none;
+        padding-left: 20px;
+    }
+    .main-nav {
+        flex-direction: column;
+        align-items: center; /* Center items horizontally */
+        gap: 15px !important;
+    }
 }
 
 /* publications/static/publications/css/style.css */
@@ -2357,3 +2467,29 @@ main>.container {
     color: var(--text-light);
     font-weight: normal;
 }
+
+/* --- Skeleton Loading --- */
+.skeleton-text {
+    height: 1rem;
+    width: 100%;
+    background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
+@keyframes skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Image Lazy Loading Placeholder */
+img[loading="lazy"] {
+    opacity: 0;
+    transition: opacity 0.5s ease-in;
+}
+
+img.loaded {
+    opacity: 1;
+}

@@ -38,12 +38,16 @@ ALLOWED_HOSTS = [
     # Add the development server host
     '8000-firebase-flippergit-1764678684466.cluster-cbeiita7rbe7iuwhvjs5zww2i4.cloudworkstations.dev',
     'idx-flippergit-09470411-122195396017.africa-south1.run.app',
+    'flipper-app-122195396017.africa-south1.run.app',
+    'flipper-app-cydpcotz4q-bq.a.run.app',
     'idx-flippergit-09470411-cydpcotz4q-bq.a.run.app',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     'https://8000-firebase-flippergit-1764678684466.cluster-cbeiita7rbe7iuwhvjs5zww2i4.cloudworkstations.dev',
     'https://idx-flippergit-09470411-122195396017.africa-south1.run.app',
+    'https://flipper-app-122195396017.africa-south1.run.app',
+    'https://flipper-app-cydpcotz4q-bq.a.run.app',
     'https://idx-flippergit-09470411-cydpcotz4q-bq.a.run.app',
 ]
 
@@ -107,8 +111,8 @@ WSGI_APPLICATION = 'flipbook_project.wsgi.application'
 
 
 # --- DATABASE CONFIGURATION ---
-if os.environ.get('GAE_APPLICATION'):
-    # Running on production, use Cloud SQL
+if os.environ.get('PRODUCTION') or os.environ.get('GAE_APPLICATION') or os.environ.get('K_SERVICE'):
+    # Running on production or with production proxy, use Cloud SQL
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -168,6 +172,9 @@ ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
 SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 SOCIALACCOUNT_ADAPTER = 'publications.adapter.CustomSocialAccountAdapter'
+ACCOUNT_ADAPTER = 'allauth.account.adapter.DefaultAccountAdapter'
+SOCIALACCOUNT_AUTO_SIGNUP = True
+SOCIALACCOUNT_LOGIN_ON_GET = True
 
 SOCIALACCOUNT_PROVIDERS = {
     'google': {

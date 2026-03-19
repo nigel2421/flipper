@@ -48,7 +48,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
         integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="{% static 'publications/css/style.css' %}?v=1.5">
+    <link rel="stylesheet" href="{% static 'publications/css/style.css' %}?v=4.2">
     {% block extra_css %}{% endblock %}
 
     <style>
@@ -119,7 +119,16 @@
                 <a href="{% url 'publications:home' %}">Home</a>
                 <a href="{% url 'publications:about_us' %}">About Us</a>
                 <a href="{% url 'publications:events' %}">Events</a>
-                <a href="{% url 'publications:articles' %}">Articles</a>
+                
+                <!-- Publications Dropdown -->
+                <div class="nav-item-dropdown">
+                    <a href="#" class="nav-link-with-icon">Publications <i class="fas fa-chevron-down" style="font-size: 0.7rem;"></i></a>
+                    <div class="dropdown-menu">
+                        <a href="{% url 'publications:articles' %}" class="dropdown-item">Articles</a>
+                        <a href="{% url 'publications:magazine' %}" class="dropdown-item">Magazines</a>
+                    </div>
+                </div>
+
                 <a href="{% url 'publications:whatsapp_updates' %}"><i class="fab fa-whatsapp" style="color:#25D366;"></i> WA Updates</a>
                 <a href="{% url 'publications:contact' %}">Contacts</a>
                 <a href="{% url 'publications:contributors' %}">Contributors</a>
@@ -131,7 +140,6 @@
                 {% else %}
                 <a href="{% url 'account_login' %}">Login</a>
                 {% endif %}
-                <a href="{% url 'account_signup' %}" class="subscribe-btn-header">Subscribe</a>
             </nav>
         </div>
     </header>
@@ -139,9 +147,12 @@
     <main>
         <!-- Messages Block -->
         {% if messages %}
-        <div class="container message-container">
+        <div class="message-container" id="message-container">
             {% for message in messages %}
-            <div class="message {{ message.tags }}">{{ message }}</div>
+            <div class="message {{ message.tags }}">
+                <span>{{ message }}</span>
+                <i class="fas fa-times close-msg" style="cursor: pointer; margin-left: 15px; opacity: 0.7;"></i>
+            </div>
             {% endfor %}
         </div>
         {% endif %}
@@ -157,24 +168,77 @@
         </div>
     </footer>
 
-    <!-- === NEW: Simple JavaScript for Mobile Menu Toggle === -->
+    <!-- === NEW: Simple JavaScript for Mobile Menu Toggle and Messages === -->
     <script>
         const hamburger = document.getElementById('hamburger-menu');
         const navMenu = document.getElementById('main-nav');
 
         if (hamburger && navMenu) {
             hamburger.addEventListener('click', () => {
-                // Toggle the 'active' class on both the hamburger and the menu
                 hamburger.classList.toggle('active');
                 navMenu.classList.toggle('active');
             });
 
-            // Close menu when a link is clicked
-            document.querySelectorAll('.main-nav a').forEach(n => n.addEventListener('click', () => {
+            document.querySelectorAll('.main-nav a').forEach(n => n.addEventListener('click', (e) => {
+                // Don't close menu if clicking the dropdown parent
+                if (n.classList.contains('nav-link-with-icon')) return;
+                
                 hamburger.classList.remove('active');
                 navMenu.classList.remove('active');
             }));
         }
+
+        // --- NEW: Auto-hide messages after 20 seconds ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const messageContainer = document.getElementById('message-container');
+            if (messageContainer) {
+                const messages = messageContainer.querySelectorAll('.message');
+                messages.forEach(msg => {
+                    // Auto-hide after 20 seconds
+                    setTimeout(() => {
+                        msg.style.transition = 'opacity 1s ease, transform 1s ease';
+                        msg.style.opacity = '0';
+                        msg.style.transform = 'translateX(100%)';
+                        setTimeout(() => msg.remove(), 1000);
+                    }, 20000);
+
+                    // Manual close
+                    const closeBtn = msg.querySelector('.close-msg');
+                    if (closeBtn) {
+                        closeBtn.addEventListener('click', () => {
+                            msg.remove();
+                        });
+                    }
+                });
+            }
+        });
+
+        // Toggle dropdown on mobile
+        document.querySelectorAll('.nav-link-with-icon').forEach(link => {
+            link.addEventListener('click', (e) => {
+                const isMobile = window.innerWidth <= 992;
+                if (isMobile) {
+                    e.preventDefault();
+                    const dropdown = link.nextElementSibling;
+                    const isVisible = window.getComputedStyle(dropdown).display === 'block';
+                    
+                    dropdown.style.display = isVisible ? 'none' : 'block';
+                    if (!isVisible) {
+                        dropdown.style.opacity = '1';
+                        dropdown.style.visibility = 'visible';
+                        dropdown.style.position = 'static';
+                        dropdown.style.transform = 'none';
+                        dropdown.style.boxShadow = 'none';
+                    }
+                } else {
+                    // On desktop, clicking the dropdown parent should perhaps just toggle or do nothing
+                    // If it's a '#' link, prevent default to avoid jumping
+                    if (link.getAttribute('href') === '#') {
+                        e.preventDefault();
+                    }
+                }
+            });
+        });
     </script>
 
     <!-- === NEW: JavaScript for Interactive Star Rating === -->

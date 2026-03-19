@@ -172,6 +172,104 @@
     }
 
     .text-to-speech-section { display: none; } /* Hide the old block */
+    /* More refined comments for article detail */
+    .comment-section {
+        background: rgba(255,255,255,0.02);
+        padding: 30px;
+        border-radius: 16px;
+        margin-top: 50px;
+        border: 1px solid rgba(255,255,255,0.05);
+    }
+    .comment-form {
+        background: rgba(255,255,255,0.05) !important;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.1) !important;
+    }
+    .comment-form textarea {
+        background: rgba(0,0,0,0.2) !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        color: #fff !important;
+    }
+    .submit-btn {
+        background: var(--primary-blue);
+        color: #fff;
+        padding: 10px 25px;
+        border-radius: 50px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,123,255,0.3);
+    }
+
+    /* AI Modal Styling */
+    .ai-modal {
+        display: none;
+        position: fixed;
+        z-index: 9999;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.8);
+        backdrop-filter: blur(5px);
+    }
+    .ai-modal-content {
+        background-color: #0d0b33;
+        margin: 10% auto;
+        padding: 30px;
+        border: 1px solid rgba(255,255,255,0.1);
+        width: 90%;
+        max-width: 600px;
+        border-radius: 16px;
+        position: relative;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+    .close-ai-modal {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    .close-ai-modal:hover {
+        color: #fff;
+    }
+    .ai-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .ai-summary-text {
+        font-size: 1.1rem;
+        line-height: 1.6;
+        color: #e0e0e0;
+    }
+    .ai-trigger-btn {
+        background: rgba(255,255,255,0.05);
+        color: #fff;
+        border: 1px solid rgba(255,255,255,0.1);
+        padding: 8px 12px;
+        border-radius: 50px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+    }
+    .ai-trigger-btn:hover {
+        background: rgba(255,255,255,0.1);
+        transform: translateY(-2px);
+    }
 </style>
 
 <div class="container article-detail-container">
@@ -183,7 +281,7 @@
             <!-- Cover Image Tucked Top Left -->
             {% if article.cover_image %}
             <div class="magazine-image-wrapper">
-                <img src="{{ article.cover_image.url }}" alt="Cover for {{ article.title }}">
+                <img src="{{ article.cover_image.url }}" alt="Cover for {{ article.title }}" loading="lazy">
             </div>
             {% endif %}
 
@@ -241,7 +339,10 @@
                 </div>
 
                 <!-- SHARE DROPDOWN INTEGRATION -->
-                <div class="social-share-section share-container-magazine">
+                <div class="social-share-section share-container-magazine" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button id="ai-overview-btn" class="ai-trigger-btn">
+                        <i class="fas fa-robot"></i> AI Overview
+                    </button>
                     <button id="main-share-btn" class="main-share-btn" style="padding: 8px 12px; font-size: 0.9rem;">
                         <i class="fa fa-share-alt"></i> Share
                     </button>
@@ -279,11 +380,50 @@
             </div>
         </div>
 
-        <!-- Main Article Content -->
-        <div class="article-content">
-            {{ article.content|safe }}
+        <!-- Main Article Content (Loaded via AJAX) -->
+        <div class="article-content" id="article-main-content">
+            <div class="skeleton-text"></div>
+            <div class="skeleton-text"></div>
+            <div class="skeleton-text" style="width: 80%;"></div>
+            <div class="skeleton-text"></div>
+            <div class="skeleton-text" style="width: 90%;"></div>
         </div>
     </article>
+
+    <!-- AI Overview Modal -->
+    <div id="ai-overview-modal" class="ai-modal">
+        <div class="ai-modal-content">
+            <span class="close-ai-modal">&times;</span>
+            <h3 class="ai-title"><i class="fas fa-robot"></i> Smart Summary</h3>
+            <div class="ai-summary-text">
+                {% if article.summary %}
+                    <p>{{ article.summary }}</p>
+                    {% if user.is_staff %}
+                        <form method="post" style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
+                            {% csrf_token %}
+                            <p style="font-size: 0.85rem; color: #b0b0b0;">Staff Action: Need an update?</p>
+                            <button type="submit" name="generate_summary" class="ai-trigger-btn" style="background: rgba(231, 76, 60, 0.2); border-color: #e74c3c;">
+                                <i class="fas fa-sync-alt"></i> Regenerate Summary
+                            </button>
+                        </form>
+                    {% endif %}
+                {% else %}
+                    <div style="text-align: center; padding: 20px;">
+                        <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 15px; color: var(--primary-color);"></i>
+                        <p>AI summary is being prepared. It usually takes about 3 minutes after the article is posted. Please check back shortly!</p>
+                        {% if user.is_staff %}
+                            <form method="post" style="margin-top: 20px;">
+                                {% csrf_token %}
+                                <button type="submit" name="generate_summary" class="ai-trigger-btn">
+                                    <i class="fas fa-magic"></i> Generate Now (Staff Only)
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 
     <!-- === NEW: Related Articles Section === -->
     {% if related_articles %}
@@ -510,6 +650,112 @@
                     ttsStatus.textContent = '';
                 };
             }
+
+            // --- COMMENT REPLY LOGIC ---
+            const commentForm = document.getElementById('comment-form');
+            const parentIdInput = document.createElement('input');
+            parentIdInput.type = 'hidden';
+            parentIdInput.name = 'parent_id';
+            commentForm.appendChild(parentIdInput);
+
+            const formHeader = document.getElementById('comment-form-header');
+            const cancelReplyBtn = document.getElementById('cancel-reply-btn');
+
+            document.querySelectorAll('.reply-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const commentId = this.getAttribute('data-comment-id');
+                    const authorName = this.closest('.comment').querySelector('strong').innerText;
+                    
+                    parentIdInput.value = commentId;
+                    formHeader.innerText = `Replying to ${authorName}`;
+                    cancelReplyBtn.style.display = 'block';
+                    
+                    // Smooth scroll to form
+                    commentForm.scrollIntoView({ behavior: 'smooth' });
+                });
+            });
+
+            cancelReplyBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                parentIdInput.value = '';
+                formHeader.innerText = 'Leave a Comment';
+                this.style.display = 'none';
+            });
+
+            // --- AI OVERVIEW MODAL LOGIC ---
+            const aiBtn = document.getElementById('ai-overview-btn');
+            const aiModal = document.getElementById('ai-overview-modal');
+            const closeAiModal = document.querySelector('.close-ai-modal');
+
+            if (aiBtn && aiModal) {
+                aiBtn.addEventListener('click', () => {
+                    aiModal.style.display = 'block';
+                    document.body.style.overflow = 'hidden'; // Prevent scroll
+                });
+
+                closeAiModal.addEventListener('click', () => {
+                    aiModal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                });
+
+                window.addEventListener('click', (e) => {
+                    if (e.target == aiModal) {
+                        aiModal.style.display = 'none';
+                        document.body.style.overflow = 'auto';
+                    }
+                });
+            }
+
+            // --- COMMENT LIKE AJAX LOGIC ---
+            document.querySelectorAll('.like-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const commentId = this.getAttribute('data-comment-id');
+                    const url = `/comment/${commentId}/like/`;
+                    
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.liked !== undefined) {
+                            this.classList.toggle('liked', data.liked);
+                            this.querySelector('.like-count').innerText = data.like_count;
+                        }
+                    })
+                    .catch(err => console.error('Error liking comment:', err));
+                });
+            });
+            // --- AJAX CONTENT LOADING ---
+            const contentContainer = document.getElementById('article-main-content');
+            if (contentContainer) {
+                fetch(`{% url 'publications:article_content_api' slug=article.slug %}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        contentContainer.innerHTML = data.content;
+                        // Handle images in content
+                        contentContainer.querySelectorAll('img').forEach(img => {
+                            img.setAttribute('loading', 'lazy');
+                        });
+                    })
+                    .catch(err => {
+                        console.error('Error loading article content:', err);
+                        contentContainer.innerHTML = '<p>Error loading content. Please refresh the page.</p>';
+                    });
+            }
+
+            // --- IMAGE LAZY LOADING ---
+            document.querySelectorAll('img[loading="lazy"]').forEach(img => {
+                img.addEventListener('load', () => {
+                    img.classList.add('loaded');
+                });
+                if (img.complete) img.classList.add('loaded');
+            });
         });
     </script>
     {% endblock %}

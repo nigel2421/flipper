@@ -12,7 +12,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.models import User
 from django.core.cache import cache
 import random 
-from .models import Magazine, Article, Event, Profile, Tag, Author, Sponsor, WhatsAppUpdate
+from .models import Magazine, Article, Event, Profile, Tag, Author, Sponsor, WhatsAppUpdate, Comment, Rating
 from django.db.models import Q, Avg
 from django.db.models.functions import ExtractYear
 from django.http import JsonResponse, HttpResponseRedirect
@@ -32,7 +32,7 @@ def home_view(request):
         avg_rating=Avg('ratings__score')
     ).order_by('-view_count')[:5]
 
-    subscribers_count = User.objects.count() + 610
+    subscribers_count = User.objects.count() + 660
     visitor_count = cache.get('visitor_count')
     if not visitor_count:
         visitor_count = random.randint(10, 73)
@@ -165,42 +165,57 @@ def article_detail_view(request, slug):
     except EmptyPage:
         top_level_comments = paginator.page(paginator.num_pages)
 
+    # Initialize forms for GET or so they are available if POST validation fails
+    rating_form = RatingForm()
+    comment_form = CommentForm()
+
     if request.method == 'POST':
-        if 'generate_summary' in request.POST:
-            from .ai_utils import generate_summary_from_text
-            article_text = strip_tags(article.content)
-            summary = generate_summary_from_text(article_text)
-            article.summary = summary
-            article.save(update_fields=['summary'])
-            return HttpResponseRedirect(request.path_info)
-
-        if 'rating_submit' in request.POST:
-            if not request.user.is_authenticated:
-                 return HttpResponseRedirect(f"/accounts/login/?next={request.path}")
-            rating_form = RatingForm(request.POST)
-            if rating_form.is_valid():
-                score = int(rating_form.cleaned_data['score'])
-                article.ratings.update_or_create(user=request.user, defaults={'score': score})
+        import logging
+        logger = logging.getLogger(__name__)
+        try:
+            if 'generate_summary' in request.POST:
+                from .ai_utils import generate_summary_from_text
+                article_text = strip_tags(article.content)
+                summary = generate_summary_from_text(article_text)
+                article.summary = summary
+                article.save(update_fields=['summary'])
                 return HttpResponseRedirect(request.path_info)
 
-        elif 'comment_submit' in request.POST:
-            if not request.user.is_authenticated:
-                 return HttpResponseRedirect(f"/accounts/login/?next={request.path}")
-            comment_form = CommentForm(request.POST)
-            if comment_form.is_valid():
-                text = comment_form.cleaned_data['text']
-                parent_id = comment_form.cleaned_data.get('parent_id')
-                parent_comment = None
-                if parent_id:
-                    try:
-                        parent_comment = article.comments.get(id=parent_id)
-                    except article.comments.model.DoesNotExist:
-                        pass
-                article.comments.create(user=request.user, text=text, parent=parent_comment)
-                return HttpResponseRedirect(request.path_info)
+            if 'rating_submit' in request.POST:
+                if not request.user.is_authenticated:
+                     return HttpResponseRedirect(f"/accounts/login/?next={request.path}")
+                rating_form = RatingForm(request.POST)
+                if rating_form.is_valid():
+                    score = int(rating_form.cleaned_data['score'])
+                    article.ratings.update_or_create(user=request.user, defaults={'score': score})
+                    return HttpResponseRedirect(request.path_info)
+                else:
+                    logger.warning(f"Rating form invalid: {rating_form.errors}")
+
+            elif 'comment_submit' in request.POST:
+                if not request.user.is_authenticated:
+                     return HttpResponseRedirect(f"/accounts/login/?next={request.path}")
+                comment_form = CommentForm(request.POST)
+                if comment_form.is_valid():
+                    text = comment_form.cleaned_data['text']
+                    parent_id = comment_form.cleaned_data.get('parent_id')
+                    parent_comment = None
+                    if parent_id:
+                        try:
+                            parent_comment = article.comments.get(id=parent_id)
+                        except Comment.DoesNotExist:
+                            pass
+                    article.comments.create(user=request.user, text=text, parent=parent_comment)
+                    return HttpResponseRedirect(request.path_info)
+                else:
+                    logger.warning(f"Comment form invalid: {comment_form.errors}")
+        except Exception as e:
+            logger.error(f"Error in article_detail_view POST: {e}", exc_info=True)
+            # Temporarily show the error to the user if they are staff for debugging
+            if request.user.is_staff:
+                messages.error(request, f"Server Error: {e}")
+            raise # Re-raise to let the user see the 500 page
     else:
-        rating_form = RatingForm()
-        comment_form = CommentForm()
         article.view_count += 1
         article.save(update_fields=['view_count'])
 
@@ -234,6 +249,14 @@ def article_detail_view(request, slug):
     }
 
     return render(request, 'publications/article_detail.html', context)
+    
+def article_content_api(request, slug):
+    """ Returns the content of an article as JSON for AJAX loading. """
+    article = get_object_or_404(Article, slug=slug)
+    return JsonResponse({
+        'content': article.content,
+        'summary': article.summary
+    })
 
 def author_detail_view(request, pk):
     author = get_object_or_404(Author, pk=pk)

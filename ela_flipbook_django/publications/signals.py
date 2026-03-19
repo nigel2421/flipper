@@ -1,16 +1,42 @@
 # publications/signals.py
 
+import threading
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth.models import User
 from allauth.account.signals import user_signed_up
-from .models import Profile
+from django.utils.html import strip_tags
+from .ai_utils import generate_summary_from_text
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     """Create a user profile when a new user is created."""
     if created:
+        from .models import Profile
         Profile.objects.create(user=instance)
+
+def _generate_article_summary(article_id):
+    """Internal function to generate summary in background."""
+    from .models import Article
+    try:
+        article = Article.objects.get(id=article_id)
+        if not article.summary:
+            content_text = strip_tags(article.content)
+            summary = generate_summary_from_text(content_text)
+            if summary and not summary.startswith("Error"):
+                article.summary = summary
+                article.save(update_fields=['summary'])
+    except Article.DoesNotExist:
+        pass
+
+@receiver(post_save, sender='publications.Article')
+def trigger_ai_summary(sender, instance, created, **kwargs):
+    """Start a background job to generate summary after 3 minutes."""
+    if created and not instance.summary:
+        # Use threading.Timer for a simple delayed background task
+        # 180 seconds = 3 minutes
+        timer = threading.Timer(180, _generate_article_summary, args=[instance.id])
+        timer.start()
 
 @receiver(user_signed_up)
 def handle_referral_signup(sender, request, user, **kwargs):

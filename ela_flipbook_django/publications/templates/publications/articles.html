@@ -18,11 +18,22 @@
     /*  SIDEBAR STYLING                    */
     /* =================================== */
     .articles-sidebar {
-        flex: 0 0 250px;
-        background-color: #f9f9f9;
-        padding: 20px;
-        border-radius: 8px;
-        height: fit-content;
+        position: fixed;
+        top: 0;
+        left: -320px; /* Hidden by default */
+        width: 300px;
+        height: 100%;
+        background-color: var(--card-bg);
+        padding: 40px 20px;
+        z-index: 1002;
+        transition: left 0.3s ease;
+        overflow-y: auto;
+        box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .articles-sidebar.open {
+        left: 0;
     }
 
     .sidebar-header {
@@ -162,25 +173,38 @@
             flex: 1.5;
             padding-left: 20px;
         }
+        .articles-page-container {
+            display: block; /* Stack vertically, filter is now a popup */
+        }
     }
 
     /* =================================== */
     /*  MOBILE FILTER STYLING              */
     /* =================================== */
     .filter-toggle-btn {
-        display: none;
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        z-index: 1001;
+        display: flex; /* Visible on desktop too */
+        align-items: center;
+        gap: 10px;
+        position: sticky;
+        top: 100px;
+        left: 20px;
+        z-index: 999;
         background-color: var(--primary-blue);
         color: white;
-        padding: 12px 20px;
+        padding: 12px 25px;
         border-radius: 50px;
         border: 1px solid rgba(255, 255, 255, 0.2);
         cursor: pointer;
         box-shadow: 0 8px 16px rgba(0,0,0,0.4);
         font-weight: bold;
+        width: fit-content;
+        margin-bottom: 20px;
+        transition: transform 0.3s ease;
+    }
+
+    .filter-toggle-btn:hover {
+        transform: scale(1.05);
+        background-color: #2980b9;
     }
 
     @media (max-width: 768px) {
@@ -227,8 +251,8 @@
 
     <aside id="articles-sidebar" class="articles-sidebar">
         <div class="sidebar-header">
-             <h3>Filters</h3>
-             <button id="close-filter-btn" class="close-filter-btn">&times;</button>
+             <h3 style="color: var(--text-dark);">Filters</h3>
+             <button id="close-filter-btn" class="close-filter-btn" style="color: var(--text-dark);">&times;</button>
         </div>
         <form method="GET" action="{% url 'publications:articles' %}" class="filter-form">
 

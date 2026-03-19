@@ -91,7 +91,7 @@ class ModelTests(PublicationTestBase):
     def test_article_get_absolute_url(self):
         """Test that Articles return a valid absolute URL."""
         url = self.article.get_absolute_url()
-        self.assertIn(str(self.article.pk), url)
+        self.assertIn(self.article.slug, url)
 
     def test_magazine_creation(self):
         """Test that a Magazine can be created and saved to the database."""
@@ -161,7 +161,7 @@ class ModelTests(PublicationTestBase):
     def test_whatsapp_update_get_absolute_url(self):
         """Test that WhatsAppUpdate returns a valid absolute URL."""
         url = self.whatsapp_update.get_absolute_url()
-        self.assertIn(str(self.whatsapp_update.pk), url)
+        self.assertIn(self.whatsapp_update.slug, url)
 
     def test_sponsor_creation(self):
         """Test that a Sponsor can be created and saved."""
@@ -216,13 +216,13 @@ class ViewTests(PublicationTestBase):
 
     def test_article_detail_view_public(self):
         """Test the article detail view is public (no login required - needed for OG crawlers)."""
-        response = self.client.get(reverse('publications:article_detail', kwargs={'pk': self.article.pk}))
+        response = self.client.get(reverse('publications:article_detail', kwargs={'slug': self.article.slug}))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'publications/article_detail.html')
 
     def test_article_detail_contains_og_tags(self):
         """Test that article detail page contains Open Graph meta tags for WhatsApp rich preview."""
-        response = self.client.get(reverse('publications:article_detail', kwargs={'pk': self.article.pk}))
+        response = self.client.get(reverse('publications:article_detail', kwargs={'slug': self.article.slug}))
         content = response.content.decode()
         self.assertIn('og:title', content)
         self.assertIn('og:description', content)
@@ -231,7 +231,7 @@ class ViewTests(PublicationTestBase):
 
     def test_article_detail_og_title_matches(self):
         """Test that the OG title matches the article title."""
-        response = self.client.get(reverse('publications:article_detail', kwargs={'pk': self.article.pk}))
+        response = self.client.get(reverse('publications:article_detail', kwargs={'slug': self.article.slug}))
         content = response.content.decode()
         self.assertIn(self.article.title, content)
 
@@ -274,13 +274,13 @@ class ViewTests(PublicationTestBase):
 
     def test_whatsapp_detail_view(self):
         """Test that the WhatsApp Update detail page renders correctly."""
-        response = self.client.get(reverse('publications:whatsapp_detail', kwargs={'pk': self.whatsapp_update.pk}))
+        response = self.client.get(reverse('publications:whatsapp_detail', kwargs={'slug': self.whatsapp_update.slug}))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'publications/whatsapp_detail.html')
 
     def test_whatsapp_detail_view_contains_og_tags(self):
         """Test that the WA detail page contains Open Graph meta tags."""
-        response = self.client.get(reverse('publications:whatsapp_detail', kwargs={'pk': self.whatsapp_update.pk}))
+        response = self.client.get(reverse('publications:whatsapp_detail', kwargs={'slug': self.whatsapp_update.slug}))
         content = response.content.decode()
         self.assertIn('og:title', content)
         self.assertIn('og:description', content)
@@ -288,12 +288,12 @@ class ViewTests(PublicationTestBase):
 
     def test_whatsapp_detail_view_contains_title(self):
         """Test that the WA detail page shows the update title."""
-        response = self.client.get(reverse('publications:whatsapp_detail', kwargs={'pk': self.whatsapp_update.pk}))
+        response = self.client.get(reverse('publications:whatsapp_detail', kwargs={'slug': self.whatsapp_update.slug}))
         self.assertContains(response, self.whatsapp_update.title)
 
     def test_whatsapp_detail_404_for_missing_update(self):
         """Test that requesting a non-existent WhatsApp Update returns 404."""
-        response = self.client.get(reverse('publications:whatsapp_detail', kwargs={'pk': 99999}))
+        response = self.client.get(reverse('publications:whatsapp_detail', kwargs={'slug': 'non-existent-slug'}))
         self.assertEqual(response.status_code, 404)
 
 
@@ -424,3 +424,63 @@ class FormTests(TestCase):
         
         valid_form = CommentForm(data={'text': 'Great article!'})
         self.assertTrue(valid_form.is_valid())
+
+# ──────────────────────────────────────────────────────────────────────────────
+# NEW FEATURE TESTS
+# ──────────────────────────────────────────────────────────────────────────────
+from unittest.mock import patch
+
+@override_settings(
+    MIDDLEWARE=TEST_MIDDLEWARE,
+    STATICFILES_STORAGE=TEST_STORAGE,
+    GOOGLE_API_KEY='fake-key'
+)
+class NewFeatureTests(PublicationTestBase):
+    
+    def test_like_comment_ajax(self):
+        """Test the comment like AJAX endpoint."""
+        self.client.login(username='testuser', password='password')
+        comment = Comment.objects.create(article=self.article, user=self.user, text='Like this.')
+        url = reverse('publications:like_comment', kwargs={'pk': comment.id})
+        
+        # Initial like
+        response = self.client.post(url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data['liked'])
+        self.assertEqual(data['like_count'], 1)
+        
+        # Unlike
+        response = self.client.post(url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        data = response.json()
+        self.assertFalse(data['liked'])
+        self.assertEqual(data['like_count'], 0)
+
+    @patch('publications.signals.generate_summary_from_text')
+    def test_ai_summary_generation_logic(self, mock_gen):
+        """Test the AI summary generation logic."""
+        mock_gen.return_value = "This is a summary."
+        from publications.signals import _generate_article_summary
+        
+        # Ensure summary is empty
+        self.article.summary = ""
+        self.article.save()
+        
+        _generate_article_summary(self.article.id)
+        
+        self.article.refresh_from_db()
+        self.assertEqual(self.article.summary, "This is a summary.")
+
+    @patch('publications.management.commands.generate_ai_summaries.generate_summary_from_text')
+    def test_ai_summary_command(self, mock_gen):
+        """Test the generate_ai_summaries management command."""
+        mock_gen.return_value = "Command summary."
+        from django.core.management import call_command
+        
+        self.article.summary = ""
+        self.article.save()
+        
+        call_command('generate_ai_summaries')
+        
+        self.article.refresh_from_db()
+        self.assertEqual(self.article.summary, "Command summary.")

@@ -19,7 +19,7 @@
                 <p class="hero-tagline">Entrepreneurship | Leadership | Strategy</p>
                 <h1 class="hero-headline">Unlock Financial Success and Sustainability</h1>
                 <p class="hero-subheadline">Subscribe now to our magazine and start building your business today!</p>
-                <a href="{% url 'account_signup' %}" class="hero-subscribe-button d-inline-block">Subscribe Now</a>
+                <a href="{% url 'account_signup' %}" class="hero-subscribe-button desktop-only desktop-only-btn">Subscribe Now</a>
             </div>
             
             <div class="hero-images">
@@ -33,6 +33,13 @@
                         {% endif %}
                     </a>
                 {% endfor %}
+            </div>
+
+            <!-- Mobile-only Subscribe Button -->
+            <div class="mobile-only-btn-wrapper">
+                <div class="text-center">
+                    <a href="{% url 'account_signup' %}" class="hero-subscribe-button">Subscribe Now</a>
+                </div>
             </div>
         </div>
     </section>

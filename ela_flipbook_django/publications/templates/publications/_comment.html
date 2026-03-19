@@ -14,7 +14,7 @@
         </a>
 
         <!-- Like Button -->
-        <button class="like-btn {% if request.user in comment.likes.all %}liked{% endif %}" data-comment-id="{{ comment.id }}">
+        <button class="like-btn {% if request.user in comment.liked_by.all %}liked{% endif %}" data-comment-id="{{ comment.id }}">
             <i class="fas fa-heart"></i>
             <span class="like-count">{{ comment.like_count }}</span>
         </button>

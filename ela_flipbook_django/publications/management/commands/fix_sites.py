@@ -12,30 +12,42 @@ class Command(BaseCommand):
         self.stdout.write('--- DIAGNOSTIC START ---')
         self.stdout.write(f'SITE_ID from settings: {settings.SITE_ID}')
 
-        # 1. Total Reset
-        self.stdout.write('Purging all SocialApps...')
-        SocialApp.objects.all().delete()
+        # 1. Ensure Sites exist
+        domains = [
+            ('idx-flippergit-09470411-122195396017.africa-south1.run.app', 'BMA Cloud Run'),
+            ('businessmatters.co.ke', 'Business Matters Africa')
+        ]
         
-        domain = 'idx-flippergit-09470411-122195396017.africa-south1.run.app'
-        site_1, _ = Site.objects.get_or_create(id=1)
-        site_1.domain = domain
-        site_1.name = 'Business Matters'
-        site_1.save()
-        Site.objects.exclude(id=1).delete()
+        site_objs = []
+        for domain, name in domains:
+            site, created = Site.objects.get_or_create(domain=domain, defaults={'name': name})
+            if not created and site.name != name:
+                site.name = name
+                site.save()
+            site_objs.append(site)
+            self.stdout.write(f'Site configured: {domain} (ID: {site.id})')
 
-        # 2. Create and Verify
+        # 2. Configure SocialApp
         client_id = os.environ.get('GOOGLE_CLIENT_ID')
         secret = os.environ.get('GOOGLE_SECRET')
 
         if client_id and secret:
-            app = SocialApp.objects.create(
+            app, created = SocialApp.objects.get_or_create(
                 provider='google',
-                name='Google Login',
-                client_id=client_id,
-                secret=secret
+                defaults={'name': 'Google Login', 'client_id': client_id, 'secret': secret}
             )
-            app.sites.add(site_1)
-            self.stdout.write(self.style.SUCCESS(f'Created SocialApp {app.id} for google.'))
+            if not created:
+                app.client_id = client_id
+                app.secret = secret
+                app.save()
+            
+            # Link to all sites
+            for s in site_objs:
+                app.sites.add(s)
+            
+            self.stdout.write(self.style.SUCCESS(f'SocialApp "google" (ID: {app.id}) is linked to all sites.'))
+        else:
+            self.stdout.write(self.style.ERROR('GOOGLE_CLIENT_ID or GOOGLE_SECRET missing from environment!'))
         
         # 3. Simulate allauth's lookup
         adapter = get_adapter()

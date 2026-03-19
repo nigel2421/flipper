@@ -107,7 +107,7 @@ class Article(models.Model):
 
 # --- NEW: Rating Model ---
 class Rating(models.Model):
-    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name="ratings") # Now non-nullable
+    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name="ratings", null=True, blank=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     score = models.PositiveSmallIntegerField(choices=[(i, i) for i in range(1, 6)]) # 1 to 5 stars
 

@@ -1,0 +1,12 @@
+System check identified some issues:
+
+WARNINGS:
+?: settings.ACCOUNT_AUTHENTICATION_METHOD is deprecated, use: settings.ACCOUNT_LOGIN_METHODS = {'email'}
+?: settings.ACCOUNT_EMAIL_REQUIRED is deprecated, use: settings.ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
+?: settings.ACCOUNT_USERNAME_REQUIRED is deprecated, use: settings.ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
+Found 1 articles to process.
+[1/1] Processing: Reimagining Africa's Role in The Future Global Tech Economy...
+DEBUG_V2: Attempting summary with models/gemini-1.5-flash
+DEBUG_V2: Error with models/gemini-1.5-flash: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+Failed to generate summary for: Reimagining Africa's Role in The Future Global Tech Economy. Response: Error: Could not generate summary.
+Generation process completed.

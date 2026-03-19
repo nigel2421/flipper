@@ -10,9 +10,16 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
     def pre_social_login(self, request, sociallogin):
         """
         Invoked just after a user successfully authenticates via a
-        social provider, but before the login is actually processed
-        (and before a man-to-many relationship has been created).
+        social provider. We use this to auto-verify social accounts.
         """
+        # Auto-verify social accounts (e.g. Google)
+        from allauth.account.models import EmailAddress
+        email = sociallogin.user.email
+        if email:
+            EmailAddress.objects.filter(user=sociallogin.user, email=email).update(verified=True)
+            # Alternatively, if multiple emails are possible:
+            # sociallogin.user.email_address_set.all().update(verified=True)
+
         # Get the user instance from the social login
         user = sociallogin.user
 
