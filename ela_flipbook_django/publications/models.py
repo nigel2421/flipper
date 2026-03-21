@@ -8,6 +8,7 @@ from django_ckeditor_5.fields import CKEditor5Field
 from django.contrib.auth.models import AbstractUser, PermissionsMixin
 from django.utils.text import slugify
 import uuid
+from .utils import resize_image_to_square
 
 # --- NEW: Author Model ---
 class Author(models.Model):
@@ -88,6 +89,8 @@ class Article(models.Model):
                 slug = f"{base_slug}-{counter}"
                 counter += 1
             self.slug = slug
+        if self.cover_image:
+            resize_image_to_square(self.cover_image, size=500)
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -314,6 +317,8 @@ class WhatsAppUpdate(models.Model):
                 slug = f"{base_slug}-{counter}"
                 counter += 1
             self.slug = slug
+        if self.cover_image:
+            resize_image_to_square(self.cover_image, size=500)
         super().save(*args, **kwargs)
 
     def __str__(self):

@@ -22,8 +22,8 @@ class ManagementCommandTests(TestCase):
         call_command('fix_sites')
         
         # Verify Sites
-        self.assertEqual(Site.objects.count(), 2)
-        site_cloud_run = Site.objects.get(domain='idx-flippergit-09470411-122195396017.africa-south1.run.app')
+        self.assertEqual(Site.objects.count(), 4)
+        site_cloud_run = Site.objects.get(domain='flipper-git-cydpcotz4q-ew.a.run.app')
         site_prod = Site.objects.get(domain='businessmatters.co.ke')
         
         # Verify SocialApp

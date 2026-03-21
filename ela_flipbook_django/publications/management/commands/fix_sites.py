@@ -14,16 +14,26 @@ class Command(BaseCommand):
 
         # 1. Ensure Sites exist
         domains = [
-            ('idx-flippergit-09470411-122195396017.africa-south1.run.app', 'BMA Cloud Run'),
-            ('businessmatters.co.ke', 'Business Matters Africa')
+            ('flipbookwebsite.web.app', 'Firebase Hosting'),
+            ('flipper-git-cydpcotz4q-ew.a.run.app', 'Cloud Run Prod'),
+            ('businessmatters.co.ke', 'Main Domain'),
+            ('127.0.0.1:8000', 'Local Development'),
         ]
         
         site_objs = []
-        for domain, name in domains:
-            site, created = Site.objects.get_or_create(domain=domain, defaults={'name': name})
-            if not created and site.name != name:
-                site.name = name
-                site.save()
+        for i, (domain, name) in enumerate(domains):
+            # Try to update the site with settings.SITE_ID first
+            if i == 0:
+                site, created = Site.objects.get_or_create(id=settings.SITE_ID, defaults={'domain': domain, 'name': name})
+                if not created:
+                    site.domain = domain
+                    site.name = name
+                    site.save()
+            else:
+                site, created = Site.objects.get_or_create(domain=domain, defaults={'name': name})
+                if not created and site.name != name:
+                    site.name = name
+                    site.save()
             site_objs.append(site)
             self.stdout.write(f'Site configured: {domain} (ID: {site.id})')
 

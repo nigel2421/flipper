@@ -41,6 +41,10 @@ ALLOWED_HOSTS = [
     'flipper-app-122195396017.africa-south1.run.app',
     'flipper-app-cydpcotz4q-bq.a.run.app',
     'idx-flippergit-09470411-cydpcotz4q-bq.a.run.app',
+    'flipper-git-122195396017.europe-west1.run.app',
+    'flipbookwebsite.web.app',
+    'flipbookwebsite.firebaseapp.com',
+    'flipper-git-cydpcotz4q-ew.a.run.app',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -49,6 +53,10 @@ CSRF_TRUSTED_ORIGINS = [
     'https://flipper-app-122195396017.africa-south1.run.app',
     'https://flipper-app-cydpcotz4q-bq.a.run.app',
     'https://idx-flippergit-09470411-cydpcotz4q-bq.a.run.app',
+    'https://flipper-git-122195396017.europe-west1.run.app',
+    'https://flipbookwebsite.web.app',
+    'https://flipbookwebsite.firebaseapp.com',
+    'https://flipper-git-cydpcotz4q-ew.a.run.app',
 ]
 
 SITE_ID = 1

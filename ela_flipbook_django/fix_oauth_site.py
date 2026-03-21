@@ -1,16 +1,17 @@
 import os
-import django
-
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'flipbook_project.settings')
+import django
 django.setup()
 
+from django.conf import settings
 from django.contrib.sites.models import Site
 
 def fix_site():
     # The domain should NOT have http/https or trailing paths
-    correct_domain = 'idx-flippergit-09470411-122195396017.africa-south1.run.app'
+    correct_domain = 'flipbookwebsite.firebaseapp.com'
     
-    site = Site.objects.get(id=1)
+    site_id = getattr(settings, 'SITE_ID', 1)
+    site = Site.objects.get(id=site_id)
     print(f"Current Site Domain: {site.domain}")
     
     if site.domain != correct_domain:

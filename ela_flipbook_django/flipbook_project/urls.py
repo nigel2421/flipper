@@ -1,5 +1,4 @@
-# flipbook_project/urls.py
-
+import os
 from django.contrib import admin
 from django.urls import path, include, re_path
 from django.conf import settings
@@ -11,6 +10,16 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     path("ckeditor5/", include('django_ckeditor_5.urls')),
+
+    # PWA Support
+    path('serviceworker.js', serve, {
+        'document_root': os.path.join(settings.BASE_DIR, 'publications', 'static', 'js'),
+        'path': 'serviceworker.js'
+    }),
+    path('manifest.json', serve, {
+        'document_root': os.path.join(settings.BASE_DIR, 'publications', 'static'),
+        'path': 'manifest.json'
+    }),
 
     # 1. Sign-Up is immediately redirected to the Google login flow.
     path("accounts/signup/",

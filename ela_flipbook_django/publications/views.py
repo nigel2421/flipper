@@ -58,6 +58,7 @@ def home_view(request):
     }
     return render(request, 'publications/home.html', context)
 
+@login_required
 def magazine_view(request):
     """ Renders the magazine page with a grid of all publications. """
     publications_list = Magazine.objects.all().order_by('-uploaded_at')
@@ -141,6 +142,7 @@ def articles_view(request):
     return render(request, 'publications/articles.html', context)
 
 
+@login_required
 def article_detail_view(request, slug):
     """ Renders a single web article page. """
     article = get_object_or_404(Article, slug=slug)
@@ -250,6 +252,7 @@ def article_detail_view(request, slug):
 
     return render(request, 'publications/article_detail.html', context)
     
+@login_required
 def article_content_api(request, slug):
     """ Returns the content of an article as JSON for AJAX loading. """
     article = get_object_or_404(Article, slug=slug)

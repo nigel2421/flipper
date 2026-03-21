@@ -30,11 +30,11 @@ class PublicationTestBase(TestCase):
         self.author = Author.objects.create(name='Test Author')
         self.tag = Tag.objects.create(name='Test Tag', slug='test-tag')
 
-        # Create a minimal dummy image for the cover_image field
+        # Create a minimal valid PNG for the cover_image field
         self.dummy_image = SimpleUploadedFile(
-            name='test_image.jpg',
-            content=b'\x47\x49\x46\x38\x39\x61',  # minimal valid file bytes
-            content_type='image/jpeg'
+            name='test_image.png',
+            content=b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde\x00\x00\x00\x0cIDAT\x08\xd7c\xf8\xff\xff?\x00\x05\xfe\x02\xfe\x0dc\x44\xaf\x00\x00\x00\x00IEND\xaeB`\x82',
+            content_type='image/png'
         )
 
         self.article = Article.objects.create(
@@ -68,7 +68,11 @@ class PublicationTestBase(TestCase):
             title='Test WA Update',
             content='This is a WhatsApp update.',
             short_description='A short WA description.',
-            cover_image=SimpleUploadedFile('wa_cover.jpg', b'\x47\x49\x46\x38\x39\x61', content_type='image/jpeg'),
+            cover_image=SimpleUploadedFile(
+                'wa_cover.png',
+                b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde\x00\x00\x00\x0cIDAT\x08\xd7c\xf8\xff\xff?\x00\x05\xfe\x02\xfe\x0dc\x44\xaf\x00\x00\x00\x00IEND\xaeB`\x82',
+                content_type='image/png'
+            ),
         )
         self.client = Client()
 
@@ -167,7 +171,11 @@ class ModelTests(PublicationTestBase):
         """Test that a Sponsor can be created and saved."""
         sponsor = Sponsor.objects.create(
             name='Test Sponsor',
-            logo=SimpleUploadedFile('logo.jpg', b'\x47\x49\x46\x38\x39\x61', content_type='image/jpeg'),
+            logo=SimpleUploadedFile(
+                'logo.png',
+                b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde\x00\x00\x00\x0cIDAT\x08\xd7c\xf8\xff\xff?\x00\x05\xfe\x02\xfe\x0dc\x44\xaf\x00\x00\x00\x00IEND\xaeB`\x82',
+                content_type='image/png'
+            ),
         )
         self.assertEqual(Sponsor.objects.count(), 1)
         self.assertEqual(str(sponsor), 'Test Sponsor')
@@ -191,10 +199,9 @@ class ViewTests(PublicationTestBase):
         self.assertTemplateUsed(response, 'publications/home.html')
 
     def test_magazine_view(self):
-        """Test the magazine view."""
+        """Test that the magazine view redirects unauthenticated users."""
         response = self.client.get(reverse('publications:magazine'))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'publications/magazine.html')
+        self.assertEqual(response.status_code, 302)
 
     def test_about_us_view(self):
         """Test the about us page is publicly accessible."""
@@ -214,14 +221,14 @@ class ViewTests(PublicationTestBase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'publications/articles.html')
 
-    def test_article_detail_view_public(self):
-        """Test the article detail view is public (no login required - needed for OG crawlers)."""
+    def test_article_detail_view_unauthenticated(self):
+        """Test that the article detail view redirects unauthenticated users."""
         response = self.client.get(reverse('publications:article_detail', kwargs={'slug': self.article.slug}))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'publications/article_detail.html')
+        self.assertEqual(response.status_code, 302)
 
     def test_article_detail_contains_og_tags(self):
         """Test that article detail page contains Open Graph meta tags for WhatsApp rich preview."""
+        self.client.login(username='testuser', password='password')
         response = self.client.get(reverse('publications:article_detail', kwargs={'slug': self.article.slug}))
         content = response.content.decode()
         self.assertIn('og:title', content)
@@ -231,6 +238,7 @@ class ViewTests(PublicationTestBase):
 
     def test_article_detail_og_title_matches(self):
         """Test that the OG title matches the article title."""
+        self.client.login(username='testuser', password='password')
         response = self.client.get(reverse('publications:article_detail', kwargs={'slug': self.article.slug}))
         content = response.content.decode()
         self.assertIn(self.article.title, content)
@@ -321,7 +329,7 @@ class AuthLogicTests(TestCase):
 
     def test_pre_social_login_fixes_none_names(self):
         """Test that pre_social_login converts None names to empty strings."""
-        user = User(email='test@example.com')
+        user = User.objects.create(email='test@example.com', username='testuser_unique')
         user.first_name = None
         user.last_name = None
         sociallogin = MockSocialLogin(user=user)
@@ -334,7 +342,7 @@ class AuthLogicTests(TestCase):
 
     def test_populate_user_extracts_names(self):
         """Test that populate_user pulls names from Google extra_data."""
-        user = User(email='new@example.com')
+        user = User.objects.create(email='new@example.com', username='newuser_unique')
         extra_data = {'given_name': 'Jane', 'family_name': 'Doe'}
         sociallogin = MockSocialLogin(user=user)
         sociallogin.account.extra_data = extra_data
