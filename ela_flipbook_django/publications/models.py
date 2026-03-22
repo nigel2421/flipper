@@ -33,7 +33,7 @@ class Magazine(models.Model):
     title = models.CharField(max_length=200)
     slug = models.SlugField(max_length=220, unique=True, blank=True)
     pdf_file = models.FileField(upload_to='pdfs/', help_text="Note: PDFs should be less than 30 MBs.")
-    cover_image = models.ImageField(upload_to='covers/')
+    cover_image = models.ImageField(upload_to='covers/', null=True, blank=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     # === NEW FIELDS ===
@@ -48,6 +48,17 @@ class Magazine(models.Model):
                 slug = f"{base_slug}-{counter}"
                 counter += 1
             self.slug = slug
+            
+        if self.pdf_file and not self.cover_image:
+            from .utils import generate_pdf_cover
+            from django.core.files.base import ContentFile
+            cover_data = generate_pdf_cover(self.pdf_file)
+            if cover_data:
+                self.cover_image.save(
+                    f"{self.slug}_cover.jpg",
+                    ContentFile(cover_data.read()),
+                    save=False
+                )
         super().save(*args, **kwargs)
 
     def __str__(self):

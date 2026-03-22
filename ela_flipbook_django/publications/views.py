@@ -32,7 +32,7 @@ def home_view(request):
         avg_rating=Avg('ratings__score')
     ).order_by('-view_count')[:5]
 
-    subscribers_count = User.objects.count() + 660
+    subscribers_count = User.objects.count() + 666
     visitor_count = cache.get('visitor_count')
     if not visitor_count:
         visitor_count = random.randint(10, 73)

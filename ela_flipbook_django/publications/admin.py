@@ -166,8 +166,37 @@ class CommentReportAdmin(admin.ModelAdmin):
 
 @admin.register(Magazine)
 class MagazineAdmin(admin.ModelAdmin):
-    list_display = ('title', 'uploaded_at')
-    fields = ('title', 'excerpt', 'pdf_file', 'cover_image')
+    list_display = ('title', 'uploaded_at', 'cover_preview')
+    readonly_fields = ('cover_image', 'cover_preview')
+    
+    def get_fields(self, request, obj=None):
+        # Exclude cover_image from the form but show it in readonly_fields
+        return ('title', 'excerpt', 'pdf_file', 'cover_preview')
+
+    def cover_preview(self, obj):
+        if obj.cover_image:
+            from django.utils.html import format_html
+            return format_html('<img src="{}" style="max-height: 200px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" />', obj.cover_image.url)
+        return "Will be automatically generated from the PDF's first page."
+    cover_preview.short_description = "Cover Preview"
+
+    def get_fieldsets(self, request, obj=None):
+        from django.utils.html import format_html
+        return (
+            (None, {
+                'fields': ('title', 'excerpt', 'pdf_file'),
+                'description': format_html(
+                    '<div style="background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; padding: 15px; border-radius: 6px; margin-bottom: 20px; font-weight: 600; display: flex; align-items: center; gap: 12px; font-size: 14px;">'
+                    '<i class="fas fa-exclamation-triangle" style="font-size: 20px;"></i>'
+                    '<span><strong>IMPORTANT:</strong> Uploaded publication files MUST be less than <strong>30 MB</strong>. The cover image will be automatically extracted from the first page.</span>'
+                    '</div>'
+                )
+            }),
+            ('Auto-generated Media', {
+                'fields': ('cover_preview',),
+                'description': 'This cover image is automatically generated from your PDF upload.'
+            }),
+        )
 
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):

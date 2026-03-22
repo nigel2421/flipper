@@ -366,6 +366,22 @@
                     loader.classList.remove('active');
                 }
             });
+
+            // --- Scroll Progress Bar Logic ---
+            const progressBar = document.getElementById("progressBar");
+            const isArticlePage = document.getElementById('article-main-content'); // Unique to article_detail.html
+            
+            if (progressBar && isArticlePage) {
+                const container = document.querySelector('.progress-container');
+                if (container) container.style.display = 'block';
+
+                window.addEventListener('scroll', () => {
+                    const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+                    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                    const scrolled = (winScroll / height) * 100;
+                    progressBar.style.width = scrolled + "%";
+                });
+            }
         });
     </script>
 

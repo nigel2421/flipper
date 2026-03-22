@@ -1,4 +1,4 @@
-const CACHE_NAME = 'business-matters-v2'; // Increment version
+const CACHE_NAME = 'business-matters-v4'; // Increment version
 const ASSETS_TO_CACHE = [
     '/',
     '/static/publications/css/style.css',

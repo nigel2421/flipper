@@ -24,6 +24,8 @@
     --text-light: #ccd6f6;
     --text-dark: #ffffff;
     --text-muted: #8892b0;
+    --card-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+    --card-hover-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
 }
 
 ::selection {
@@ -108,6 +110,7 @@ main>.container {
     position: sticky;
     top: 0;
     z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
 }
 
 .navbar-container {
@@ -300,25 +303,21 @@ main>.container {
 
 .publication-card {
     background-color: var(--card-bg);
-    border-radius: 12px;
-    /* Slightly increased radius */
+    border-radius: 16px; /* Softer rounded corners */
     text-decoration: none;
     color: var(--text-light);
     overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    /* Deeper initial shadow */
-    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease, border-color 0.3s ease;
     display: flex;
     flex-direction: column;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    /* Subtle border */
+    border: 1px solid rgba(255, 255, 255, 0.1); /* Slightly more visible border */
 }
 
 .publication-card:hover {
-    transform: translateY(-8px);
-    /* Slightly less movement for a more grounded feel */
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
-    border-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-10px);
+    box-shadow: var(--card-hover-shadow);
+    border-color: rgba(255, 196, 0, 0.3); /* Subtle yellow tint on hover */
 }
 
 .card-image-wrapper {
@@ -349,26 +348,27 @@ main>.container {
 }
 
 .card-content {
-    padding: 15px;
+    padding: 20px; /* Standardized more generous padding */
     flex-grow: 1;
     display: flex;
     flex-direction: column;
+    gap: 10px; /* Consistent spacing between elements */
 }
 
 .card-date {
     font-size: 0.8rem;
-    font-weight: bold;
-    color: var(--text-muted);
+    font-weight: 700; /* Heavier for better legibility */
+    color: var(--accent-yellow); /* Magazines date also in yellow for consistency */
     text-transform: uppercase;
     display: block;
-    margin-bottom: 5px;
 }
 
 .card-title {
-    font-size: 1.1rem;
+    font-size: 1.2rem; /* Slightly larger, standardized */
     color: var(--text-dark);
-    margin: 0 0 10px 0;
-    line-height: 1.3;
+    margin: 0;
+    line-height: 1.4;
+    font-weight: 600;
 }
 
 .card-caption {
@@ -467,7 +467,8 @@ main>.container {
     font-weight: bold;
     color: var(--accent-yellow);
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 1.5px; /* Increased for readability */
+    font-weight: 700; /* Bolder for contrast */
 }
 
 .hero-headline {
@@ -691,6 +692,7 @@ main>.container {
     text-transform: uppercase;
     letter-spacing: 1px;
     margin: 0 0 8px 0;
+    font-weight: 700; /* Bolder for contrast */
 }
 
 .stat-number {
@@ -1613,10 +1615,10 @@ main>.container {
     margin-bottom: 20px;
 }
 .about-snippet-text {
-    font-size: 1.15rem;
-    color: var(--text-muted);
-    line-height: 1.7;
-    margin-bottom: 30px;
+    font-size: 1.1rem; /* Slightly smaller for better scaling */
+    color: var(--text-light); /* Better contrast than muted */
+    line-height: 1.6;
+    margin-bottom: 20px;
 }
 
 /* --- About Us Redesign (Socialy Inspired) --- */
@@ -2364,7 +2366,7 @@ main>.container {
 
 .card-title a:hover {
     color: var(--primary-blue) !important;
-    text-decoration: underline;
+    text-shadow: 0 0 10px rgba(52, 152, 219, 0.5); /* Glow effect on hover */
 }
 
 /* --- Profile Edit Form Styling --- */

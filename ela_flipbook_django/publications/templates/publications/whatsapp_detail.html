@@ -141,36 +141,16 @@
         {{ update.content|safe }}
     </div>
 
-    <!-- Share box -->
+    <!-- Follow us box -->
     <div class="wa-share-box">
         <div class="wa-share-icon"><i class="fab fa-whatsapp"></i></div>
         <div>
-            <h3>Share on WhatsApp</h3>
-            <p>Copy the link and paste it into your WhatsApp Channel to share this update.</p>
+            <h3>Follow us on WhatsApp</h3>
+            <p>Join our WhatsApp Channel for the latest news and insights delivered directly to you.</p>
         </div>
-        <button class="wa-share-btn" id="wa-copy-btn">
-            <i class="fas fa-copy"></i> Copy Link
-        </button>
+        <a href="https://whatsapp.com/channel/0029Vb70gUlBPzjg9ZOkjV2v" target="_blank" class="wa-share-btn" style="text-decoration: none;">
+            <i class="fab fa-whatsapp"></i> Follow Us
+        </a>
     </div>
 </div>
-
-<script>
-document.getElementById('wa-copy-btn').addEventListener('click', function() {
-    var btn = this;
-    var headline = document.querySelector('.wa-detail-title').innerText;
-    var url = window.location.href.split('?')[0] + "?utm_source=whatsapp";
-    var fullText = "*" + headline + "*\n\n" + url;
-    
-    navigator.clipboard.writeText(fullText).then(function() {
-        btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
-        btn.style.background = '#075E54';
-        setTimeout(function() {
-            btn.innerHTML = '<i class="fas fa-copy"></i> Copy Link';
-            btn.style.background = '#25D366';
-        }, 2500);
-    }).catch(function() {
-        btn.innerHTML = '<i class="fas fa-times"></i> Error';
-    });
-});
-</script>
 {% endblock %}
