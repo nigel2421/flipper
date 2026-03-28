@@ -409,7 +409,7 @@ class SecurityEvent(models.Model):
     ]
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='security_events')
     event_type = models.CharField(max_length=20, choices=EVENT_TYPES)
-    ip_address = models.GenericIPAddressField()
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
     user_agent = models.TextField(blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     details = models.JSONField(null=True, blank=True, help_text="Extra info (e.g., location, failure reason).")

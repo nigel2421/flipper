@@ -1,0 +1,56 @@
+Creating test database for alias 'default'...
+
+............................................C:\Users\USER\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\django\db\models\fields\__init__.py:1612: RuntimeWarning: DateTimeField Event.date received a naive datetime (2026-03-28 00:00:00) while time zone support is active.
+  warnings.warn(
+...........
+----------------------------------------------------------------------
+Ran 55 tests in 37.982s
+
+OK
+Destroying test database for alias 'default'...
+
+Successfully extracted cover!
+Saved test_cover.jpg
+Found 55 test(s).
+
+[MIGRATION] Detected database vendor: sqlite
+[MIGRATION] Running SQLite-specific safe column addition...
+[MIGRATION] Creating unique indexes (SQLite)...
+System check identified no issues (0 silenced).
+Found 1 magazines and 0 articles to notify.
+Successfully sent notification emails for 1 publications.
+--- DIAGNOSTIC START ---
+SITE_ID from settings: 1
+Site configured: flipbookwebsite.web.app (ID: 1)
+Site configured: flipper-git-cydpcotz4q-ew.a.run.app (ID: 2)
+Site configured: businessmatters.co.ke (ID: 3)
+Site configured: 127.0.0.1:8000 (ID: 4)
+SocialApp "google" (ID: 1) is linked to all sites.
+Simulating allauth adapter.get_app(None, "google")...
+Successfully found app: Google Login (ID: 1)
+--- DIAGNOSTIC END ---
+--- DIAGNOSTIC START ---
+SITE_ID from settings: 1
+Site configured: flipbookwebsite.web.app (ID: 1)
+Site configured: flipper-git-cydpcotz4q-ew.a.run.app (ID: 3)
+Site configured: businessmatters.co.ke (ID: 4)
+Site configured: 127.0.0.1:8000 (ID: 5)
+SocialApp "google" (ID: 1) is linked to all sites.
+Simulating allauth adapter.get_app(None, "google")...
+Successfully found app: Google (ID: 1)
+--- DIAGNOSTIC END ---
+--- DIAGNOSTIC START ---
+SITE_ID from settings: 1
+Site configured: flipbookwebsite.web.app (ID: 1)
+Site configured: flipper-git-cydpcotz4q-ew.a.run.app (ID: 2)
+Site configured: businessmatters.co.ke (ID: 3)
+Site configured: 127.0.0.1:8000 (ID: 4)
+GOOGLE_CLIENT_ID or GOOGLE_SECRET missing from environment!
+Simulating allauth adapter.get_app(None, "google")...
+Adapter failed: DoesNotExist: 
+Apps matching (site=1, provider="google"): 0
+--- DIAGNOSTIC END ---
+Using DATABASE: file:memorydb_default?mode=memory&cache=shared on HOST: 
+Processing 1 articles (Limit: None).
+Generating summary for: Test Article
+Successfully generated summary for Test Article

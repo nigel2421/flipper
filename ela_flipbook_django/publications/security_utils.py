@@ -8,12 +8,15 @@ from .utils import send_single_email
 
 def get_client_ip(request):
     """Extracts the client's IP address from the request."""
+    if not request:
+        return '0.0.0.0'
+        
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
     if x_forwarded_for:
         ip = x_forwarded_for.split(',')[0]
     else:
-        ip = request.META.get('REMOTE_ADDR')
-    return ip
+        ip = request.META.get('REMOTE_ADDR', '0.0.0.0')
+    return ip or '0.0.0.0'
 
 def detect_anomalies(user, ip, event_type, request=None):
     """
@@ -124,7 +127,7 @@ def send_security_notification_to_user(user, ip, request=None):
 def log_security_event(user, event_type, request, details=None):
     """Helper to log a security event and check for anomalies."""
     ip = get_client_ip(request)
-    ua = request.META.get('HTTP_USER_AGENT', '')
+    ua = request.META.get('HTTP_USER_AGENT', '') if request else 'Unknown'
     
     event = SecurityEvent.objects.create(
         user=user,
