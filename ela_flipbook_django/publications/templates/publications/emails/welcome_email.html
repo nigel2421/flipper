@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px; }
+        .header { text-align: center; padding-bottom: 20px; border-bottom: 2px solid #8B5CF6; }
+        .content { padding: 30px 20px; background-color: #f8fafc; border-radius: 8px; margin-top: 20px; }
+        .story-section { font-style: italic; color: #475569; border-left: 4px solid #8B5CF6; padding-left: 15px; margin: 25px 0; }
+        .btn { display: inline-block; background-color: #8B5CF6; color: white !important; padding: 14px 28px; text-decoration: none; border-radius: 5px; font-weight: bold; margin-top: 20px; }
+        .footer { font-size: 12px; color: #94a3b8; text-align: center; margin-top: 30px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 style="color: #8B5CF6; margin: 0;">Welcome to Business Matters Africa</h1>
+            <p>We're thrilled to have you join our community of leaders.</p>
+        </div>
+        
+        <div class="content">
+            <p>Hello {{ user.first_name|default:user.username }},</p>
+            <p>Thank you for signing up for Business Matters Africa (BMA).</p>
+            
+            <div class="story-section">
+                "Launched in November 2025, we deliberately position ourselves against the tide of superficial business content: no clickbait lists, no recycled generic advice, no obsession with viral trends. Instead, every edition focuses on depth — exploring the psychology of power, succession in family enterprises, and contrarian strategies that win in volatile markets."
+            </div>
+            
+            <p>Our mission is to become the trusted, desk-reference publication for serious African business builders who value <strong>signal over noise</strong>.</p>
+            
+            <p>Equipping ambitious leaders with strategic courage and Africa-centric perspectives that enable legacy building is at the heart of everything we do.</p>
+            
+            <div style="text-align: center;">
+                <a href="{{ site_url }}" class="btn">Start Exploring BMA</a>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>You received this email because you recently created an account at {{ SITE_NAME }}.</p>
+            <p>&copy; {{ year }} {{ SITE_NAME }}. All rights reserved.</p>
+        </div>
+        {% if tracking_url %}
+        <img src="{{ tracking_url }}" width="1" height="1" style="display:none !important;" />
+        {% endif %}
+    </div>
+</body>
+</html>

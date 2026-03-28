@@ -37,7 +37,7 @@ class RatingForm(forms.ModelForm):
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ['bio', 'job_title', 'job_role', 'company', 'industry']
+        fields = ['bio', 'job_title', 'job_role', 'company', 'industry', 'is_subscribed']
         widgets = {
             'bio': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Tell us about yourself...'}),
         }

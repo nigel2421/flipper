@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px; }
+        .header { text-align: center; padding-bottom: 20px; border-bottom: 2px solid #8B5CF6; }
+        .content { padding: 20px 0; }
+        .publication-card { margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
+        .publication-title { font-size: 20px; color: #1e293b; margin: 10px 0; font-weight: bold; }
+        .publication-image { width: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; }
+        .publication-excerpt { font-size: 14px; color: #64748b; margin-bottom: 15px; }
+        .btn { display: inline-block; background-color: #8B5CF6; color: white !important; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; }
+        .footer { font-size: 12px; color: #94a3b8; text-align: center; margin-top: 30px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 style="color: #8B5CF6; margin: 0;">New Publication Highlights!</h1>
+            <p>Don't miss out on our latest updates from yesterday.</p>
+        </div>
+        
+        <div class="content">
+            {% for pub in publications %}
+            <div class="publication-card">
+                {% if pub.image_url %}
+                <img src="{{ pub.image_url }}" alt="{{ pub.title }}" class="publication-image">
+                {% endif %}
+                <div class="publication-title">{{ pub.title }}</div>
+                <div class="publication-excerpt">{{ pub.excerpt|truncatewords:30|safe }}</div>
+                <a href="{{ pub.absolute_url }}" class="btn">Read More</a>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="footer">
+            <p>You are receiving this email because you're subscribed to our newsletter at {{ SITE_NAME }}.</p>
+            <p>If you wish to unsubscribe, please update your profile settings or <a href="{{ unsubscribe_url }}">click here</a>.</p>
+            <p>&copy; {{ year }} {{ SITE_NAME }}. All rights reserved.</p>
+        </div>
+        {% if tracking_url %}
+        <img src="{{ tracking_url }}" width="1" height="1" style="display:none !important;" />
+        {% endif %}
+    </div>
+</body>
+</html>

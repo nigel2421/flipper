@@ -10,6 +10,9 @@ from django.utils.text import slugify
 import uuid
 from .utils import resize_image_to_square
 
+from django.urls import reverse
+from .utils import resize_image_to_square
+
 # --- NEW: Author Model ---
 class Author(models.Model):
     user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True, help_text="Link to a Django user if the author has an account.")
@@ -35,6 +38,7 @@ class Magazine(models.Model):
     pdf_file = models.FileField(upload_to='pdfs/', help_text="Note: PDFs should be less than 30 MBs.")
     cover_image = models.ImageField(upload_to='covers/', null=True, blank=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
+    email_sent = models.BooleanField(default=False)
 
     # === NEW FIELDS ===
     excerpt = models.TextField(blank=True, help_text="A short summary for card previews.")
@@ -90,6 +94,7 @@ class Article(models.Model):
     uploaded_at = models.DateTimeField(auto_now_add=True)
     summary = models.TextField(blank=True, null=True, help_text="AI-generated summary of the article content.")
     was_shared_on_whatsapp = models.BooleanField(default=False, help_text="Tracks if this article has been shared on WhatsApp.")
+    email_sent = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -205,10 +210,11 @@ class Profile(models.Model):
     referred_by = models.ForeignKey(
         User, 
         on_delete=models.SET_NULL, 
-        null=True, 
+        null=True,
         blank=True, 
         related_name='referrals'
     )
+    is_subscribed = models.BooleanField(default=True, help_text="Newsletter subscription status.")
 
     def __str__(self):
         return f'{self.user.username} Profile'
@@ -307,6 +313,11 @@ class Sponsor(models.Model):
     class Meta:
         ordering = ['order', 'name']
 
+    def save(self, *args, **kwargs):
+        if self.logo:
+            resize_image_to_square(self.logo, size=500)
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.name
 
@@ -344,3 +355,83 @@ class WhatsAppUpdate(models.Model):
         verbose_name = "WhatsApp Update"
         verbose_name_plural = "WhatsApp Updates"
 
+class EmailLog(models.Model):
+    EMAIL_TYPES = [
+        ('notification', 'Publication Notification'),
+        ('welcome', 'Welcome Email'),
+    ]
+    
+    STATUS_CHOICES = [
+        ('sent', 'Sent'),
+        ('opened', 'Opened'),
+        ('bounced', 'Bounced'),
+        ('failed', 'Failed'),
+    ]
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='email_logs')
+    email_type = models.CharField(max_length=20, choices=EMAIL_TYPES)
+    subject = models.CharField(max_length=255)
+    sent_at = models.DateTimeField(auto_now_add=True)
+    opened_at = models.DateTimeField(null=True, blank=True)
+    is_opened = models.BooleanField(default=False)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='sent')
+    
+    class Meta:
+        ordering = ['-sent_at']
+        verbose_name = "Email Analytic"
+        verbose_name_plural = "Email Analytics"
+
+    def __str__(self):
+        return f"{self.get_email_type_display()} to {self.user.email}"
+
+class EmailConfiguration(models.Model):
+    is_automation_enabled = models.BooleanField(
+        default=False, 
+        help_text="Global toggle for all automated emails (digests and welcome emails). If OFF, only manual triggers from Admin will work."
+    )
+    last_updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Email Configuration"
+        verbose_name_plural = "Email Configuration"
+
+    def __str__(self):
+        status = "ENABLED" if self.is_automation_enabled else "DISABLED"
+        return f"Global Email Automation: {status}"
+
+class SecurityEvent(models.Model):
+    EVENT_TYPES = [
+        ('login_success', 'Successful Login'),
+        ('login_failed', 'Failed Login'),
+        ('password_change', 'Password Change'),
+        ('anomaly', 'Anomaly Detected'),
+    ]
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='security_events')
+    event_type = models.CharField(max_length=20, choices=EVENT_TYPES)
+    ip_address = models.GenericIPAddressField()
+    user_agent = models.TextField(blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    details = models.JSONField(null=True, blank=True, help_text="Extra info (e.g., location, failure reason).")
+
+    class Meta:
+        verbose_name = "Security Event"
+        verbose_name_plural = "Security Events"
+        ordering = ['-timestamp']
+
+    def __str__(self):
+        user_str = self.user.email if self.user else "Anonymous"
+        return f"{self.get_event_type_display()} - {user_str} ({self.ip_address})"
+
+class SecurityConfiguration(models.Model):
+    max_failed_attempts = models.PositiveIntegerField(default=5, help_text="Alert if more than this many failures from same IP/User in 1 hour.")
+    alert_on_new_ip = models.BooleanField(default=True, help_text="Notify user/admin when login occurs from a new IP address.")
+    admin_email = models.EmailField(default='nigel2421@gmail.com', help_text="Email to receive security reports and critical alerts.")
+    last_updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Security Configuration"
+        verbose_name_plural = "Security Configuration"
+
+    def __str__(self):
+        return f"Security Config (Last updated: {self.last_updated.strftime('%Y-%m-%d %H:%M')})"

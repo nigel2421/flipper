@@ -1948,12 +1948,12 @@ main>.container {
 }
 
 .sponsor-logo img {
-    height: 80px;
+    height: 100px; /* Slightly larger while still "small" */
     width: auto;
-    max-width: 150px;
+    max-width: 200px;
     object-fit: contain;
-    filter: grayscale(100%) opacity(0.7); /* Professional dark mode look */
-    transition: filter 0.3s ease, transform 0.3s ease;
+    filter: none; /* Professional original color look */
+    transition: transform 0.3s ease;
 }
 
 .sponsor-logo img:hover {

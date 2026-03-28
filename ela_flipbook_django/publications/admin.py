@@ -6,6 +6,8 @@ from django.contrib.auth.models import User
 import csv
 import datetime
 from django.http import HttpResponse
+from django.utils.html import format_html
+
 
 # Import allauth models and admin for customization
 from allauth.account.models import EmailAddress
@@ -14,7 +16,12 @@ from allauth.socialaccount.models import SocialAccount
 from allauth.socialaccount.admin import SocialAccountAdmin
 
 # Import your project's models
-from .models import Contributor, Magazine, Article, Profile, Event, Author, Tag, Rating, Comment, CommentReport, Sponsor, WhatsAppUpdate
+from .models import (
+    Contributor, Magazine, Article, Profile, Event, Author, Tag, Rating, 
+    Comment, CommentReport, Sponsor, WhatsAppUpdate, EmailLog, EmailConfiguration, 
+    SecurityEvent, SecurityConfiguration
+)
+from .utils import send_publication_notifications
 
 
 # --- Custom Admin Action to Export User Emails ---
@@ -118,6 +125,26 @@ def export_users_with_details_csv(modeladmin, request, queryset):
 export_users_with_details_csv.short_description = "Export Selected Users with Details to CSV"
 
 
+# --- NEW: Action to send email notifications for publications ---
+def send_notification_emails(modeladmin, request, queryset):
+    """
+    Sends email notifications for the selected publications.
+    """
+    total_notified = 0
+    if queryset.model == Magazine:
+        total_notified = send_publication_notifications(new_magazines=queryset, force_manual=True)
+    elif queryset.model == Article:
+        total_notified = send_publication_notifications(new_articles=queryset, force_manual=True)
+    
+    model_name = queryset.model._meta.verbose_name_plural
+    if total_notified > 0:
+        modeladmin.message_user(request, f"Successfully sent notification emails for {total_notified} {model_name}.")
+    else:
+        modeladmin.message_user(request, f"No notifications were sent for the selected {model_name}. Check logs for details or ensure there are active subscribers.", level='error')
+
+send_notification_emails.short_description = "Send Email Notification to Subscribers"
+
+
 # --- Model Admins ---
 
 @admin.register(Author)
@@ -166,8 +193,9 @@ class CommentReportAdmin(admin.ModelAdmin):
 
 @admin.register(Magazine)
 class MagazineAdmin(admin.ModelAdmin):
-    list_display = ('title', 'uploaded_at', 'cover_preview')
-    readonly_fields = ('cover_image', 'cover_preview')
+    list_display = ('title', 'uploaded_at', 'email_sent', 'cover_preview')
+    readonly_fields = ('cover_image', 'cover_preview', 'email_sent')
+    actions = [send_notification_emails]
     
     def get_fields(self, request, obj=None):
         # Exclude cover_image from the form but show it in readonly_fields
@@ -200,8 +228,9 @@ class MagazineAdmin(admin.ModelAdmin):
 
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
-    list_display = ('title', 'author', 'uploaded_at', 'is_featured', 'is_editors_pick', 'view_count')
-    list_filter = ('is_featured', 'is_editors_pick', 'tags', 'author')
+    list_display = ('title', 'author', 'uploaded_at', 'email_sent', 'is_featured', 'is_editors_pick', 'view_count')
+    list_filter = ('email_sent', 'is_featured', 'is_editors_pick', 'tags', 'author')
+    actions = [send_notification_emails]
     search_fields = ('title', 'excerpt', 'author__name', 'author__user__username', 'author__user__email')
     autocomplete_fields = ['author']
     filter_horizontal = ('tags',)
@@ -225,10 +254,36 @@ class ProfileInline(admin.StackedInline):
     verbose_name_plural = 'Profile'
     fk_name = 'user'
 
+class EmailAddressInline(admin.TabularInline):
+    model = EmailAddress
+    can_delete = False
+    extra = 0
+
 class UserAdmin(BaseUserAdmin):
-    inlines = (ProfileInline,)
-    list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff')
+    inlines = (ProfileInline, EmailAddressInline)
+    list_display = ('id', 'email', 'get_full_name', 'get_social_provider', 'get_email_verified', 'is_staff', 'date_joined')
+    list_filter = ('is_staff', 'is_superuser', 'is_active', 'groups', 'date_joined')
+    search_fields = ('username', 'email', 'first_name', 'last_name')
+    ordering = ('-date_joined',)
     actions = [export_emails_and_join_date_csv, export_users_with_details_csv]
+
+    def get_social_provider(self, obj):
+        social_acc = obj.socialaccount_set.first()
+        return social_acc.provider if social_acc else 'Direct'
+    get_social_provider.short_description = 'Provider'
+
+    def get_email_verified(self, obj):
+        from allauth.account.models import EmailAddress
+        email_obj = EmailAddress.objects.filter(user=obj, primary=True).first()
+        if not email_obj:
+            email_obj = EmailAddress.objects.filter(user=obj).first()
+        return email_obj.verified if email_obj else False
+    get_email_verified.boolean = True
+    get_email_verified.short_description = 'Verified'
+
+    def get_full_name(self, obj):
+        return f"{obj.first_name} {obj.last_name}" if obj.first_name or obj.last_name else obj.username
+    get_full_name.short_description = 'Name'
 
     def get_inline_instances(self, request, obj=None):
         if not obj:
@@ -323,6 +378,58 @@ class SponsorAdmin(admin.ModelAdmin):
     list_filter = ('is_active',)
     search_fields = ('name',)
     list_editable = ('is_active', 'order')
+
+@admin.register(EmailLog)
+class EmailLogAdmin(admin.ModelAdmin):
+    list_display = ('user', 'email_type', 'subject', 'sent_at', 'status', 'is_opened', 'opened_at')
+    list_filter = ('email_type', 'status', 'is_opened', 'sent_at')
+    search_fields = ('user__email', 'user__username', 'subject')
+    readonly_fields = ('id', 'user', 'email_type', 'subject', 'sent_at', 'opened_at', 'is_opened', 'status')
+    
+    def changelist_view(self, request, extra_context=None):
+        # Aggregate stats for the dashboard
+        from django.db.models import Count, Q
+        
+        stats = EmailLog.objects.aggregate(
+            total=Count('id'),
+            opened=Count('id', filter=Q(is_opened=True)),
+            sent=Count('id', filter=Q(status='sent')),
+            failed=Count('id', filter=Q(status='failed')),
+            bounced=Count('id', filter=Q(status='bounced')),
+        )
+        
+        if stats['total'] > 0:
+            open_rate = (stats['opened'] / stats['total']) * 100
+        else:
+            open_rate = 0
+            
+        extra_context = extra_context or {}
+        extra_context['email_stats'] = stats
+        extra_context['open_rate'] = round(open_rate, 1)
+        
+        return super().changelist_view(request, extra_context=extra_context)
+
+@admin.register(SecurityEvent)
+class SecurityEventAdmin(admin.ModelAdmin):
+    list_display = ('timestamp', 'event_type', 'user', 'ip_address', 'anomaly_tag')
+    list_filter = ('event_type', 'timestamp')
+    search_fields = ('ip_address', 'user__email', 'user_agent')
+    readonly_fields = ('timestamp', 'ip_address', 'user_agent', 'details')
+
+    def anomaly_tag(self, obj):
+        if obj.details and 'anomaly_detected' in obj.details:
+            return format_html('<span style="color: red; font-weight: bold;">ANOMALY: {}</span>', obj.details['anomaly_detected'])
+        return "-"
+    anomaly_tag.short_description = "Anomaly Status"
+
+@admin.register(SecurityConfiguration)
+class SecurityConfigurationAdmin(admin.ModelAdmin):
+    list_display = ('admin_email', 'max_failed_attempts', 'alert_on_new_ip', 'last_updated')
+
+    def has_add_permission(self, request):
+        # Only allow one configuration object
+        return not SecurityConfiguration.objects.exists()
+
 
 # --- NEW: Social Account Admin ---
 class CustomSocialAccountAdmin(SocialAccountAdmin):

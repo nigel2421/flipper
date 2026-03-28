@@ -12,10 +12,10 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.models import User
 from django.core.cache import cache
 import random 
-from .models import Magazine, Article, Event, Profile, Tag, Author, Sponsor, WhatsAppUpdate, Comment, Rating
+from .models import Magazine, Article, Event, Profile, Tag, Author, Sponsor, WhatsAppUpdate, Comment, Rating, EmailLog
 from django.db.models import Q, Avg
 from django.db.models.functions import ExtractYear
-from django.http import JsonResponse, HttpResponseRedirect
+from django.http import JsonResponse, HttpResponseRedirect, HttpResponse
 from allauth.account.views import SignupView # Import the original SignupView
 from django.core.mail import send_mail
 
@@ -402,16 +402,38 @@ def submit_contribution_view(request):
     if request.method == 'POST':
         form = ContributorForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
-            return JsonResponse({'status': 'success', 'message': 'Your contribution has been submitted successfully!'})
+            try:
+                form.save()
+                return JsonResponse({'status': 'success', 'message': 'Your contribution has been submitted successfully!'})
+            except Exception as e:
+                return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
         else:
             return JsonResponse({'status': 'error', 'message': 'Please correct the errors below.', 'errors': form.errors.get_json_data()})
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
 
+def track_email_open(request, log_id):
+    """
+    Tracking pixel view to record when an email is opened.
+    Returns a 1x1 transparent GIF.
+    """
+    try:
+        log = EmailLog.objects.get(id=log_id)
+        if not log.is_opened:
+            log.is_opened = True
+            log.opened_at = timezone.now()
+            log.status = 'opened'
+            log.save()
+    except (EmailLog.DoesNotExist, ValueError):
+        pass
+    
+    # 1x1 transparent GIF
+    pixel = b'\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\x80\x00\x00\xff\xff\xff\x00\x00\x00\x21\xf9\x04\x01\x00\x00\x00\x00\x2c\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02\x44\x01\x00\x3b'
+    return HttpResponse(pixel, content_type='image/gif')
+
 def whatsapp_list_view(request):
     """Displays a list of all WhatsApp Updates."""
-    updates = WhatsAppUpdate.objects.all().order_by('-uploaded_at')
-    paginator = Paginator(updates, 12)
+    updates_qs = WhatsAppUpdate.objects.all().order_by('-uploaded_at')
+    paginator = Paginator(updates_qs, 12)
     page = request.GET.get('page')
     try:
         updates = paginator.page(page)
@@ -419,7 +441,18 @@ def whatsapp_list_view(request):
         updates = paginator.page(1)
     except EmptyPage:
         updates = paginator.page(paginator.num_pages)
-    return render(request, 'publications/whatsapp_list.html', {'updates': updates})
+
+    sponsors_qs = Sponsor.objects.filter(is_active=True).order_by('order')
+    sponsors = list(sponsors_qs)
+    if sponsors:
+        # Ensure there are enough logos to fill large screens before seamlessly repeating
+        multiplier = max(1, 15 // len(sponsors) + 1)
+        sponsors = sponsors * multiplier
+
+    return render(request, 'publications/whatsapp_list.html', {
+        'updates': updates,
+        'sponsors': sponsors
+    })
 
 def whatsapp_detail_view(request, slug):
     """Displays a single WhatsApp Update detail page."""

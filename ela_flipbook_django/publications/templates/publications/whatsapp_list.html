@@ -33,8 +33,8 @@
     }
     .wa-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 28px;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 35px;
     }
     .wa-card {
         background: #fff;
@@ -53,8 +53,9 @@
     }
     .wa-card-image {
         width: 100%;
-        height: 200px;
-        object-fit: cover;
+        aspect-ratio: 1 / 1;
+        object-fit: contain;
+        background: #f8f9fa; /* Light grey background for empty spaces */
     }
     .wa-card-content {
         padding: 20px;
@@ -186,4 +187,33 @@
     </div>
     {% endif %}
 </section>
+
+<!-- === OUR SPONSORS MARQUEE SECTION === -->
+{% if sponsors %}
+<section class="sponsors-section">
+    <div class="container text-center">
+        <h2 style="color: var(--text-light); margin-bottom: 25px; margin-top: 50px;">Our Sponsors</h2>
+    </div>
+    <div class="marquee-container">
+        <div class="marquee-track">
+            <!-- First identical twin for seamless loop -->
+            <div class="marquee-content">
+                {% for sponsor in sponsors %}
+                    <div class="sponsor-logo">
+                        <img src="{{ sponsor.logo.url }}" alt="{{ sponsor.name }} Logo" onerror="this.style.display='none'">
+                    </div>
+                {% endfor %}
+            </div>
+            <!-- Second identical twin -->
+            <div class="marquee-content" aria-hidden="true">
+                {% for sponsor in sponsors %}
+                    <div class="sponsor-logo">
+                        <img src="{{ sponsor.logo.url }}" alt="{{ sponsor.name }} Logo" onerror="this.style.display='none'">
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
 {% endblock %}

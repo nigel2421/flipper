@@ -111,7 +111,7 @@
         showDownload: false,
         disableDownload: true,
         showPrint: false, // Explicitly hide print button
-        allControls: "alt,zoom,fullscreen,share,more", // Define specific controls to exclude download/print
+        allControls: "alt,pageNumber,zoomIn,zoomOut,fullScreen,search,thumbs,toc,share,more", // Define specific controls to exclude download/print
         onReady: function(flipbook) {
             // Disable right-click on the flipbook container
             if (flipbook.container) {
@@ -128,6 +128,9 @@
                     
                     if (flipbook.ui && flipbook.ui.fullScreen) {
                         flipbook.ui.fullScreen.trigger('click');
+                        triggered = true;
+                    } else if (typeof flipbook.toggleFullScreen === 'function') {
+                        flipbook.toggleFullScreen();
                         triggered = true;
                     } else {
                         // Fallback selector

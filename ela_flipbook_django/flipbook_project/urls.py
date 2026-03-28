@@ -8,6 +8,14 @@ from django.views.generic import RedirectView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+]
+
+# Admin Branding Customization
+admin.site.site_header = "Business Matters Admin"
+admin.site.site_title = "Business Matters Admin Portal"
+admin.site.index_title = "Welcome to Business Matters Africa Admin"
+
+urlpatterns += [
 
     path("ckeditor5/", include('django_ckeditor_5.urls')),
 

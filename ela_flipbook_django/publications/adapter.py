@@ -15,7 +15,8 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         # Auto-verify social accounts (e.g. Google)
         from allauth.account.models import EmailAddress
         email = sociallogin.user.email
-        if email:
+        if email and sociallogin.user.pk:
+            # Only update if user is already saved
             EmailAddress.objects.filter(user=sociallogin.user, email=email).update(verified=True)
             # Alternatively, if multiple emails are possible:
             # sociallogin.user.email_address_set.all().update(verified=True)

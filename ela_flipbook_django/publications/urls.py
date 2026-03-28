@@ -27,4 +27,5 @@ urlpatterns = [
     path('submit/', views.submit_contribution_view, name='submit_contribution'),
     path('whatsapp-updates/', views.whatsapp_list_view, name='whatsapp_updates'),
     path('whatsapp-updates/<slug:slug>/', views.whatsapp_detail_view, name='whatsapp_detail'),
+    path('track-email-open/<uuid:log_id>/', views.track_email_open, name='track_email_open'),
 ]
