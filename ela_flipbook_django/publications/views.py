@@ -459,3 +459,8 @@ def whatsapp_detail_view(request, slug):
     update = get_object_or_404(WhatsAppUpdate, slug=slug)
     update.view_count = getattr(update, 'view_count', 0)  # safe fallback
     return render(request, 'publications/whatsapp_detail.html', {'update': update})
+
+def ads_txt_view(request):
+    """ Serves the ads.txt file for Google AdSense verification. """
+    content = "google.com, pub-7444519879164717, DIRECT, f08c47fec0942fa0"
+    return HttpResponse(content, content_type='text/plain')

@@ -435,3 +435,32 @@ class SecurityConfiguration(models.Model):
 
     def __str__(self):
         return f"Security Config (Last updated: {self.last_updated.strftime('%Y-%m-%d %H:%M')})"
+
+class AdUnit(models.Model):
+    name = models.CharField(max_length=100, help_text="e.g., Homepage Hero")
+    slot_name = models.CharField(max_length=100, unique=True, help_text="The div ID or slot name (e.g., div-gpt-ad-hero).")
+    gam_id = models.CharField(max_length=255, help_text="Full GAM path (e.g., /12345/Article_Mid).")
+    sizes = models.CharField(max_length=255, default="[[728, 90]]", help_text="GPT sizes array (e.g., [[728, 90], [320, 50]]).")
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.slot_name})"
+
+    class Meta:
+        verbose_name = "Ad Unit"
+        verbose_name_plural = "Ad Units"
+
+class HouseAd(models.Model):
+    name = models.CharField(max_length=100)
+    image = models.ImageField(upload_to='house_ads/')
+    link_url = models.URLField(help_text="Where the ad should link to.")
+    ad_unit = models.ForeignKey(AdUnit, on_delete=models.CASCADE, related_name='house_ads')
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"House Ad: {self.name} for {self.ad_unit.name}"
+
+    class Meta:
+        verbose_name = "House Ad"
+        verbose_name_plural = "House Ads"

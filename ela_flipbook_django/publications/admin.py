@@ -19,7 +19,7 @@ from allauth.socialaccount.admin import SocialAccountAdmin
 from .models import (
     Contributor, Magazine, Article, Profile, Event, Author, Tag, Rating, 
     Comment, CommentReport, Sponsor, WhatsAppUpdate, EmailLog, EmailConfiguration, 
-    SecurityEvent, SecurityConfiguration
+    SecurityEvent, SecurityConfiguration, AdUnit, HouseAd
 )
 from .utils import send_publication_notifications
 
@@ -442,3 +442,33 @@ class CustomSocialAccountAdmin(SocialAccountAdmin):
 
 admin.site.unregister(SocialAccount)
 admin.site.register(SocialAccount, CustomSocialAccountAdmin)
+
+class HouseAdInline(admin.TabularInline):
+    model = HouseAd
+    extra = 1
+    fields = ('name', 'image', 'link_url', 'is_active', 'image_preview')
+    readonly_fields = ('image_preview',)
+
+    def image_preview(self, obj):
+        if obj.image:
+            return format_html('<img src="{}" style="max-height: 50px;" />', obj.image.url)
+        return "-"
+
+@admin.register(AdUnit)
+class AdUnitAdmin(admin.ModelAdmin):
+    list_display = ('name', 'slot_name', 'gam_id', 'is_active')
+    list_editable = ('is_active',)
+    search_fields = ('name', 'slot_name', 'gam_id')
+    inlines = [HouseAdInline]
+
+@admin.register(HouseAd)
+class HouseAdAdmin(admin.ModelAdmin):
+    list_display = ('name', 'ad_unit', 'is_active', 'created_at', 'image_preview')
+    list_filter = ('ad_unit', 'is_active')
+    search_fields = ('name', 'link_url')
+    readonly_fields = ('image_preview',)
+
+    def image_preview(self, obj):
+        if obj.image:
+            return format_html('<img src="{}" style="max-height: 100px;" />', obj.image.url)
+        return "-"

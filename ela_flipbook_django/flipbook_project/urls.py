@@ -6,8 +6,11 @@ from django.conf.urls.static import static
 from django.views.static import serve
 from django.views.generic import RedirectView
 
+from publications.views import ads_txt_view
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('ads.txt', ads_txt_view, name='ads_txt'),
 ]
 
 # Admin Branding Customization

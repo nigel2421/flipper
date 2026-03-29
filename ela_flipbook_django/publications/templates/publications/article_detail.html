@@ -1,6 +1,7 @@
 <!-- publications/templates/publications/article_detail.html -->
 
 {% extends 'publications/base.html' %}
+{% load ad_tags %}
 
 {% block title %}{{ article.title }} | Business Matters Africa{% endblock %}
 
@@ -387,6 +388,11 @@
             <div class="skeleton-text" style="width: 80%;"></div>
             <div class="skeleton-text"></div>
             <div class="skeleton-text" style="width: 90%;"></div>
+        </div>
+
+        <!-- Article Mid Ad Slot -->
+        <div class="ad-slot-wrapper" style="margin: 40px 0;">
+            {% render_ad 'Article_Mid_Content' %}
         </div>
     </article>
 

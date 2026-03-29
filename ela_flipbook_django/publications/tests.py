@@ -2,7 +2,10 @@
 from django.test import TestCase, Client, override_settings
 from django.contrib.auth.models import User
 from django.urls import reverse
-from .models import Article, Author, Tag, Magazine, Event, Contributor, Profile, Comment, Rating, Sponsor, WhatsAppUpdate
+from .models import (
+    Article, Author, Tag, Magazine, Event, Contributor, Profile, Comment, 
+    Rating, Sponsor, WhatsAppUpdate, AdUnit, HouseAd
+)
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 # Middleware list with whitenoise removed so tests work without the package installed
@@ -492,3 +495,41 @@ class NewFeatureTests(PublicationTestBase):
         
         self.article.refresh_from_db()
         self.assertEqual(self.article.summary, "Command summary.")
+
+# ──────────────────────────────────────────────────────────────────────────────
+# AD SYSTEM TESTS
+# ──────────────────────────────────────────────────────────────────────────────
+
+class AdSystemTests(PublicationTestBase):
+    
+    def test_ad_unit_creation(self):
+        """Test that an AdUnit can be created."""
+        unit = AdUnit.objects.create(
+            name='Test Hero',
+            slot_name='Test_Hero',
+            gam_id='/123/Test'
+        )
+        self.assertEqual(AdUnit.objects.count(), 1)
+        self.assertTrue(unit.is_active)
+
+    def test_house_ad_creation(self):
+        """Test that a HouseAd can be created and linked."""
+        unit = AdUnit.objects.create(slot_name='Test_Hero', gam_id='/123/Test')
+        house_ad = HouseAd.objects.create(
+            name='Test House Ad',
+            image=self.dummy_image,
+            link_url='https://example.com',
+            ad_unit=unit
+        )
+        self.assertEqual(unit.house_ads.count(), 1)
+        self.assertEqual(house_ad.ad_unit, unit)
+
+    def test_ads_txt_view(self):
+        """Test the ads.txt verification endpoint content."""
+        url = reverse('ads_txt')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'text/plain')
+        content = response.content.decode()
+        self.assertIn('pub-7444519879164717', content)
+        self.assertIn('f08c47fec0942fa0', content)

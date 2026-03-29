@@ -1,5 +1,6 @@
 {% extends 'publications/base.html' %}
 {% load static %}
+{% load ad_tags %}
 
 {% block content %}
     <!-- Google tag (gtag.js) -->
@@ -43,6 +44,11 @@
             </div>
         </div>
     </section>
+    
+    <!-- Homepage Hero Ad Slot -->
+    <div class="container ad-slot-wrapper">
+        {% render_ad 'Homepage_Hero' %}
+    </div>
 
     <!-- === TRUST & IMPACT BAR === -->
     <section class="trust-impact-bar">
@@ -100,6 +106,11 @@
             {% endfor %}
         </div>
         <a href="{% url 'publications:magazine' %}" class="show-more-btn">Show More Publications</a>
+    </div>
+
+    <!-- Homepage Mid Ad Slot -->
+    <div class="container ad-slot-wrapper">
+        {% render_ad 'Homepage_Mid' %}
     </div>
 
     <!-- === NEW: MOST POPULAR ARTICLES SECTION === -->
