@@ -51,7 +51,33 @@
         }
     </script>
 
-    <!-- Main Stylesheet -->
+    <!-- Google Font: Poppins (Modern) and Merriweather (Classic Serif) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-blue': '#3498db',
+                        'accent-yellow': '#ffc400',
+                        'dark-bg': '#0a192f',
+                        'card-bg': '#172a45',
+                    },
+                    fontFamily: {
+                        sans: ['Poppins', 'system-ui', 'sans-serif'],
+                        serif: ['Merriweather', 'Georgia', 'serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <!-- Main Stylesheet (Legacy fallback/support) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
         integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -115,54 +141,61 @@
     </script>
 </head>
 
-<body>
+<body class="bg-dark-bg text-slate-200 font-sans min-h-screen flex flex-col antialiased">
     <div class="loader"></div>
     <!-- Reading Progress Bar -->
     <div class="progress-container">
         <div class="progress-bar" id="progressBar"></div>
     </div>
 
-    <header class="site-header">
-        <!-- Changed class to 'navbar-container' for better CSS control -->
-        <div class="container navbar-container">
-            <a href="{% url 'publications:home' %}" class="logo">
-                {% comment %} Replace "img/logo.png" with the actual path to your logo image {% endcomment %}
-                <img src="{% static 'img/logo.png' %}" alt="Business Matters Logo">
+    <header class="sticky top-0 z-50 bg-[#0a192f]/90 backdrop-blur-md border-b border-white/10 py-3 shadow-lg transition-all duration-300">
+        <div class="container mx-auto px-4 max-w-7xl flex justify-between items-center">
+            <a href="{% url 'publications:home' %}" class="flex-shrink-0 transition-transform duration-300 hover:scale-105">
+                <img src="{% static 'img/logo.png' %}" alt="Business Matters Logo" class="h-10 md:h-12 w-auto object-contain">
             </a>
 
-            <!-- === NEW: The Hamburger Menu Icon === -->
-            <div class="hamburger" id="hamburger-menu">
-                <span class="bar"></span>
-                <span class="bar"></span>
-                <span class="bar"></span>
+            <!-- The Hamburger Menu Icon (Simplified with Tailwind) -->
+            <div class="hamburger md:hidden cursor-pointer p-2 z-[1001]" id="hamburger-menu">
+                <div class="space-y-1.5 overflow-hidden">
+                    <span class="bar block w-6 h-0.5 bg-white transition-all duration-300"></span>
+                    <span class="bar block w-6 h-0.5 bg-white transition-all duration-300"></span>
+                    <span class="bar block w-4 h-0.5 bg-white transition-all duration-300"></span>
+                </div>
             </div>
 
             <!-- The Navigation Links -->
-            <nav class="main-nav" id="main-nav">
-                <a href="{% url 'publications:home' %}">Home</a>
-                <a href="{% url 'publications:about_us' %}">About Us</a>
-                <a href="{% url 'publications:events' %}">Events</a>
+            <nav class="main-nav hidden md:flex items-center space-x-2 lg:space-x-3 text-[12px] uppercase tracking-wider font-bold ml-auto" id="main-nav">
+                <a href="{% url 'publications:home' %}" class="hover:text-amber-400 transition-colors">Home</a>
+                <a href="{% url 'publications:about_us' %}" class="hover:text-amber-400 transition-colors">About</a>
+                <a href="{% url 'publications:events' %}" class="hover:text-amber-400 transition-colors">Events</a>
                 
                 <!-- Publications Dropdown -->
-                <div class="nav-item-dropdown">
-                    <a href="#" class="nav-link-with-icon">Publications <i class="fas fa-chevron-down" style="font-size: 0.7rem;"></i></a>
-                    <div class="dropdown-menu">
-                        <a href="{% url 'publications:articles' %}" class="dropdown-item">Articles</a>
-                        <a href="{% url 'publications:magazine' %}" class="dropdown-item">Magazines</a>
+                <div class="relative group nav-item-dropdown">
+                    <a href="#" class="flex items-center space-x-1 hover:text-amber-400 transition-colors py-2">
+                        <span>Publications</span> 
+                        <i class="fas fa-chevron-down text-[10px] opacity-70"></i>
+                    </a>
+                    <div class="absolute invisible group-hover:visible group-hover:translate-y-0 translate-y-2 opacity-0 group-hover:opacity-100 top-full left-0 bg-slate-900 border border-white/10 min-width-[180px] rounded-lg py-2 shadow-2xl transition-all duration-200">
+                        <a href="{% url 'publications:articles' %}" class="block px-6 py-2.5 hover:bg-white/5 hover:text-amber-400 transition-colors">Articles</a>
+                        <a href="{% url 'publications:magazine' %}" class="block px-6 py-2.5 hover:bg-white/5 hover:text-amber-400 transition-colors">Magazines</a>
                     </div>
                 </div>
 
-                <a href="{% url 'publications:whatsapp_updates' %}"><i class="fab fa-whatsapp" style="color:#25D366;"></i> WA Updates</a>
-                <a href="{% url 'publications:contact' %}">Contacts</a>
-                <a href="{% url 'publications:contributors' %}">Contributors</a>
+                <a href="{% url 'publications:whatsapp_updates' %}" class="flex items-center space-x-1.5 hover:text-green-400 transition-colors">
+                    <i class="fab fa-whatsapp"></i> <span>Updates</span>
+                </a>
+                <a href="{% url 'publications:contact' %}" class="hover:text-amber-400 transition-colors">Contacts</a>
+                <a href="{% url 'publications:contributors' %}" class="hover:text-amber-400 transition-colors">People</a>
 
-                <!-- === UPDATED USER SECTION === -->
-                {% if user.is_authenticated %}
-                <a href="{% url 'publications:profile' %}">Hi, {{ user.first_name|default:user.username }}</a>
-                <a href="{% url 'account_logout' %}">Logout</a>
-                {% else %}
-                <a href="{% url 'account_login' %}">Login</a>
-                {% endif %}
+                <!-- User Section -->
+                <div class="flex items-center space-x-4 pl-4 border-l border-white/20">
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'publications:profile' %}" class="text-amber-400 hover:underline underline-offset-4 decoration-2">Profile</a>
+                    <a href="{% url 'account_logout' %}" class="bg-red-500/10 hover:bg-red-500/20 text-red-500 px-4 py-1.5 rounded-full border border-red-500/30 text-xs transition-all">Logout</a>
+                    {% else %}
+                    <a href="{% url 'account_login' %}" class="bg-amber-400 hover:bg-amber-500 text-black px-6 py-1.5 rounded-full font-extrabold text-xs transition-all">Login</a>
+                    {% endif %}
+                </div>
             </nav>
         </div>
     </header>
@@ -185,9 +218,10 @@
         {% endblock %}
     </main>
 
-    <footer class="site-footer">
-        <div class="container">
-            <p>&copy; {% now "Y" %} Business Matters. All Rights Reserved.</p>
+    <footer class="bg-[#0a192f] text-slate-500 py-12 border-t border-white/5 mt-auto">
+        <div class="container mx-auto px-4 max-w-7xl text-center space-y-4">
+            <img src="{% static 'img/logo.png' %}" alt="Business Matters Logo" class="h-8 w-auto mx-auto opacity-50 grayscale brightness-200">
+            <p class="text-sm font-medium tracking-widest uppercase">&copy; {% now "Y" %} Business Matters. All Rights Reserved.</p>
         </div>
     </footer>
 
@@ -198,16 +232,26 @@
 
         if (hamburger && navMenu) {
             hamburger.addEventListener('click', () => {
+                const isActive = navMenu.classList.contains('active-mobile');
+                if (isActive) {
+                    navMenu.classList.remove('active-mobile', 'flex', 'fixed', 'inset-0', 'bg-[#0a192f]', 'flex-col', 'items-center', 'justify-center', 'space-y-8', 'z-[1000]', 'text-2xl');
+                    navMenu.classList.add('hidden');
+                    document.body.style.overflow = '';
+                } else {
+                    navMenu.classList.remove('hidden');
+                    navMenu.classList.add('active-mobile', 'flex', 'fixed', 'inset-0', 'bg-[#0a192f]', 'flex-col', 'items-center', 'justify-center', 'space-y-8', 'z-[1000]', 'text-2xl');
+                    document.body.style.overflow = 'hidden';
+                }
                 hamburger.classList.toggle('active');
-                navMenu.classList.toggle('active');
             });
 
             document.querySelectorAll('.main-nav a').forEach(n => n.addEventListener('click', (e) => {
-                // Don't close menu if clicking the dropdown parent
                 if (n.classList.contains('nav-link-with-icon')) return;
                 
+                navMenu.classList.remove('active-mobile', 'flex', 'fixed', 'inset-0', 'bg-[#0a192f]', 'flex-col', 'items-center', 'justify-center', 'space-y-8', 'z-[1000]', 'text-2xl');
+                navMenu.classList.add('hidden', 'md:flex');
+                document.body.style.overflow = '';
                 hamburger.classList.remove('active');
-                navMenu.classList.remove('active');
             }));
         }
 

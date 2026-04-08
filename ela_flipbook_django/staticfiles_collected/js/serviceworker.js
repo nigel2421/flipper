@@ -31,6 +31,14 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
     const url = new URL(event.request.url);
 
+    // 0. Skip interception for Google Ads to avoid CORS issues
+    if (url.hostname.includes('doubleclick.net') || 
+        url.hostname.includes('googlesyndication.com') ||
+        url.hostname.includes('googletagservices.com')) {
+        return;
+    }
+
+
     // 1. Skip caching for POST requests
     if (event.request.method !== 'GET') {
         return;

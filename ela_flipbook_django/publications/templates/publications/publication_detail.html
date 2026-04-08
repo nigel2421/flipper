@@ -7,37 +7,6 @@
 <!-- dFlip CSS -->
 <link href="{% static 'publications/dflip/dflip.min.css' %}" rel="stylesheet" type="text/css">
 <style>
-    #fullscreen-notification {
-        display: none;
-        position: fixed;
-        top: 25px;
-        left: 50%;
-        transform: translateX(-50%) translateY(-20px);
-        z-index: 999999;
-        background: rgba(13, 11, 51, 0.7); /* Deep blue with opacity */
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        color: #25D366; /* WhatsApp green for success feel */
-        padding: 14px 28px;
-        border-radius: 50px;
-        border: 1px solid rgba(37, 211, 102, 0.3);
-        box-shadow: 0 10px 40px rgba(0,0,0,0.4);
-        align-items: center;
-        gap: 12px;
-        font-weight: 700;
-        letter-spacing: 0.5px;
-        opacity: 0;
-        transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-        pointer-events: none;
-    }
-    #fullscreen-notification.active {
-        opacity: 1;
-        transform: translateX(-50%) translateY(0);
-    }
-    #fullscreen-notification i {
-        font-size: 1.2rem;
-    }
-
     /* Hide dFlip Download and Print buttons via CSS as a fail-safe */
     .df-ui-download, .df-ui-print, .df-icon-download, .df-icon-print, 
     [data-type="download"], [data-type="print"],
@@ -48,35 +17,81 @@
         pointer-events: none !important;
     }
 </style>
+</style>
 {% endblock %}
 
 {% block content %}
-<div id="fullscreen-notification">
-    <i class="fas fa-expand-arrows-alt"></i>
-    <span>FULLSCREEN MODE ACTIVATED</span>
+<!-- Fullscreen Notification Widget -->
+<div id="fullscreen-notification" class="hidden fixed top-6 left-1/2 -translate-x-1/2 z-[999999] bg-[#0a192f]/70 backdrop-blur-xl border border-green-500/30 px-8 py-4 rounded-full shadow-2xl flex items-center gap-3 text-green-400 font-black tracking-widest text-xs opacity-0 transition-all duration-500 pointer-events-none active:opacity-100 active:translate-y-0 -translate-y-4">
+    <i class="fas fa-expand-arrows-alt text-lg"></i>
+    <span>IMMERSIVE MODE ACTIVATED</span>
 </div>
 
-<div class="container py-5">
-    <div class="row">
-        <div class="col-lg-10 mx-auto">
-            <div class="flipbook-container">
-                <a href="{% url 'publications:home' %}" class="back-link">&larr; Back to All Publications</a>
-                <h2 class="mb-4">Viewing: {{ publication.title }}</h2>
+<div class="lg:py-12 min-h-[calc(100vh-80px)] bg-black/20 lg:bg-transparent">
+    <div class="container mx-auto max-w-7xl px-0 md:px-4">
+        <div class="bg-black lg:bg-slate-900/50 lg:backdrop-blur-md lg:border lg:border-white/5 lg:rounded-3xl overflow-hidden shadow-2xl">
+            
+            <div class="p-4 lg:p-8 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/5">
+                <div>
+                    <a href="{% url 'publications:home' %}" class="text-xs font-black uppercase tracking-widest text-primary-gray hover:text-amber-400 transition-colors flex items-center gap-2 mb-2">
+                        <i class="fas fa-arrow-left text-[10px]"></i>
+                        Back to Library
+                    </a>
+                    <h1 class="text-xl md:text-2xl font-black text-white leading-tight">
+                        {{ publication.title }}
+                    </h1>
+                </div>
+                <!-- Action Tools (Example) -->
+                <div class="flex items-center gap-3">
+                    <span class="text-[10px] font-black uppercase tracking-widest bg-white/10 px-3 py-1.5 rounded-full text-slate-400">Digital Premium</span>
+                </div>
+            </div>
 
-                <!-- dFlip.js Flipbook Container -->
+            <!-- dFlip.js Flipbook Container -->
+            <div class="relative bg-black w-full min-h-[70vh] md:min-h-[85vh] group/flipbook">
                 {% if publication.pdf_file %}
-                <div class="_df_book" source="{{ publication.pdf_file.url }}" id="df_manual_book" download="false">
+                <!-- Immersive Reading Overlay -->
+                <div id="reading-overlay" class="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm transition-all duration-700">
+                    <div class="text-center space-y-6 max-w-sm px-4">
+                        <div class="relative inline-block">
+                            <i class="fas fa-book-open text-5xl text-accent-yellow animate-pulse"></i>
+                            <div class="absolute -inset-4 bg-accent-yellow/20 rounded-full blur-xl animate-pulse"></div>
+                        </div>
+                        <div class="space-y-2">
+                            <h2 class="text-2xl font-black text-white tracking-tight uppercase">Ready to Read?</h2>
+                            <p class="text-slate-400 text-sm font-medium leading-relaxed">Experience this publication in high-definition immersive mode.</p>
+                        </div>
+                        <button id="start-reading-btn" class="w-full bg-accent-yellow hover:bg-yellow-500 text-black px-8 py-4 rounded-full font-black text-xs uppercase tracking-[0.2em] transition-all shadow-[0_0_30px_rgba(255,196,0,0.3)] hover:scale-105 active:scale-95 flex items-center justify-center gap-3">
+                            Start Immersive Reading
+                            <i class="fas fa-expand-alt"></i>
+                        </button>
+                        <p class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Industry Standard Immersive Experience</p>
+                    </div>
+                </div>
+
+                <div class="_df_book h-full w-full" source="{{ publication.pdf_file.url }}" id="df_manual_book" download="false">
                 </div>
                 {% else %}
-                <div class="alert alert-warning" role="alert"
-                    style="background-color: #333; color: var(--accent-yellow); border: 1px solid var(--accent-yellow); padding: 20px; border-radius: 8px;">
-                    <i class="fas fa-exclamation-triangle"></i> The PDF for this publication is not currently available.
+                <div class="flex flex-col items-center justify-center p-20 text-center space-y-4">
+                    <i class="fas fa-file-pdf text-6xl text-slate-700"></i>
+                    <p class="text-slate-500 font-bold max-w-xs">The Digital Premium file for this publication is not available.</p>
                 </div>
                 {% endif %}
+            </div>
+            
+            <div class="p-4 bg-white/[0.02] lg:hidden text-center">
+                <p class="text-[10px] font-black text-slate-600 uppercase tracking-[0.3em]">Business Matters Premium Experience</p>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    #fullscreen-notification.activated {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+</style>
 {% endblock %}
 
 {% block extra_js %}
@@ -93,15 +108,17 @@
         var notify = document.getElementById('fullscreen-notification');
         if (!notify) return;
         
-        notify.style.display = 'flex';
+        notify.classList.remove('hidden');
+        notify.classList.add('flex');
         setTimeout(function() {
-            notify.classList.add('active');
+            notify.classList.add('activated');
         }, 100);
         
         setTimeout(function() {
-            notify.classList.remove('active');
+            notify.classList.remove('activated');
             setTimeout(function() {
-                notify.style.display = 'none';
+                notify.classList.remove('flex');
+                notify.classList.add('hidden');
             }, 600);
         }, 3500);
     }
@@ -113,41 +130,64 @@
         showPrint: false, // Explicitly hide print button
         allControls: "alt,pageNumber,zoomIn,zoomOut,fullScreen,search,thumbs,toc,share,more", // Define specific controls to exclude download/print
         onReady: function(flipbook) {
+            console.log("dFlip Ready:", flipbook);
             // Disable right-click on the flipbook container
             if (flipbook.container) {
                 $(flipbook.container).on("contextmenu", function(e) {
                     return false;
                 });
             }
-
-            // Check if user is on a desktop (width > 992px)
-            if (window.innerWidth > 992) {
-                setTimeout(function() {
-                    // Try different ways to trigger fullscreen in dFlip
-                    var triggered = false;
-                    
-                    if (flipbook.ui && flipbook.ui.fullScreen) {
-                        flipbook.ui.fullScreen.trigger('click');
-                        triggered = true;
-                    } else if (typeof flipbook.toggleFullScreen === 'function') {
-                        flipbook.toggleFullScreen();
-                        triggered = true;
-                    } else {
-                        // Fallback selector
-                        var fsBtn = $('.df-ui-btn.df-ui-fullscreen');
-                        if (fsBtn.length > 0) {
-                            fsBtn.click();
-                            triggered = true;
-                        }
-                    }
-                    
-                    if (triggered) {
-                        showFullscreenNotification();
-                    }
-                }, 1200); // Increased delay for smoother initialization
-            }
         }
     };
+
+    // --- Definitive Immersive Trigger (Attached Immediately) ---
+    document.addEventListener('DOMContentLoaded', function() {
+        const startBtn = document.getElementById('start-reading-btn');
+        const overlay = document.getElementById('reading-overlay');
+        
+        if (startBtn && overlay) {
+            startBtn.addEventListener('click', function() {
+                console.log("Immersive Reading Triggered");
+                
+                // 1. Immediate Visual Feedback
+                overlay.classList.add('pointer-events-none');
+                overlay.style.opacity = '0';
+                overlay.style.transform = 'scale(1.1)';
+
+                // 2. Multi-Stage Fullscreen Trigger
+                try {
+                    // Try to get the flipbook instance if it exists yet
+                    const flipbook = DFLIP.books["df_manual_book"];
+                    
+                    if (flipbook && flipbook.ui && flipbook.ui.fullScreen) {
+                        console.log("Triggering via API UI");
+                        flipbook.ui.fullScreen.trigger('click');
+                    } else if (flipbook && typeof flipbook.toggleFullScreen === 'function') {
+                        console.log("Triggering via API Method");
+                        flipbook.toggleFullScreen();
+                    } else {
+                        // Fallback: Physical DOM click on dFlip's own button
+                        const dfFsBtn = document.querySelector('.df-ui-fullscreen, .df-icon-fullscreen');
+                        if (dfFsBtn) {
+                            console.log("Triggering via DOM Click");
+                            dfFsBtn.click();
+                        } else if (document.documentElement.requestFullscreen) {
+                            console.log("Triggering via Browser Native");
+                            document.documentElement.requestFullscreen();
+                        }
+                    }
+                } catch (e) {
+                    console.warn("Fullscreen API failed, falling back to overlay removal only:", e);
+                }
+                
+                // 3. Complete Removal
+                setTimeout(() => {
+                    overlay.remove();
+                    showFullscreenNotification();
+                }, 700);
+            });
+        }
+    });
 </script>
 
 <!-- dFlip JavaScript Library -->

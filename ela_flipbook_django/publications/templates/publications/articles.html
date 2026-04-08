@@ -4,280 +4,48 @@
 {% load static %}
 
 {% block content %}
-<style>
-    /* =================================== */
-    /*  ARTICLES PAGE CONTAINER            */
-    /* =================================== */
-    .articles-page-container {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 20px;
-    }
-
-    /* =================================== */
-    /*  SIDEBAR STYLING                    */
-    /* =================================== */
-    .articles-sidebar {
-        position: fixed;
-        top: 0;
-        left: -320px; /* Hidden by default */
-        width: 300px;
-        height: 100%;
-        background-color: var(--card-bg);
-        padding: 40px 20px;
-        z-index: 1002;
-        transition: left 0.3s ease;
-        overflow-y: auto;
-        box-shadow: 10px 0 30px rgba(0,0,0,0.5);
-        border-right: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    .articles-sidebar.open {
-        left: 0;
-    }
-
-    .sidebar-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-    }
-
-    .close-filter-btn {
-        display: none;
-        background: none;
-        border: none;
-        font-size: 1.5rem;
-        cursor: pointer;
-    }
-
-    /* =================================== */
-    /*  FILTER FORM STYLING                */
-    /* =================================== */
-    .filter-form {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .filter-section {
-        border-bottom: 1px solid #e0e0e0;
-        margin-bottom: 10px;
-    }
-
-    .filter-section summary {
-        font-weight: bold;
-        padding: 10px 0;
-        cursor: pointer;
-        list-style: none; /* Remove default marker */
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .filter-section summary::-webkit-details-marker {
-        display: none; /* Hide for Webkit browsers */
-    }
-
-    .filter-section summary::after {
-        content: '+';
-        font-size: 1.2rem;
-        transition: transform 0.2s;
-    }
-
-    .filter-section[open] > summary::after {
-        content: '−';
-        transform: rotate(180deg);
-    }
-
-    .filter-section .form-group {
-        padding: 10px 0;
-    }
-
-    .filter-form label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: bold;
-    }
-
-    .filter-form input[type="search"],
-    .filter-form select {
-        width: 100%;
-        padding: 8px;
-        border-radius: 4px;
-        border: 1px solid #ddd;
-    }
-
-    .filter-form .filter-btn {
-        width: 100%;
-        padding: 10px;
-        background-color: var(--primary-blue);
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        margin-top: 10px;
-        font-weight: bold;
-    }
-
-    /* =================================== */
-    /*  MAIN CONTENT STYLING               */
-    /* =================================== */
-    .articles-main-content {
-        flex: 1;
-    }
-
-    .featured-story {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-        background: linear-gradient(135deg, var(--card-bg) 0%, #1e3a5f 100%);
-        padding: 25px;
-        border-radius: 15px;
-        margin-bottom: 30px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-    }
-    
-    .featured-content h2 {
-        color: var(--accent-yellow);
-        font-size: 0.9rem;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        margin-bottom: 10px;
-    }
-
-    .featured-content h1 {
-        color: var(--text-dark);
-        font-size: 2.2rem;
-        margin-bottom: 15px;
-        line-height: 1.2;
-    }
-
-    .featured-image img {
-        width: 100%;
-        height: auto;
-        border-radius: 8px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-    }
-
-    @media (min-width: 992px) {
-        .featured-story {
-            flex-direction: row;
-            align-items: center;
-            padding: 40px;
-        }
-        .featured-image {
-            flex: 1;
-        }
-        .featured-content {
-            flex: 1.5;
-            padding-left: 20px;
-        }
-        .articles-page-container {
-            display: block; /* Stack vertically, filter is now a popup */
-        }
-    }
-
-    /* =================================== */
-    /*  MOBILE FILTER STYLING              */
-    /* =================================== */
-    .filter-toggle-btn {
-        display: flex; /* Visible on desktop too */
-        align-items: center;
-        gap: 10px;
-        position: sticky;
-        top: 100px;
-        left: 20px;
-        z-index: 999;
-        background-color: var(--primary-blue);
-        color: white;
-        padding: 12px 25px;
-        border-radius: 50px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        cursor: pointer;
-        box-shadow: 0 8px 16px rgba(0,0,0,0.4);
-        font-weight: bold;
-        width: fit-content;
-        margin-bottom: 20px;
-        transition: transform 0.3s ease;
-    }
-
-    .filter-toggle-btn:hover {
-        transform: scale(1.05);
-        background-color: #2980b9;
-    }
-
-    @media (max-width: 768px) {
-        .filter-toggle-btn {
-            display: block;
-        }
-        .articles-sidebar {
-            position: fixed;
-            top: 0;
-            left: -100%;
-            width: 80%;
-            max-width: 300px;
-            height: 100%;
-            z-index: 1002;
-            transition: left 0.3s ease;
-            overflow-y: auto;
-        }
-        .articles-sidebar.open {
-            left: 0;
-        }
-        .close-filter-btn {
-            display: block;
-        }
-        .sidebar-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-        }
-        .sidebar-overlay.active {
-            display: block;
-        }
-    }
+    /* Minimal custom CSS for things Tailwind doesn't handle natively as easily in CDN mode */
+    .filter-section summary::-webkit-details-marker { display: none; }
+    .filter-section summary::after { content: '+'; font-size: 1rem; transition: transform 0.2s; }
+    .filter-section[open] > summary::after { content: '-'; transform: rotate(180deg); }
+</style>
 
 </style>
 
-<div class="container articles-page-container">
+<div class="bg-slate-50 min-h-screen">
+<div class="container mx-auto px-4 max-w-7xl py-12">
 
-    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+    <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/40 z-[1000] hidden backdrop-blur-sm transition-all duration-300"></div>
 
-    <aside id="articles-sidebar" class="articles-sidebar">
-        <div class="sidebar-header">
-             <h3 style="color: var(--text-dark);">Filters</h3>
-             <button id="close-filter-btn" class="close-filter-btn" style="color: var(--text-dark);">&times;</button>
+    <aside id="articles-sidebar" class="fixed top-0 left-[-320px] w-80 h-full bg-white z-[1002] transition-all duration-300 shadow-2xl border-r border-slate-100 overflow-y-auto p-6 md:p-8">
+        <div class="flex justify-between items-center mb-8">
+            <h3 class="text-xl font-black text-white uppercase tracking-widest font-sans">Filters</h3>
+             <button id="close-filter-btn" class="p-2 text-slate-400 hover:text-white transition-colors text-2xl">&times;</button>
         </div>
-        <form method="GET" action="{% url 'publications:articles' %}" class="filter-form">
+        <form method="GET" action="{% url 'publications:articles' %}" class="space-y-6">
 
-            <details class="filter-section" data-filter-title="search" open>
-                <summary>Search</summary>
-                <div class="form-group">
-                    <input type="search" name="q" id="search-input" placeholder="Search articles..." value="{{ current_query|default:'' }}">
+            <details class="filter-section group" data-filter-title="search" open>
+                <summary class="flex justify-between items-center py-3 font-black text-[10px] uppercase tracking-widest text-slate-400 cursor-pointer list-none">Search</summary>
+                <div class="py-2">
+                    <input type="search" name="q" id="search-input" placeholder="Keyword..." class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-primary-blue transition-all" value="{{ current_query|default:'' }}">
                 </div>
             </details>
 
-            <details class="filter-section" data-filter-title="sort">
-                <summary>Sort By</summary>
-                <div class="form-group">
-                    <select name="sort" id="sort-select">
-                        <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>Newest</option>
-                        <option value="most_read" {% if current_sort == 'most_read' %}selected{% endif %}>Most Read</option>
+            <details class="filter-section group border-t border-slate-100" data-filter-title="sort">
+                <summary class="flex justify-between items-center py-3 font-black text-[10px] uppercase tracking-widest text-slate-400 cursor-pointer list-none">Sort By</summary>
+                <div class="py-2">
+                    <select name="sort" id="sort-select" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-900 focus:outline-none focus:border-primary-blue transition-all">
+                        <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>Newest first</option>
+                        <option value="most_read" {% if current_sort == 'most_read' %}selected{% endif %}>Popularity</option>
                         <option value="editors_pick" {% if current_sort == 'editors_pick' %}selected{% endif %}>Editor's Pick</option>
                     </select>
                 </div>
             </details>
 
-            <details class="filter-section" data-filter-title="year">
-                <summary>Filter by Year</summary>
-                <div class="form-group">
-                    <select name="year" id="year-select">
+            <details class="filter-section group border-t border-slate-100" data-filter-title="year">
+                <summary class="flex justify-between items-center py-3 font-black text-[10px] uppercase tracking-widest text-slate-400 cursor-pointer list-none">Archive</summary>
+                <div class="py-2">
+                    <select name="year" id="year-select" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-900 focus:outline-none focus:border-primary-blue transition-all">
                         <option value="">All Years</option>
                         {% for date in year_list %}
                             <option value="{{ date.year }}" {% if selected_year and date.year == selected_year|add:0 %}selected{% endif %}>
@@ -288,11 +56,11 @@
                 </div>
             </details>
 
-            <details class="filter-section" data-filter-title="category">
-                <summary>Category</summary>
-                <div class_="form-group">
-                    <select name="tag" id="tag-select">
-                        <option value="">All Categories</option>
+            <details class="filter-section group border-t border-slate-100" data-filter-title="category">
+                <summary class="flex justify-between items-center py-3 font-black text-[10px] uppercase tracking-widest text-slate-400 cursor-pointer list-none">Category</summary>
+                <div class="py-2">
+                    <select name="tag" id="tag-select" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-900 focus:outline-none focus:border-primary-blue transition-all">
+                        <option value="">All Topics</option>
                         {% for tag in all_tags %}
                             <option value="{{ tag.slug }}" {% if current_tag == tag.slug %}selected{% endif %}>
                                 {{ tag.name }}
@@ -302,67 +70,99 @@
                 </div>
             </details>
 
-            <button type="submit" class="filter-btn">Apply Filters</button>
+            <button type="submit" class="w-full bg-primary-blue hover:bg-blue-600 text-white font-black uppercase tracking-widest text-xs py-4 rounded-xl shadow-xl hover:shadow-blue-500/20 active:scale-95 transition-all mt-4">Update Results</button>
         </form>
     </aside>
 
-    <main class="articles-main-content">
+    <main class="w-full space-y-12">
         {% if featured_story %}
-        <section class="featured-story">
-            <div class="featured-image">
-                <img src="{{ featured_story.cover_image.url }}" alt="Featured Story: {{ featured_story.title }}">
-            </div>
-            <div class="featured-content">
-                <h2>Featured Story of the Month</h2>
-                <h1>{{ featured_story.title }}</h1>
-                <p>{{ featured_story.excerpt|striptags|truncatewords:30 }}</p>
-                {% if featured_story.average_rating %}
-                    <span class="average-rating">
-                        Average Rating: {{ featured_story.average_rating|floatformat:1 }} / 5
-                    </span>
-                {% endif %}
-                <a href="{% url 'publications:article_detail' slug=featured_story.slug %}" class="hero-subscribe-button">Read &rarr;</a>
+        <section class="relative group rounded-3xl overflow-hidden border border-slate-100 shadow-2xl hover:shadow-[0_45px_100px_-20px_rgba(0,0,0,0.1)] transition-all duration-500">
+            <div class="flex flex-col lg:flex-row bg-white">
+                <div class="lg:w-2/5 aspect-[16/10] lg:aspect-auto overflow-hidden">
+                    <img src="{{ featured_story.cover_image.url }}" alt="Featured Story: {{ featured_story.title }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                </div>
+                <div class="lg:w-3/5 p-8 lg:p-16 flex flex-col justify-center space-y-8 relative overflow-hidden">
+                    <!-- Background Decoration -->
+                    <div class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-64 h-64 bg-primary-blue/5 rounded-full blur-3xl"></div>
+                    
+                    <div class="space-y-6 relative z-10">
+                        <h2 class="text-primary-blue font-black uppercase tracking-[0.4em] text-[11px] font-sans">Featured Article</h2>
+                        <h1 class="text-4xl md:text-5xl lg:text-7xl font-black text-slate-900 leading-tight font-serif italic">
+                            <a href="{% url 'publications:article_detail' slug=featured_story.slug %}" class="hover:text-primary-blue transition-colors">{{ featured_story.title }}</a>
+                        </h1>
+                        <p class="text-slate-600 text-xl md:text-2xl line-clamp-3 leading-relaxed font-serif">{{ featured_story.excerpt|striptags|truncatewords:30 }}</p>
+                    </div>
+                    
+                    <div class="flex items-center gap-8 pt-6 relative z-10">
+                        <a href="{% url 'publications:article_detail' slug=featured_story.slug %}" class="bg-slate-900 hover:bg-slate-800 text-white px-10 py-4 rounded-full font-black text-xs uppercase transition-all shadow-xl active:scale-95">Read Story</a>
+                        {% if featured_story.average_rating %}
+                            <div class="flex items-center gap-2 text-accent-yellow font-black text-lg">
+                                <i class="fas fa-star text-[14px]"></i>
+                                <span>{{ featured_story.average_rating|floatformat:1 }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </section>
         {% endif %}
 
         {% for publication_name, articles_in_publication in articles_by_publication.items %}
-            <div class="publications-header">
-                <h2>{{ publication_name }}</h2>
-            </div>
-            <div class="publications-grid">
-                {% for article in articles_in_publication %}
-                    <div class="publication-card article-story-card">
-                        <a href="{% url 'publications:article_detail' slug=article.slug %}" class="card-image-wrapper">
-                            <img src="{{ article.cover_image.url }}" alt="Cover for {{ article.title }}">
-                        </a>
-                        <div class="card-content">
-                            <h3 class="card-title"><a href="{% url 'publications:article_detail' slug=article.slug %}">{{ article.title }}</a></h3>
-                            <p class="card-excerpt">{{ article.excerpt|striptags|truncatewords:20 }}</p>
-                            <div class="card-tags">
-                                {% for tag in article.tags.all %}
-                                    <span class="tag">{{ tag.name }}</span>
-                                {% endfor %}
-                            </div>
-                            <div class="article-average-rating">
-                                {% if article.average_rating %}
-                                    Average Rating: {{ article.average_rating|floatformat:1 }} / 5
-                                {% endif %}
+            <div class="space-y-10 pt-16">
+                <div class="flex items-center gap-8">
+                    <h2 class="text-2xl md:text-4xl font-black text-slate-900 whitespace-nowrap font-serif italic">{{ publication_name }}</h2>
+                    <div class="h-px w-full bg-slate-200"></div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
+                    {% for article in articles_in_publication %}
+                        <div class="group relative flex flex-col bg-white rounded-3xl overflow-hidden border border-slate-100 transition-all duration-500 hover:shadow-[0_45px_100px_-20px_rgba(0,0,0,0.08)]">
+                            <a href="{% url 'publications:article_detail' slug=article.slug %}" class="block overflow-hidden bg-slate-100">
+                                <img src="{{ article.cover_image.url }}" alt="Cover for {{ article.title }}" class="w-full aspect-video object-cover transition-transform duration-700 group-hover:scale-105">
+                            </a>
+                            <div class="p-8 flex-1 flex flex-col">
+                                <h3 class="text-xl md:text-2xl font-bold leading-tight font-sans">
+                                    <a href="{% url 'publications:article_detail' slug=article.slug %}" class="text-slate-900 hover:text-primary-blue transition-colors line-clamp-2">
+                                        {{ article.title }}
+                                    </a>
+                                </h3>
+                                <p class="text-slate-600 text-sm mt-4 line-clamp-3 leading-relaxed font-serif">{{ article.excerpt|striptags|truncatewords:15 }}</p>
+                                
+                                <div class="mt-auto pt-8 flex items-center justify-between border-t border-slate-50 gap-4">
+                                    <div class="flex gap-2">
+                                        {% for tag in article.tags.all|slice:":2" %}
+                                            <span class="text-[9px] font-black uppercase tracking-widest bg-slate-50 text-slate-500 px-3 py-1.5 rounded-full">{{ tag.name }}</span>
+                                        {% endfor %}
+                                    </div>
+                                    {% if article.average_rating %}
+                                        <div class="flex items-center gap-1.5 text-accent-yellow text-sm font-black">
+                                            <i class="fas fa-star text-[12px]"></i>
+                                            <span>{{ article.average_rating|floatformat:1 }}</span>
+                                        </div>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                {% endfor %}
+                    {% endfor %}
+                </div>
             </div>
         {% empty %}
-            <p class="no-publications">No articles match your filter.</p>
+            <div class="text-center py-32 bg-white rounded-3xl border border-slate-100 shadow-sm">
+                <i class="fas fa-newspaper text-8xl text-slate-100 mb-8"></i>
+                <h3 class="text-2xl font-black text-slate-900">No articles match your selection.</h3>
+                <p class="text-slate-500 mt-4 text-lg">Try adjusting your filters or search keywords.</p>
+            </div>
         {% endfor %}
 
-        {% include 'publications/_pagination.html' with page_obj=articles_paginated %}
+        <div class="pt-20 border-t border-slate-200">
+            {% include 'publications/_pagination.html' with page_obj=articles_paginated %}
+        </div>
     </main>
 
-    <button id="filter-toggle-btn" class="filter-toggle-btn">
-        <i class="fas fa-filter"></i>
-        Filters
+    <!-- Filter Toggle Button (Floating) -->
+    <button id="filter-toggle-btn" class="fixed bottom-8 right-8 z-[1001] bg-primary-blue hover:bg-blue-600 text-white flex items-center gap-3 px-6 py-4 rounded-full shadow-2xl font-black uppercase tracking-widest text-xs transition-all hover:scale-105 active:scale-95 group">
+        <i class="fas fa-filter group-hover:rotate-12 transition-transform"></i>
+        <span>Filters</span>
     </button>
 
 </div>
@@ -377,13 +177,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const sidebarOverlay = document.getElementById('sidebar-overlay');
 
     function openSidebar() {
-        articlesSidebar.classList.add('open');
-        sidebarOverlay.classList.add('active');
+        articlesSidebar.classList.remove('left-[-320px]');
+        articlesSidebar.classList.add('left-0');
+        sidebarOverlay.classList.remove('hidden');
     }
 
     function closeSidebar() {
-        articlesSidebar.classList.remove('open');
-        sidebarOverlay.classList.remove('active');
+        articlesSidebar.classList.remove('left-0');
+        articlesSidebar.classList.add('left-[-320px]');
+        sidebarOverlay.classList.add('hidden');
     }
 
     if (filterToggleBtn) {

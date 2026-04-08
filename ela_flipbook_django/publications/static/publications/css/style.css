@@ -226,9 +226,9 @@ main>.container {
    ========================================================================== */
 .publications-header {
     text-align: center;
-    padding: 40px 0;
+    padding: 20px 0;
     border-bottom: 1px solid #333;
-    margin-bottom: 40px;
+    margin-bottom: 20px;
 }
 
 .publications-header h1,
@@ -249,7 +249,7 @@ main>.container {
 
 /* --- Publications & Articles Grid --- */
 .publications-grid {
-    margin-top: 40px;
+    margin-top: 20px;
 }
 
 /* Desktop: 4 columns */
@@ -378,6 +378,43 @@ main>.container {
     margin-bottom: 15px;
 }
 
+/* --- Article Story Card (Homepage Popular Articles) --- */
+.article-story-card {
+    border-radius: 12px !important;
+}
+
+.article-story-card .card-image-wrapper {
+    aspect-ratio: 16 / 9 !important; /* Cinematic/Horizontal for articles */
+}
+
+.article-story-card .card-content {
+    padding: 15px !important;
+    gap: 8px !important;
+}
+
+.article-story-card .card-title {
+    font-size: 1.1rem !important;
+}
+
+.article-story-card .card-excerpt {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3; /* Standard property for compatibility */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.article-story-card .tag {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
 .no-publications {
     grid-column: 1 / -1;
     text-align: center;
@@ -445,7 +482,7 @@ main>.container {
     background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%), linear-gradient(-45deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%);
     background-size: 20px 20px;
     color: var(--text-dark);
-    padding: 100px 0 60px;
+    padding: 60px 0 40px;
 }
 
 
@@ -546,7 +583,7 @@ main>.container {
 
 @media (max-width: 992px) {
     .hero-banner {
-        padding: 40px 0 !important;
+        padding: 20px 0 10px !important;
     }
 
     .hero-banner .hero-container {
@@ -658,7 +695,7 @@ main>.container {
 /* --- NEW: Stats Card Section --- */
 .trust-impact-bar {
     background-color: var(--dark-bg);
-    padding: 10px 0 20px;
+    padding: 5px 0 10px;
 }
 
 .stats-card-container {

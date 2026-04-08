@@ -60,13 +60,13 @@
     }
 
     .magazine-title {
-        font-family: 'Playfair Display', serif; /* Assuming a premium serif might be available or fallback */
+        font-family: inherit; /* Handled by font-serif class */
         font-size: 3rem;
-        line-height: 1.1;
+        line-height: 1.15;
         margin-bottom: 20px;
         color: #fff;
-        font-weight: 800;
-        letter-spacing: -1px;
+        font-weight: 900;
+        letter-spacing: -0.02em;
     }
 
     .magazine-meta-container {
@@ -132,10 +132,10 @@
 
     /* Main Article Typography */
     .article-content {
-        font-family: 'Inter', sans-serif;
-        font-size: 1.15rem;
-        line-height: 1.8;
-        color: #e0e0e0;
+        font-size: 1.25rem;
+        line-height: 1.85;
+        color: #e5e7eb; /* slate-200 */
+        letter-spacing: -0.011em;
     }
 
     .article-content p {
@@ -309,7 +309,7 @@
                 </div>
 
                 <!-- TITLE ADJACENT TO IMAGE -->
-                <h1 id="article-title" class="magazine-title">{{ article.title }}</h1>
+                <h1 id="article-title" class="magazine-title font-serif">{{ article.title }}</h1>
 
                 <!-- META INFO -->
                 <div class="magazine-meta-container">
@@ -333,7 +333,7 @@
                     {% endif %}
                 </div>
 
-                <div class="card-tags">
+                <div class="card-tags font-sans">
                     {% for tag in article.tags.all %}
                     <span class="tag">{{ tag.name }}</span>
                     {% endfor %}
@@ -382,7 +382,7 @@
         </div>
 
         <!-- Main Article Content (Loaded via AJAX) -->
-        <div class="article-content" id="article-main-content">
+        <div class="article-content font-serif" id="article-main-content">
             <div class="skeleton-text"></div>
             <div class="skeleton-text"></div>
             <div class="skeleton-text" style="width: 80%;"></div>

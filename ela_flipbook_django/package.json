@@ -1,0 +1,14 @@
+{
+  "name": "business-matters-tailwind",
+  "version": "1.0.0",
+  "description": "Production Tailwind build scripts for Business Matters Africa",
+  "scripts": {
+    "build": "tailwindcss.exe -i ./static_src/tailwind_input.css -o ./publications/static/publications/css/tailwind.css --minify",
+    "watch": "tailwindcss.exe -i ./static_src/tailwind_input.css -o ./publications/static/publications/css/tailwind.css --watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/line-clamp": "^0.4.4",
+    "@tailwindcss/typography": "^0.5.19",
+    "tailwindcss": "^4.2.2"
+  }
+}

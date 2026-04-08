@@ -1,31 +1,38 @@
-<!-- publications/templates/publications/magazine.html -->
+<div class="bg-slate-50 min-h-screen">
+    <div class="container mx-auto px-4 max-w-7xl py-16 space-y-12">
+        <div class="flex items-center gap-8">
+            <h1 class="text-3xl md:text-5xl font-black text-slate-900 whitespace-nowrap uppercase tracking-tighter font-serif italic">Magazine <span class="text-primary-blue">Archive</span></h1>
+            <div class="h-px w-full bg-slate-200"></div>
+        </div>
 
-{% extends 'publications/base.html' %}
-
-{% block content %}
-    <div class="publications-header">
-        <h1>Magazine Issues</h1>
-    </div>
-
-    <div class="publications-grid">
-        {% for pub in publications %}
-            <a href="{% url 'publications:detail' slug=pub.slug %}" class="publication-card">
-                <div class="card-image-wrapper">
-                    {% if pub.cover_image %}
-                        <img src="{{ pub.cover_image.url }}" alt="Cover for {{ pub.title }}">
-                    {% else %}
-                        <div class="placeholder-image">No Cover</div>
-                    {% endif %}
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
+            {% for pub in publications %}
+                <a href="{% url 'publications:detail' slug=pub.slug %}" class="group block bg-white rounded-2xl overflow-hidden border border-slate-100 hover:border-primary-blue/30 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2">
+                    <div class="aspect-[3/4] overflow-hidden bg-slate-50 relative">
+                        {% if pub.cover_image %}
+                            <img src="{{ pub.cover_image.url }}" alt="Cover for {{ pub.title }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                        {% else %}
+                            <div class="w-full h-full flex items-center justify-center text-slate-300 font-black">PREMIUM</div>
+                        {% endif %}
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6">
+                            <span class="text-white text-[11px] font-black uppercase tracking-[0.2em] translate-y-2 group-hover:translate-y-0 transition-transform">Read Issue &rarr;</span>
+                        </div>
+                    </div>
+                    <div class="p-8">
+                        <span class="text-[11px] font-black uppercase tracking-widest text-primary-blue bg-primary-blue/5 px-2 py-1 rounded font-sans">{{ pub.uploaded_at|date:"M-Y" }}</span>
+                        <h3 class="text-lg md:text-xl font-bold text-slate-900 mt-4 group-hover:text-primary-blue transition-colors line-clamp-1 font-serif">{{ pub.title }}</h3>
+                    </div>
+                </a>
+            {% empty %}
+                <div class="col-span-full text-center py-32 bg-white rounded-3xl border border-slate-100 shadow-sm">
+                    <i class="fas fa-book-open text-8xl text-slate-100 mb-8"></i>
+                    <h2 class="text-2xl font-black text-slate-900 italic">No magazines have been published yet.</h2>
                 </div>
-                <div class="card-content">
-                    <span class="card-date">{{ pub.uploaded_at|date:"M-y" }}</span>
-                    <h3 class="card-title">{{ pub.title }}</h3>
-                </div>
-            </a>
-        {% empty %}
-            <p class="no-publications">No publications are available at the moment.</p>
-        {% endfor %}
-    </div>
+            {% endfor %}
+        </div>
 
-    {% include 'publications/_pagination.html' with page_obj=publications %}
-{% endblock %}
+        <div class="pt-16 border-t border-slate-200">
+            {% include 'publications/_pagination.html' with page_obj=publications %}
+        </div>
+    </div>
+</div>
