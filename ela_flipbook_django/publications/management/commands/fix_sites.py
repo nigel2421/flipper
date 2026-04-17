@@ -14,9 +14,9 @@ class Command(BaseCommand):
 
         # 1. Ensure Sites exist
         domains = [
-            ('flipbookwebsite.web.app', 'Firebase Hosting'),
+            ('businessmatters.co.ke', 'Main Production'),
+            ('www.businessmatters.co.ke', 'Main Production WWW'),
             ('flipper-git-cydpcotz4q-ew.a.run.app', 'Cloud Run Prod'),
-            ('businessmatters.co.ke', 'Main Domain'),
             ('127.0.0.1:8000', 'Local Development'),
         ]
         

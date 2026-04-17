@@ -12,7 +12,7 @@ from django.contrib.auth.models import User
 
 def sync_production():
     # 1. Update Site Domain
-    correct_domain = 'flipbookwebsite.firebaseapp.com'
+    correct_domain = 'businessmatters.co.ke'
     site_id = getattr(settings, 'SITE_ID', 1)
     try:
         site = Site.objects.get(id=site_id)

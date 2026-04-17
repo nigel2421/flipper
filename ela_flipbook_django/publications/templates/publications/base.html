@@ -11,6 +11,7 @@
     <!-- PWA -->
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#3498db">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Business Matters">
@@ -141,13 +142,14 @@
     </script>
 </head>
 
-<body class="bg-dark-bg text-slate-200 font-sans min-h-screen flex flex-col antialiased">
+<body class="bg-dark-bg text-slate-200 font-sans min-h-screen flex flex-col antialiased {% block body_class %}{% endblock %}">
     <div class="loader"></div>
     <!-- Reading Progress Bar -->
     <div class="progress-container">
         <div class="progress-bar" id="progressBar"></div>
     </div>
 
+    {% block site_header %}
     <header class="sticky top-0 z-50 bg-[#0a192f]/90 backdrop-blur-md border-b border-white/10 py-3 shadow-lg transition-all duration-300">
         <div class="container mx-auto px-4 max-w-7xl flex justify-between items-center">
             <a href="{% url 'publications:home' %}" class="flex-shrink-0 transition-transform duration-300 hover:scale-105">
@@ -199,6 +201,7 @@
             </nav>
         </div>
     </header>
+    {% endblock %}
 
     <main>
         <!-- Messages Block -->
@@ -218,12 +221,14 @@
         {% endblock %}
     </main>
 
+    {% block site_footer %}
     <footer class="bg-[#0a192f] text-slate-500 py-12 border-t border-white/5 mt-auto">
         <div class="container mx-auto px-4 max-w-7xl text-center space-y-4">
             <img src="{% static 'img/logo.png' %}" alt="Business Matters Logo" class="h-8 w-auto mx-auto opacity-50 grayscale brightness-200">
             <p class="text-sm font-medium tracking-widest uppercase">&copy; {% now "Y" %} Business Matters. All Rights Reserved.</p>
         </div>
     </footer>
+    {% endblock %}
 
     <!-- === NEW: Simple JavaScript for Mobile Menu Toggle and Messages === -->
     <script>

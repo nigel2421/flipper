@@ -57,6 +57,8 @@ CSRF_TRUSTED_ORIGINS = [
     'https://flipbookwebsite.web.app',
     'https://flipbookwebsite.firebaseapp.com',
     'https://flipper-git-cydpcotz4q-ew.a.run.app',
+    'https://businessmatters.co.ke',
+    'https://www.businessmatters.co.ke',
 ]
 
 SITE_ID = 1
@@ -176,7 +178,7 @@ ACCOUNT_SIGNUP_FORM_CLASS = 'publications.custom_auth_forms.CustomSignupForm'
 ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 
-ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+ACCOUNT_EMAIL_VERIFICATION = 'none'
 SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
 SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 SOCIALACCOUNT_ADAPTER = 'publications.adapter.CustomSocialAccountAdapter'
@@ -279,14 +281,48 @@ if os.environ.get('PRODUCTION'):
     LOGGING = {
         'version': 1,
         'disable_existing_loggers': False,
+        'formatters': {
+            'verbose': {
+                'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+                'style': '{',
+            },
+            'simple': {
+                'format': '{levelname} {message}',
+                'style': '{',
+            },
+        },
         'handlers': {
             'console': {
+                'level': 'INFO',
                 'class': 'logging.StreamHandler',
+                'formatter': 'verbose',
             },
         },
         'root': {
             'handlers': ['console'],
             'level': 'INFO',
+        },
+        'loggers': {
+            'django': {
+                'handlers': ['console'],
+                'level': 'ERROR',
+                'propagate': False,
+            },
+            'django.request': {
+                'handlers': ['console'],
+                'level': 'ERROR',
+                'propagate': False,
+            },
+            'allauth': {
+                'handlers': ['console'],
+                'level': 'INFO',
+                'propagate': False,
+            },
+            'publications': {
+                'handlers': ['console'],
+                'level': 'ERROR',
+                'propagate': False,
+            },
         },
     }
 else:

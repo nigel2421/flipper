@@ -22,6 +22,22 @@
         <div class="auth-divider">
             <span>Or securely with</span>
         </div>
+
+        <form class="premium-auth-form" id="login_form" method="POST" action="{% url 'account_login' %}">
+            {% csrf_token %}
+            <div class="form-fields text-left">
+                {{ form.as_p }}
+            </div>
+            
+            {% if redirect_field_value %}
+            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+            {% endif %}
+            
+            <button type="submit" class="premium-submit-btn">Sign In</button>
+            <div class="mt-4">
+                <a href="{% url 'account_reset_password' %}" class="text-xs text-slate-400 hover:text-amber-500 transition-colors">Forgot Password?</a>
+            </div>
+        </form>
         
         <div class="auth-footer">
             <p>New to BMA? <a href="{% url 'account_signup' %}">Create an account</a></p>
