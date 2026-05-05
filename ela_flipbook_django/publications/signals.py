@@ -77,6 +77,7 @@ def handle_referral_signup(sender, request, user, **kwargs):
     referral_code = request.session.get('referral_code')
     if referral_code:
         try:
+            from .models import Profile
             # Find the profile of the user who referred the new user
             referrer_profile = Profile.objects.get(referral_code=referral_code)
 

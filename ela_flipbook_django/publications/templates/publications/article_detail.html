@@ -17,6 +17,35 @@
 <meta property="og:site_name" content="Business Matters Africa">
 {% endblock %}
 
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "{{ article.title|escapejs }}",
+  "description": "{{ article.excerpt|striptags|truncatechars:160|escapejs }}",
+  "image": "{% if article.cover_image %}{{ request.scheme }}://{{ request.get_host }}{{ article.cover_image.url }}{% endif %}",
+  "datePublished": "{{ article.published_at|date:'c' }}",
+  "author": {
+    "@type": "Person",
+    "name": "{{ article.author.get_full_name|default:article.author.username|escapejs }}"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Business Matters Africa",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "{{ request.scheme }}://{{ request.get_host }}{% static 'img/logo.png' %}"
+    }
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{ request.build_absolute_uri }}"
+  }
+}
+</script>
+{% endblock %}
+
 {% block content %}
 <style>
     /* =================================== */

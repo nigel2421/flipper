@@ -1,9 +1,26 @@
 # publications/adapter.py
 
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
+from allauth.account.adapter import DefaultAccountAdapter
 from django.utils.text import slugify
 import random
 import string
+
+class CustomAccountAdapter(DefaultAccountAdapter):
+    def is_open_for_signup(self, request):
+        """
+        Allow signups only via social accounts (Google). 
+        Regular email/password signups are disabled.
+        """
+        # Allauth sets 'sociallogin' on the request during social signup flows
+        if hasattr(request, 'sociallogin') or 'socialaccount_sociallogin' in request.session:
+            return True
+        
+        # Also allow if the path indicates a social login/signup callback
+        if "/google/" in request.path or "/social/" in request.path:
+            return True
+            
+        return False
 
 class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
 

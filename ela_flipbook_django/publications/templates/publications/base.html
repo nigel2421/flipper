@@ -5,8 +5,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Business Matters{% endblock %}</title>
-    {% block og_tags %}{% endblock %}
+    <title>{% block title %}Business Matters Africa - Premium Publications{% endblock %}</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="{% block meta_description %}Access premium business insights, reports, and publications from Business Matters Africa. Stay ahead with our expert analysis.{% endblock %}">
+    <meta name="keywords" content="Business, Africa, Reports, Analysis, Publications, Business Matters Africa">
+    <meta name="author" content="Business Matters Africa">
+    <link rel="canonical" href="{{ request.build_absolute_uri }}">
+
+    <!-- Open Graph / Facebook -->
+    {% block og_tags %}
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:title" content="{% block og_title %}Business Matters Africa - Premium Publications{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Access premium business insights, reports, and publications from Business Matters Africa.{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}{{ request.scheme }}://{{ request.get_host }}{% static 'publications/images/og-image.png' %}{% endblock %}">
+    {% endblock %}
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="{{ request.build_absolute_uri }}">
+    <meta property="twitter:title" content="{% block twitter_title %}Business Matters Africa - Premium Publications{% endblock %}">
+    <meta property="twitter:description" content="{% block twitter_description %}Access premium business insights, reports, and publications from Business Matters Africa.{% endblock %}">
+    <meta property="twitter:image" content="{% block twitter_image %}{{ request.scheme }}://{{ request.get_host }}{% static 'publications/images/og-image.png' %}{% endblock %}">
 
     <!-- PWA -->
     <link rel="manifest" href="/manifest.json">
@@ -140,6 +161,34 @@
         googletag.enableServices();
       });
     </script>
+
+    <!-- Structured Data (JSON-LD) for AI & SEO -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Business Matters Africa",
+      "url": "{{ request.scheme }}://{{ request.get_host }}",
+      "logo": "{{ request.scheme }}://{{ request.get_host }}{% static 'img/logo.png' %}",
+      "sameAs": [
+        "https://twitter.com/BM_Africa",
+        "https://www.linkedin.com/company/business-matters-africa"
+      ],
+      "description": "Access premium business insights, reports, and publications from Business Matters Africa. Stay ahead with our expert analysis."
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "url": "{{ request.scheme }}://{{ request.get_host }}",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "{{ request.scheme }}://{{ request.get_host }}/search/?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
 </head>
 
 <body class="bg-dark-bg text-slate-200 font-sans min-h-screen flex flex-col antialiased {% block body_class %}{% endblock %}">
@@ -183,8 +232,8 @@
                     </div>
                 </div>
 
-                <a href="{% url 'publications:whatsapp_updates' %}" class="flex items-center space-x-1.5 hover:text-green-400 transition-colors">
-                    <i class="fab fa-whatsapp"></i> <span>Updates</span>
+                <a href="{% url 'publications:whatsapp_updates' %}" class="flex items-center space-x-1.5 hover:text-amber-400 transition-colors">
+                    <i class="fas fa-file-alt"></i> <span>Business Matters Africa Report</span>
                 </a>
                 <a href="{% url 'publications:contact' %}" class="hover:text-amber-400 transition-colors">Contacts</a>
                 <a href="{% url 'publications:contributors' %}" class="hover:text-amber-400 transition-colors">People</a>

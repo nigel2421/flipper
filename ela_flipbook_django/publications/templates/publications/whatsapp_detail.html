@@ -25,7 +25,7 @@
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        color: #25D366; /* Lighter green for better visibility */
+        color: #3498db; /* Blue for better visibility */
         font-weight: 600;
         text-decoration: none;
         margin-bottom: 25px;
@@ -36,7 +36,7 @@
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        background: #25D366;
+        background: #3498db;
         color: white;
         font-size: 0.8rem;
         font-weight: 700;
@@ -70,8 +70,8 @@
         color: #e2e8f0; /* Light text for readability on dark background */
     }
     .wa-share-box {
-        background: linear-gradient(135deg, #f0fdf4, #dcfce7);
-        border: 1px solid #86efac;
+        background: linear-gradient(135deg, #172a45, #1e3a8a);
+        border: 1px solid #3498db;
         border-radius: 12px;
         padding: 25px;
         margin-top: 40px;
@@ -82,23 +82,23 @@
     }
     .wa-share-box .wa-share-icon {
         font-size: 2.5rem;
-        color: #25D366;
+        color: #3498db;
         flex-shrink: 0;
     }
     .wa-share-box h3 {
         margin: 0 0 4px;
         font-size: 1rem;
-        color: #075E54;
+        color: #3498db;
         font-weight: 700;
     }
     .wa-share-box p {
         margin: 0;
         font-size: 0.85rem;
-        color: #555;
+        color: #e2e8f0;
     }
     .wa-share-btn {
         margin-left: auto;
-        background: #25D366;
+        background: #3498db;
         color: white;
         border: none;
         padding: 12px 22px;
@@ -112,7 +112,7 @@
         transition: background 0.2s;
         white-space: nowrap;
     }
-    .wa-share-btn:hover { background: #128C7E; }
+    .wa-share-btn:hover { background: #2980b9; }
     @media (max-width: 600px) {
         .wa-detail-title { font-size: 1.5rem; }
         .wa-share-box { flex-direction: column; }
@@ -122,11 +122,11 @@
 
 <div class="wa-detail-container">
     <a href="{% url 'publications:whatsapp_updates' %}" class="wa-detail-back">
-        <i class="fas fa-arrow-left"></i> Back to Updates
+        <i class="fas fa-arrow-left"></i> Back to Reports
     </a>
 
     <div>
-        <span class="wa-detail-badge"><i class="fab fa-whatsapp"></i> WhatsApp Update</span>
+        <span class="wa-detail-badge"><i class="fas fa-file-alt"></i> Business Matters Africa Report</span>
     </div>
     <h1 class="wa-detail-title">{{ update.title }}</h1>
     <p class="wa-detail-meta">
@@ -143,14 +143,43 @@
 
     <!-- Follow us box -->
     <div class="wa-share-box">
-        <div class="wa-share-icon"><i class="fab fa-whatsapp"></i></div>
+        <div class="wa-share-icon"><i class="fas fa-file-alt"></i></div>
         <div>
-            <h3>Follow us on WhatsApp</h3>
-            <p>Join our WhatsApp Channel for the latest news and insights delivered directly to you.</p>
+            <h3>Official Business Matters Africa Reports</h3>
+            <p>Access our premium insights and business reports directly on your device.</p>
         </div>
-        <a href="https://whatsapp.com/channel/0029Vb70gUlBPzjg9ZOkjV2v" target="_blank" class="wa-share-btn" style="text-decoration: none;">
-            <i class="fab fa-whatsapp"></i> Follow Us
+        <a href="{% url 'publications:whatsapp_updates' %}" class="wa-share-btn" style="text-decoration: none;">
+            <i class="fas fa-list"></i> View All Reports
         </a>
     </div>
 </div>
+
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "{{ update.title|escapejs }}",
+  "description": "{{ update.short_description|striptags|truncatechars:160|escapejs }}",
+  "image": "{% if update.cover_image %}{{ request.scheme }}://{{ request.get_host }}{{ update.cover_image.url }}{% endif %}",
+  "datePublished": "{{ update.uploaded_at|date:'c' }}",
+  "author": {
+    "@type": "Organization",
+    "name": "Business Matters Africa"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Business Matters Africa",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "{{ request.scheme }}://{{ request.get_host }}{% static 'img/logo.png' %}"
+    }
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{ request.build_absolute_uri }}"
+  }
+}
+</script>
+{% endblock %}
 {% endblock %}
