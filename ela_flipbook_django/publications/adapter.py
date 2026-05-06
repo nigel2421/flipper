@@ -9,17 +9,17 @@ import string
 class CustomAccountAdapter(DefaultAccountAdapter):
     def is_open_for_signup(self, request):
         """
-        Allow signups only via social accounts (Google). 
+        Allow signups via social accounts (Google).
         Regular email/password signups are disabled.
         """
         # Allauth sets 'sociallogin' on the request during social signup flows
         if hasattr(request, 'sociallogin') or 'socialaccount_sociallogin' in request.session:
             return True
-        
-        # Also allow if the path indicates a social login/signup callback
-        if "/google/" in request.path or "/social/" in request.path:
+
+        # Allow if the path indicates a social login/signup callback or 3rdparty flow
+        if any(p in request.path for p in ("/google/", "/social/", "/3rdparty/", "/callback/", "/accounts/")):
             return True
-            
+
         return False
 
 class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
@@ -55,20 +55,27 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
     def populate_user(self, request, sociallogin, data):
         """
         Populates user fields from social account data.
+        Always ensures first_name and last_name are non-None strings so allauth
+        does not consider the profile incomplete and redirect to /accounts/3rdparty/signup/.
         """
         user = super().populate_user(request, sociallogin, data)
 
         # Get the first and last name from the social account
-        first_name = sociallogin.account.extra_data.get('given_name')
-        last_name = sociallogin.account.extra_data.get('family_name')
+        first_name = sociallogin.account.extra_data.get('given_name') or ''
+        last_name = sociallogin.account.extra_data.get('family_name') or ''
 
-        # Populate the user model with the new data
-        if first_name and not user.first_name:
+        # Populate the user model — always set a value (even empty string) so
+        # allauth never sees a None/missing field and redirects to the signup form
+        if not user.first_name:
             user.first_name = first_name
-        if last_name and not user.last_name:
-            user.last_name = last_name
+        if not user.last_name:
+            user.last_name = last_name  # empty string is acceptable
         if not user.email and 'email' in data:
             user.email = data['email']
+
+        # Ensure username is set
+        if not user.username:
+            user.username = self.generate_unique_username(user.email)
 
         return user
 

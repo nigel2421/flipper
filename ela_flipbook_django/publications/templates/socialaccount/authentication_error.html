@@ -1,0 +1,108 @@
+{% extends "publications/base.html" %}
+{% load i18n static %}
+
+{% block head_title %}Sign In Error{% endblock %}
+
+{% block content %}
+<div class="auth-page-wrapper">
+    <div class="premium-auth-card" style="text-align: center;">
+        <div class="auth-header">
+            <img src="{% static 'publications/images/logo.png' %}" alt="BMA Logo" class="auth-logo" onerror="this.style.display='none'">
+            <div class="error-icon">⚠️</div>
+            <h1>Sign In Failed</h1>
+            <p>
+                There was a problem signing in with your Google account.
+                This is usually temporary — please try again.
+            </p>
+        </div>
+
+        <div class="auth-social-actions" style="margin-top: 20px;">
+            <form method="post" action="/accounts/google/login/">
+                {% csrf_token %}
+                <button type="submit" class="premium-google-btn" style="width: 100%;">
+                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google">
+                    <span>Try Again with Google</span>
+                </button>
+            </form>
+        </div>
+
+        <div class="auth-footer" style="margin-top: 24px;">
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">
+                If the problem persists, please clear your browser cookies and try again,
+                or contact support.
+            </p>
+            <p>
+                <a href="{% url 'publications:home' %}" style="color: var(--primary-blue); font-weight: 600;">
+                    ← Back to Home
+                </a>
+                &nbsp;&nbsp;|&nbsp;&nbsp;
+                <a href="{% url 'publications:contact' %}" style="color: var(--primary-blue); font-weight: 600;">
+                    Contact Support
+                </a>
+            </p>
+        </div>
+    </div>
+</div>
+
+<style>
+    .auth-page-wrapper {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+    }
+    .premium-auth-card {
+        background: var(--card-bg);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 40px;
+        width: 100%;
+        max-width: 450px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(20px);
+    }
+    .auth-logo {
+        width: 70px;
+        margin-bottom: 16px;
+    }
+    .error-icon {
+        font-size: 2.5rem;
+        margin-bottom: 12px;
+    }
+    .auth-header h1 {
+        font-size: 1.75rem;
+        color: var(--text-dark);
+        margin-bottom: 10px;
+    }
+    .auth-header p {
+        color: var(--text-muted);
+        margin-bottom: 10px;
+        line-height: 1.6;
+    }
+    .premium-google-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        background: white;
+        color: #1f2937;
+        padding: 14px;
+        border-radius: 12px;
+        font-weight: 600;
+        border: 1px solid #e5e7eb;
+        cursor: pointer;
+        width: 100%;
+        transition: all 0.3s ease;
+    }
+    .premium-google-btn:hover {
+        background: #f9fafb;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    .premium-google-btn img {
+        width: 24px;
+        height: 24px;
+    }
+</style>
+{% endblock content %}
