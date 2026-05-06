@@ -288,12 +288,12 @@
             hamburger.addEventListener('click', () => {
                 const isActive = navMenu.classList.contains('active-mobile');
                 if (isActive) {
-                    navMenu.classList.remove('active-mobile', 'flex', 'fixed', 'inset-0', 'bg-[#0a192f]', 'flex-col', 'items-center', 'justify-center', 'space-y-8', 'z-[1000]', 'text-2xl');
+                    navMenu.classList.remove('active-mobile', 'flex', 'fixed', 'inset-0', 'bg-[#0a192f]', 'flex-col', 'items-center', 'justify-center', 'justify-start', 'pt-24', 'pb-12', 'overflow-y-auto', 'space-y-8', 'z-[1000]', 'text-2xl');
                     navMenu.classList.add('hidden');
                     document.body.style.overflow = '';
                 } else {
                     navMenu.classList.remove('hidden');
-                    navMenu.classList.add('active-mobile', 'flex', 'fixed', 'inset-0', 'bg-[#0a192f]', 'flex-col', 'items-center', 'justify-center', 'space-y-8', 'z-[1000]', 'text-2xl');
+                    navMenu.classList.add('active-mobile', 'flex', 'fixed', 'inset-0', 'bg-[#0a192f]', 'flex-col', 'items-center', 'justify-start', 'pt-24', 'pb-12', 'overflow-y-auto', 'space-y-8', 'z-[1000]', 'text-2xl');
                     document.body.style.overflow = 'hidden';
                 }
                 hamburger.classList.toggle('active');
@@ -302,7 +302,7 @@
             document.querySelectorAll('.main-nav a').forEach(n => n.addEventListener('click', (e) => {
                 if (n.classList.contains('nav-link-with-icon')) return;
                 
-                navMenu.classList.remove('active-mobile', 'flex', 'fixed', 'inset-0', 'bg-[#0a192f]', 'flex-col', 'items-center', 'justify-center', 'space-y-8', 'z-[1000]', 'text-2xl');
+                navMenu.classList.remove('active-mobile', 'flex', 'fixed', 'inset-0', 'bg-[#0a192f]', 'flex-col', 'items-center', 'justify-center', 'justify-start', 'pt-24', 'pb-12', 'overflow-y-auto', 'space-y-8', 'z-[1000]', 'text-2xl');
                 navMenu.classList.add('hidden', 'md:flex');
                 document.body.style.overflow = '';
                 hamburger.classList.remove('active');

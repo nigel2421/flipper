@@ -46,12 +46,6 @@
 <!-- Immersive Viewer Layout (Flush between header and bottom bar) -->
 <div class="w-full bg-black fixed top-16 left-0 right-0 overflow-hidden" style="bottom: 64px;">
 
-    <!-- Mobile Loading Overlay -->
-    <div id="mobile-loading-overlay" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black md:hidden">
-        <div class="w-12 h-12 rounded-full border-4 border-amber-400 border-t-transparent animate-spin mb-4"></div>
-        <p class="text-amber-400 font-black uppercase tracking-widest text-sm">Loading PDF&hellip;</p>
-    </div>
-
     <!-- The Flipbook -->
     <div class="h-full w-full relative z-10">
         {% if publication.pdf_file %}
@@ -178,11 +172,6 @@
         .df-stage {
             width: 100% !important;
         }
-
-        /* Hide the native dFlip loading bar — we show our overlay instead */
-        .df-loading {
-            display: none !important;
-        }
     }
 </style>
 
@@ -262,14 +251,7 @@
         // On mobile: single page so PDF fills the screen width correctly
         singlePageMode: isMobile ? 1 : 0,
         onReady: function(flipbook) {
-            console.log("dFlip Ready");
-            // Dismiss the mobile loading overlay
-            var overlay = document.getElementById('mobile-loading-overlay');
-            if (overlay) {
-                overlay.style.transition = 'opacity 0.4s ease';
-                overlay.style.opacity = '0';
-                setTimeout(function() { overlay.style.display = 'none'; }, 420);
-            }
+            console.log("dFlip Ready event fired");
         }
     };
 
