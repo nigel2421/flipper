@@ -149,28 +149,15 @@
        ===================================================== */
     @media (max-width: 767px) {
         /* Hide dFlip's own built-in toolbar on mobile — we use our custom bottom bar */
-        .df-ui-controls,
         .df-ui-wrapper,
-        .df-ui-toolbar {
+        .df-ui-controls,
+        .df-ui-container,
+        .df-ui {
             display: none !important;
-        }
-
-        /* Single-page mode: ensure the book container fills width not 2x width */
-        .df-container {
-            width: 100% !important;
-            max-width: 100% !important;
-        }
-
-        /* Make each page fill the available width */
-        .df-page-wrapper,
-        .df-page {
-            width: 100% !important;
-            max-width: 100% !important;
-        }
-
-        /* Remove any side-by-side (spread) layout on mobile */
-        .df-stage {
-            width: 100% !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+            height: 0 !important;
+            pointer-events: none !important;
         }
     }
 </style>
