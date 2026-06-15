@@ -16,7 +16,9 @@
                 {% with article=rating.article %}
                 <div class="publication-card article-story-card">
                     <a href="{% url 'publications:article_detail' slug=article.slug %}" class="card-image-wrapper">
+                        {% if article.cover_image %}
                         <img src="{{ article.cover_image.url }}" alt="Cover for {{ article.title }}">
+                        {% endif %}
                     </a>
                     <div class="card-content">
                         <h3 class="card-title"><a href="{% url 'publications:article_detail' slug=article.slug %}">{{ article.title }}</a></h3>
