@@ -5,32 +5,23 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from publications.views import CustomSignupView
-from django.views.generic import RedirectView 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
+    # Custom signup view — captures referral codes and shows the real sign-up form.
+    # IMPORTANT: this must come BEFORE the generic allauth include below so Django
+    # matches it first and does not fall through to allauth's default signup view.
     path('accounts/signup/', CustomSignupView.as_view(), name='account_signup'),
+
+    # All other allauth URLs (login, logout, password reset, social auth, etc.)
     path('accounts/', include('allauth.urls')),
-    path('', include('publications.urls')), # This points to your app's urls
-    
-]
 
-# This is for serving files in development
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-
-    urlpatterns = [
-    path('admin/', admin.site.urls),
-
-    # 1. Sign-Up is immediately redirected to the Google login flow.
-    path("accounts/signup/", 
-         RedirectView.as_view(url='/accounts/google/login/', permanent=False), 
-         name="account_signup"
-    ),
-    
-    # 2. All other allauth URLs
-    path('accounts/', include('allauth.urls')),
-    
+    # App pages
     path('', include('publications.urls')),
 ]
+
+# Serve uploaded media files locally during development only.
+# In production the web server (LiteSpeed/Apache) handles this directly.
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

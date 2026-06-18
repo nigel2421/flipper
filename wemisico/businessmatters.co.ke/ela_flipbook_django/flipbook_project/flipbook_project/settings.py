@@ -14,7 +14,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-p)$_lf*$b=h2x(l9cv^r8yo(662fa^1=nbnfs+fe8(iw-x^c+&'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True # Set to False for production!
+DEBUG = False  # Production: keep False. Set env var DJANGO_DEBUG=True only for local dev.
 
 ALLOWED_HOSTS = [ 
     'press.businessmatters.co.ke',
@@ -103,8 +103,9 @@ USE_TZ = True
 
 
 # --- Static and Media File Configuration ---
-STATIC_URL = 'flipper/ela_flipbook_django/publications/static/'
-MEDIA_URL = 'flipper/ela_flipbook_django/media/'
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'   # collectstatic copies files here
+MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
