@@ -121,29 +121,57 @@ WSGI_APPLICATION = 'flipbook_project.wsgi.application'
 
 
 # --- DATABASE CONFIGURATION ---
-if os.environ.get('PRODUCTION') or os.environ.get('GAE_APPLICATION') or os.environ.get('K_SERVICE'):
-    # Running on production or with production proxy, use Cloud SQL
+# Cloud Run detection: Only use Cloud SQL if we're truly ready (i.e., have Cloud SQL Proxy or Private IP)
+IN_CLOUD_RUN = bool(os.environ.get('K_SERVICE'))
+HAS_DB_CREDENTIALS = os.environ.get('CLOUD_SQL_CONNECTION_NAME')
+
+if (os.environ.get('PRODUCTION') or os.environ.get('GAE_APPLICATION')) and HAS_DB_CREDENTIALS:
+    # Running on production WITH explicit Cloud SQL config
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'flipbook_db',            # <-- Change to your DB name
-            'USER': 'businessmatters',               # <-- Change to your DB user
-            'PASSWORD': 'q1w2e3r4t5y.', # <-- Change to your DB password
-            
-            # This HOST string tells Cloud Run to connect using the secure internal socket
-            'HOST': '/cloudsql/flipbookwebsite:europe-west1:flipper-fdc',
+            'NAME': os.environ.get('DB_NAME', 'flipbook_db'),
+            'USER': os.environ.get('DB_USER', 'businessmatters'),
+            'PASSWORD': os.environ.get('DB_PASSWORD', 'q1w2e3r4t5y.'),
+            'HOST': f"/cloudsql/{os.environ.get('CLOUD_SQL_CONNECTION_NAME')}",
         }
     }
-    # Check if we are running locally but want to connect to production DB via proxy
-    if os.name == 'nt' or os.environ.get('USE_DB_PROXY'):
-        DATABASES['default']['HOST'] = '127.0.0.1'
-        DATABASES['default']['PORT'] = '5432'
+elif os.environ.get('USE_DB_PROXY'):
+    # Using local proxy for testing
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'flipbook_db',
+            'USER': 'businessmatters',
+            'PASSWORD': 'q1w2e3r4t5y.',
+            'HOST': '127.0.0.1',
+            'PORT': '5432',
+        }
+    }
 else:
-    # Running locally, use SQLite
+    # Local development OR Cloud Run without explicit DB setup - use SQLite
+    # This allows the app to start without database connection
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+
+# For Cloud Run, disable some features if database isn't configured
+if IN_CLOUD_RUN and not HAS_DB_CREDENTIALS:
+    # Use in-memory cache to avoid database dependency
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'flipper-cache',
+        }
+    }
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+            'LOCATION': 'django_cache_table',
         }
     }
 

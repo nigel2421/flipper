@@ -1,0 +1,1 @@
+web: cd ela_flipbook_django && gunicorn flipbook_project.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 90 --access-logfile - --error-logfile -

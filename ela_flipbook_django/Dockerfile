@@ -31,8 +31,12 @@ RUN tailwindcss -i ./static_src/tailwind_input.css -o ./publications/static/publ
 RUN SECRET_KEY=dummy-key-for-build python manage.py collectstatic --noinput
 
 # Copy entrypoint script and make it executable
-COPY startup.sh .
-RUN chmod +x startup.sh
+COPY debug_startup.sh .
+COPY health_check_app.py .
+RUN chmod +x debug_startup.sh
 
-# Run startup script on container start (runs migrations then starts Gunicorn)
-CMD ["./startup.sh"]
+# Expose port for Cloud Run
+EXPOSE 8080
+
+# Try Django first, fall back to health check if it fails
+CMD ./debug_startup.sh || python health_check_app.py
