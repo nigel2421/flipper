@@ -13,7 +13,7 @@ from django.contrib.auth.models import User
 from django.core.cache import cache
 import random 
 from .models import Magazine, Article, Event, Profile, Tag, Author, Sponsor, WhatsAppUpdate, Comment, Rating, EmailLog
-from django.db.models import Q, Avg
+from django.db.models import Q, Avg, F, Count
 from django.db.models.functions import ExtractYear
 from django.http import JsonResponse, HttpResponseRedirect, HttpResponse
 from allauth.account.views import SignupView # Import the original SignupView
@@ -24,22 +24,49 @@ from django.core.mail import send_mail
 
 # === FUNCTION-BASED VIEWS (for pages) ===
 
+def health_check_view(request):
+    """Simple readiness endpoint for container and deployment health checks."""
+    return HttpResponse('OK', content_type='text/plain')
+
+
 def home_view(request):
     """ Renders the homepage with the hero banner and publication grid. """
-    all_publications = Magazine.objects.all()
-    latest_publications = Magazine.objects.order_by('-uploaded_at')[:3]
-    top_articles = Article.objects.select_related('author').prefetch_related('tags').annotate(
-        avg_rating=Avg('ratings__score')
-    ).order_by('-view_count')[:5]
+    # Single limited magazine query — template only needs 8 cards + 3 hero covers.
+    latest_publications = list(Magazine.objects.order_by('-uploaded_at')[:8])
+    hero_publications = latest_publications[:3]
 
-    subscribers_count = User.objects.count() + 666
-    visitor_count = cache.get('visitor_count')
+    top_articles = list(
+        Article.objects.select_related('author')
+        .prefetch_related('tags')
+        .annotate(avg_rating=Avg('ratings__score'))
+        .order_by('-view_count')[:4]
+    )
+
+    try:
+        subscribers_count = cache.get('subscribers_count')
+    except Exception:
+        subscribers_count = None
+    if subscribers_count is None:
+        subscribers_count = User.objects.count() + 666
+        try:
+            cache.set('subscribers_count', subscribers_count, timeout=6 * 60 * 60)
+        except Exception:
+            pass
+
+    try:
+        visitor_count = cache.get('visitor_count')
+    except Exception:
+        visitor_count = None
+
     if not visitor_count:
         visitor_count = random.randint(10, 73)
-        cache.set('visitor_count', visitor_count, timeout=4 * 60 * 60)
+        try:
+            cache.set('visitor_count', visitor_count, timeout=4 * 60 * 60)
+        except Exception:
+            pass
 
     key_event = Event.objects.filter(date__gte=timezone.now().date()).order_by('date').first()
-    
+
     sponsors_qs = Sponsor.objects.filter(is_active=True).order_by('order')
     sponsors = list(sponsors_qs)
     if sponsors:
@@ -48,8 +75,8 @@ def home_view(request):
         sponsors = sponsors * multiplier
 
     context = {
-        'all_publications': all_publications,
-        'latest_publications': latest_publications,
+        'all_publications': latest_publications,
+        'latest_publications': hero_publications,
         'top_articles': top_articles,
         'subscribers_count': subscribers_count,
         'visitor_count': visitor_count,
@@ -81,7 +108,7 @@ def articles_view(request):
     """ Renders the web articles archive page with filtering and grouping. """
     articles = Article.objects.select_related('author').prefetch_related('tags').annotate(
         avg_rating=Avg('ratings__score')
-    ).all().order_by('-uploaded_at')
+    ).order_by('-uploaded_at')
 
     # Get filter parameters
     query = request.GET.get('q')
@@ -91,7 +118,9 @@ def articles_view(request):
 
     # Apply filters
     if query:
-        articles = articles.filter(Q(title__icontains=query) | Q(excerpt__icontains=query) | Q(author__name__icontains=query)).distinct()
+        articles = articles.filter(
+            Q(title__icontains=query) | Q(excerpt__icontains=query) | Q(author__name__icontains=query)
+        ).distinct()
     if selected_year:
         articles = articles.filter(uploaded_at__year=selected_year)
     if selected_tag:
@@ -103,8 +132,14 @@ def articles_view(request):
     elif sort_by == 'editors_pick':
         articles = articles.filter(is_editors_pick=True).order_by('-uploaded_at')
 
-    # Get the featured story and exclude it from the main list
-    featured_story = Article.objects.filter(is_featured=True).first()
+    # Featured story with rating annotation (avoids extra aggregate in template)
+    featured_story = (
+        Article.objects.filter(is_featured=True)
+        .select_related('author')
+        .prefetch_related('tags')
+        .annotate(avg_rating=Avg('ratings__score'))
+        .first()
+    )
     if featured_story:
         articles = articles.exclude(pk=featured_story.pk)
 
@@ -118,22 +153,31 @@ def articles_view(request):
     except EmptyPage:
         articles_paginated = paginator.page(paginator.num_pages)
 
-    # --- Group articles by publication ---
-    articles_by_publication = {}
-    for article in articles_paginated:
-        # Since there's no direct foreign key, we can't group by a related object.
-        # Instead, we'll create a single group for all articles.
-        publication_name = "All Articles"
-        if publication_name not in articles_by_publication:
-            articles_by_publication[publication_name] = []
-        articles_by_publication[publication_name].append(article)
+    # Template expects a grouped dict; keep a single bucket without extra work.
+    articles_by_publication = {"All Articles": list(articles_paginated)}
+
+    try:
+        all_tags = cache.get('articles_all_tags')
+        if all_tags is None:
+            all_tags = list(Tag.objects.all())
+            cache.set('articles_all_tags', all_tags, timeout=60 * 60)
+    except Exception:
+        all_tags = list(Tag.objects.all())
+
+    try:
+        year_list = cache.get('articles_year_list')
+        if year_list is None:
+            year_list = list(Article.objects.dates('uploaded_at', 'year', order='DESC'))
+            cache.set('articles_year_list', year_list, timeout=60 * 60)
+    except Exception:
+        year_list = list(Article.objects.dates('uploaded_at', 'year', order='DESC'))
 
     context = {
         'articles_by_publication': articles_by_publication,
-        'articles_paginated': articles_paginated, # For pagination links
+        'articles_paginated': articles_paginated,  # For pagination links
         'featured_story': featured_story,
-        'all_tags': Tag.objects.all(),
-        'year_list': Article.objects.dates('uploaded_at', 'year', order='DESC'),
+        'all_tags': all_tags,
+        'year_list': year_list,
         'selected_year': selected_year,
         'current_query': query,
         'current_sort': sort_by,
@@ -145,8 +189,14 @@ def articles_view(request):
 @login_required
 def article_detail_view(request, slug):
     """ Renders a single web article page. """
-    article = get_object_or_404(Article, slug=slug)
+    article = get_object_or_404(
+        Article.objects.select_related('author')
+        .prefetch_related('tags')
+        .annotate(avg_rating=Avg('ratings__score')),
+        slug=slug,
+    )
     from .forms import RatingForm, CommentForm
+    from .models import Comment
 
     user_rating = None
     if request.user.is_authenticated:
@@ -154,10 +204,12 @@ def article_detail_view(request, slug):
         if rating_obj:
             user_rating = rating_obj.score
 
-    top_level_comments_list = article.comments.filter(parent__isnull=True)\
-                                     .select_related('user')\
-                                     .prefetch_related('replies', 'replies__user', 'liked_by')\
-                                     .order_by('-created_at')
+    top_level_comments_list = (
+        article.comments.filter(parent__isnull=True)
+        .select_related('user')
+        .prefetch_related('replies', 'replies__user', 'liked_by')
+        .order_by('-created_at')
+    )
     paginator = Paginator(top_level_comments_list, 10)
     page = request.GET.get('page')
     try:
@@ -185,7 +237,7 @@ def article_detail_view(request, slug):
 
             if 'rating_submit' in request.POST:
                 if not request.user.is_authenticated:
-                     return HttpResponseRedirect(f"/accounts/login/?next={request.path}")
+                    return HttpResponseRedirect(f"/accounts/login/?next={request.path}")
                 rating_form = RatingForm(request.POST)
                 if rating_form.is_valid():
                     score = int(rating_form.cleaned_data['score'])
@@ -196,7 +248,7 @@ def article_detail_view(request, slug):
 
             elif 'comment_submit' in request.POST:
                 if not request.user.is_authenticated:
-                     return HttpResponseRedirect(f"/accounts/login/?next={request.path}")
+                    return HttpResponseRedirect(f"/accounts/login/?next={request.path}")
                 comment_form = CommentForm(request.POST)
                 if comment_form.is_valid():
                     text = comment_form.cleaned_data['text']
@@ -213,30 +265,43 @@ def article_detail_view(request, slug):
                     logger.warning(f"Comment form invalid: {comment_form.errors}")
         except Exception as e:
             logger.error(f"Error in article_detail_view POST: {e}", exc_info=True)
-            # Temporarily show the error to the user if they are staff for debugging
             if request.user.is_staff:
                 messages.error(request, f"Server Error: {e}")
-            raise # Re-raise to let the user see the 500 page
+            raise
     else:
-        article.view_count += 1
-        article.save(update_fields=['view_count'])
+        # Atomic increment — safe under concurrent Cloud Run instances
+        Article.objects.filter(pk=article.pk).update(view_count=F('view_count') + 1)
+        article.view_count = (article.view_count or 0) + 1
 
     other_articles_by_author = []
-    if article.author:
-        other_articles_by_author = article.author.articles.exclude(pk=article.pk).order_by('-uploaded_at')[:4]
+    if article.author_id:
+        other_articles_by_author = list(
+            article.author.articles.exclude(pk=article.pk).order_by('-uploaded_at')[:4]
+        )
 
-    previous_article = Article.objects.filter(uploaded_at__lt=article.uploaded_at).order_by('-uploaded_at').first()
-    next_article = Article.objects.filter(uploaded_at__gt=article.uploaded_at).order_by('uploaded_at').first()
+    previous_article = (
+        Article.objects.filter(uploaded_at__lt=article.uploaded_at)
+        .order_by('-uploaded_at')
+        .only('id', 'title', 'slug', 'uploaded_at')
+        .first()
+    )
+    next_article = (
+        Article.objects.filter(uploaded_at__gt=article.uploaded_at)
+        .order_by('uploaded_at')
+        .only('id', 'title', 'slug', 'uploaded_at')
+        .first()
+    )
 
+    article_tags_ids = list(article.tags.values_list('id', flat=True))
     related_articles = []
-    if article.tags.exists():
-        from django.db.models import Count
-        article_tags_ids = article.tags.values_list('id', flat=True)
-        related_articles = Article.objects.filter(tags__in=article_tags_ids)\
-                                          .exclude(pk=article.pk)\
-                                          .annotate(common_tag_count=Count('tags'))\
-                                          .prefetch_related('tags')\
-                                          .order_by('-common_tag_count', '-uploaded_at')[:4]
+    if article_tags_ids:
+        related_articles = list(
+            Article.objects.filter(tags__in=article_tags_ids)
+            .exclude(pk=article.pk)
+            .annotate(common_tag_count=Count('tags', distinct=True))
+            .prefetch_related('tags')
+            .order_by('-common_tag_count', '-uploaded_at')[:4]
+        )
 
     context = {
         'article': article,
@@ -361,8 +426,8 @@ def report_comment(request, pk):
 @login_required
 def like_comment_view(request, pk):
     from .models import Comment
-    comment = get_object_or_404(Comment, pk=pk)
-    
+    comment = get_object_or_404(Comment.objects.select_related('article'), pk=pk)
+
     is_liked = False
     if comment.liked_by.filter(id=request.user.id).exists():
         comment.liked_by.remove(request.user)
@@ -371,20 +436,26 @@ def like_comment_view(request, pk):
         comment.liked_by.add(request.user)
         is_liked = True
 
-    channel_layer = get_channel_layer()
-    if channel_layer:
-        article_id = comment.article.id
-        async_to_sync(channel_layer.group_send)(
-            f'article_{article_id}_comments',
-            {
-                'type': 'comment_like_update',
-                'message': {
-                    'comment_id': comment.id,
-                    'like_count': comment.like_count
-                }
-            }
-        )
-    return JsonResponse({'liked': is_liked, 'like_count': comment.like_count})
+    like_count = comment.liked_by.count()
+
+    # Optional realtime fan-out; never fail the JSON response if channels is unset.
+    try:
+        channel_layer = get_channel_layer()
+        if channel_layer:
+            async_to_sync(channel_layer.group_send)(
+                f'article_{comment.article_id}_comments',
+                {
+                    'type': 'comment_like_update',
+                    'message': {
+                        'comment_id': comment.id,
+                        'like_count': like_count,
+                    },
+                },
+            )
+    except Exception:
+        pass
+
+    return JsonResponse({'liked': is_liked, 'like_count': like_count})
 
 def subscribe_view(request):
     return render(request, 'publications/subscribe.html')

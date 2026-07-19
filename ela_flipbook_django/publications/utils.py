@@ -12,11 +12,20 @@ from django.contrib.sites.models import Site
 
 def is_email_automation_enabled():
     """
-    Returns True if the global automation toggle is enabled.
+    Returns True only when automated emails are explicitly allowed.
+
+    Hard-off by default for Cloud Run performance and to keep Google OAuth
+    signup fast. Requires BOTH:
+      - env EMAIL_AUTOMATION_ENABLED in ('1', 'true', 'yes')
+      - EmailConfiguration.is_automation_enabled == True in admin
     """
+    env_flag = os.environ.get('EMAIL_AUTOMATION_ENABLED', '').strip().lower()
+    if env_flag not in ('1', 'true', 'yes', 'on'):
+        return False
+
     from .models import EmailConfiguration
     config = EmailConfiguration.objects.first()
-    return config.is_automation_enabled if config else False
+    return bool(config and config.is_automation_enabled)
 
 def resize_image_to_square(image_field, size=500):
     """
@@ -172,6 +181,10 @@ def send_publication_notifications(new_magazines=None, new_articles=None, force_
     """
     Sends email notifications for a set of magazines and articles.
     Returns the number of publications notified.
+
+    Intentionally gated: without EMAIL_AUTOMATION_ENABLED + admin toggle
+    (or force_manual=True from admin), this is a no-op so the site never
+    blocks on per-user SMTP loops.
     """
     if not force_manual and not is_email_automation_enabled():
         return 0
@@ -179,8 +192,6 @@ def send_publication_notifications(new_magazines=None, new_articles=None, force_
     if not new_magazines and not new_articles:
         return 0
 
-    now = timezone.now()
-    
     try:
         current_site = Site.objects.get_current()
         domain = current_site.domain
@@ -188,11 +199,11 @@ def send_publication_notifications(new_magazines=None, new_articles=None, force_
     except Exception:
         domain = 'businessmatters.co.ke'
         site_name = 'Business Matters'
-    
+
     base_url = f"https://{domain}" if not domain.startswith('http') else domain
-    
+
     publications_data = []
-    
+
     if new_magazines:
         for mag in new_magazines:
             publications_data.append({
@@ -201,7 +212,7 @@ def send_publication_notifications(new_magazines=None, new_articles=None, force_
                 'absolute_url': f"{base_url}{mag.get_absolute_url()}",
                 'image_url': f"{base_url}{mag.cover_image.url}" if mag.cover_image else None,
             })
-            
+
     if new_articles:
         for art in new_articles:
             publications_data.append({
@@ -214,30 +225,36 @@ def send_publication_notifications(new_magazines=None, new_articles=None, force_
     if not publications_data:
         return 0
 
-    # Get subscribed users
-    subscribed_users = User.objects.filter(profile__is_subscribed=True).exclude(email='')
-    
-    if not subscribed_users.exists():
-        # Still mark as sent so we don't spam if users are added later but content is old
-        if new_magazines: new_magazines.update(email_sent=True)
-        if new_articles: new_articles.update(email_sent=True)
-        return len(publications_data)
+    # Cap batch size so a large subscriber list cannot hang a worker.
+    # Prefer a background job / Cloud Tasks for real bulk sends later.
+    max_recipients = int(os.environ.get('EMAIL_MAX_RECIPIENTS_PER_RUN', '50'))
+    subscribed_users = (
+        User.objects.filter(profile__is_subscribed=True)
+        .exclude(email='')
+        .only('id', 'email', 'first_name', 'last_name', 'username')[:max_recipients]
+    )
 
-    # Email content
     subject = f"New on {site_name}: {publications_data[0]['title']}"
     if len(publications_data) > 1:
         subject += f" and {len(publications_data) - 1} more"
 
-    count_sent = 0
     for user in subscribed_users:
         context = {
             'publications': publications_data,
             'user': user,
         }
-        if send_single_email(user, subject, 'publications/emails/publication_notification_email.html', context, 'notification', force_manual=force_manual):
-            count_sent += 1
-    
-    if new_magazines: new_magazines.update(email_sent=True)
-    if new_articles: new_articles.update(email_sent=True)
-    
+        send_single_email(
+            user,
+            subject,
+            'publications/emails/publication_notification_email.html',
+            context,
+            'notification',
+            force_manual=force_manual,
+        )
+
+    if new_magazines:
+        new_magazines.update(email_sent=True)
+    if new_articles:
+        new_articles.update(email_sent=True)
+
     return len(publications_data)

@@ -37,12 +37,21 @@ def _generate_article_summary(article_id):
 
 @receiver(post_save, sender='publications.Article')
 def trigger_ai_summary(sender, instance, created, **kwargs):
-    """Start a background job to generate summary after 3 minutes."""
-    if created and not instance.summary:
-        # Use threading.Timer for a simple delayed background task
-        # 180 seconds = 3 minutes
-        timer = threading.Timer(180, _generate_article_summary, args=[instance.id])
-        timer.start()
+    """
+    Optionally schedule AI summary generation.
+
+    Disabled by default on Cloud Run: threading.Timer is unreliable when
+    instances scale to zero and can leak work across test runs.
+    Set AI_SUMMARY_AUTO=1 to re-enable the delayed timer.
+    """
+    if not created or instance.summary:
+        return
+    if os.environ.get('AI_SUMMARY_AUTO', '').strip().lower() not in ('1', 'true', 'yes', 'on'):
+        return
+    # Use threading.Timer for a simple delayed background task (180s = 3 min)
+    timer = threading.Timer(180, _generate_article_summary, args=[instance.id])
+    timer.daemon = True
+    timer.start()
 
 from django.contrib.auth.signals import user_logged_in, user_login_failed
 from .security_utils import log_security_event, get_client_ip
@@ -97,12 +106,21 @@ def handle_referral_signup(sender, request, user, **kwargs):
 
 @receiver(user_signed_up)
 def send_welcome_email(sender, request, user, **kwargs):
-    """Send a welcome email when a new user signs up."""
+    """
+    Welcome emails are intentionally disabled for performance and to avoid
+    blocking Google OAuth signup. Enable only via EMAIL_AUTOMATION_ENABLED=1
+    and the admin EmailConfiguration toggle.
+    """
+    # Never block or slow signup — emails are off unless explicitly enabled.
     if not is_email_automation_enabled():
         return
-        
+
     subject = "Welcome to Business Matters Africa!"
     context = {
         'user': user,
     }
-    send_single_email(user, subject, 'publications/emails/welcome_email.html', context, 'welcome')
+    try:
+        send_single_email(user, subject, 'publications/emails/welcome_email.html', context, 'welcome')
+    except Exception:
+        # Signup must succeed even if email delivery fails.
+        pass

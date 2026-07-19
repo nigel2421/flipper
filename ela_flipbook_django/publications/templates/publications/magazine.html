@@ -3,27 +3,27 @@
 {% block content %}
 <div class="bg-dark-bg min-h-screen">
     <div class="container mx-auto px-4 max-w-7xl py-16 space-y-12">
-        <div class="flex items-center gap-8">
-            <h1 class="text-3xl md:text-5xl font-black text-white whitespace-nowrap uppercase tracking-tighter font-serif italic">Magazine <span class="text-primary-blue">Archive</span></h1>
-            <div class="h-px w-full bg-white/10"></div>
+        <div class="flex items-center gap-4 md:gap-8 min-w-0">
+            <h1 class="text-2xl sm:text-3xl md:text-5xl font-black text-white min-w-0 uppercase tracking-tighter font-serif italic leading-tight">Magazine <span class="text-primary-blue">Archive</span></h1>
+            <div class="h-px w-full bg-white/10 hidden sm:block"></div>
         </div>
 
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 md:gap-8 lg:gap-12">
             {% for pub in publications %}
-                <a href="{% url 'publications:detail' slug=pub.slug %}" class="group block bg-white/5 rounded-2xl overflow-hidden border border-white/10 hover:border-primary-blue/30 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2">
+                <a href="{% url 'publications:detail' slug=pub.slug %}" class="group block min-w-0 bg-white/5 rounded-xl md:rounded-2xl overflow-hidden border border-white/10 hover:border-primary-blue/30 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2">
                     <div class="aspect-[3/4] overflow-hidden bg-slate-800 relative border-b border-white/5">
                         {% if pub.cover_image %}
-                            <img src="{{ pub.cover_image.url }}" alt="Cover for {{ pub.title }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                            <img src="{{ pub.cover_image.url }}" alt="Cover for {{ pub.title }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy">
                         {% else %}
                             <div class="w-full h-full flex items-center justify-center text-slate-600 font-black italic">PREMIUM</div>
                         {% endif %}
-                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4 md:p-6">
                             <span class="text-white text-[11px] font-black uppercase tracking-[0.2em] translate-y-2 group-hover:translate-y-0 transition-transform">Read Issue &rarr;</span>
                         </div>
                     </div>
-                    <div class="p-8">
-                        <span class="text-[11px] font-black uppercase tracking-widest text-accent-yellow font-sans">{{ pub.uploaded_at|date:"M-Y" }}</span>
-                        <h3 class="text-lg md:text-xl font-bold text-white mt-4 group-hover:text-primary-blue transition-colors line-clamp-1 font-serif">{{ pub.title }}</h3>
+                    <div class="p-3 sm:p-5 md:p-8 min-w-0">
+                        <span class="text-[9px] sm:text-[11px] font-black uppercase tracking-widest text-accent-yellow font-sans">{{ pub.uploaded_at|date:"M-Y" }}</span>
+                        <h3 class="text-sm sm:text-base md:text-xl font-bold text-white mt-2 md:mt-4 group-hover:text-primary-blue transition-colors line-clamp-2 break-words leading-snug font-serif">{{ pub.title }}</h3>
                     </div>
                 </a>
             {% empty %}

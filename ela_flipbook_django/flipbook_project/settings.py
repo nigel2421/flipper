@@ -61,7 +61,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://www.businessmatters.co.ke',
 ]
 
-SITE_ID = 1
+SITE_ID = int(os.environ.get('SITE_ID', 1))
 
 
 # Application definition
@@ -134,6 +134,11 @@ if (os.environ.get('PRODUCTION') or os.environ.get('GAE_APPLICATION')) and HAS_D
             'USER': os.environ.get('DB_USER', 'businessmatters'),
             'PASSWORD': os.environ.get('DB_PASSWORD', 'q1w2e3r4t5y.'),
             'HOST': f"/cloudsql/{os.environ.get('CLOUD_SQL_CONNECTION_NAME')}",
+            # Reuse connections across requests (Cloud Run + Cloud SQL)
+            'CONN_MAX_AGE': int(os.environ.get('DB_CONN_MAX_AGE', '60')),
+            'OPTIONS': {
+                'connect_timeout': 10,
+            },
         }
     }
 elif os.environ.get('USE_DB_PROXY'):
@@ -146,6 +151,7 @@ elif os.environ.get('USE_DB_PROXY'):
             'PASSWORD': 'q1w2e3r4t5y.',
             'HOST': '127.0.0.1',
             'PORT': '5432',
+            'CONN_MAX_AGE': 60,
         }
     }
 else:
@@ -158,20 +164,26 @@ else:
         }
     }
 
-# For Cloud Run, disable some features if database isn't configured
-if IN_CLOUD_RUN and not HAS_DB_CREDENTIALS:
-    # Use in-memory cache to avoid database dependency
+# Cache: prefer Redis (Memorystore) when REDIS_URL is set; otherwise LocMem.
+# Avoid DatabaseCache on Cloud Run — it adds a DB round-trip to every cache hit.
+_redis_url = os.environ.get('REDIS_URL') or os.environ.get('REDISHOST')
+if _redis_url:
+    if not _redis_url.startswith('redis://') and not _redis_url.startswith('rediss://'):
+        _redis_port = os.environ.get('REDISPORT', '6379')
+        _redis_url = f'redis://{_redis_url}:{_redis_port}/0'
     CACHES = {
         'default': {
-            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-            'LOCATION': 'flipper-cache',
+            'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+            'LOCATION': _redis_url,
+            'TIMEOUT': 300,
         }
     }
 else:
     CACHES = {
         'default': {
-            'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
-            'LOCATION': 'django_cache_table',
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'flipper-cache',
+            'TIMEOUT': 300,
         }
     }
 
@@ -202,7 +214,11 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-ACCOUNT_SIGNUP_FORM_CLASS = 'publications.custom_auth_forms.CustomSignupForm'
+# NOTE: ACCOUNT_SIGNUP_FORM_CLASS is intentionally NOT set here.
+# Setting it causes allauth to require first_name/last_name via a separate
+# /accounts/3rdparty/signup/ step for Google users, which needs a template
+# (socialaccount/signup.html) and triggers a 500 error for new sign-ups.
+# First/last name population is handled in CustomSocialAccountAdapter.populate_user.
 ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 
@@ -234,7 +250,11 @@ LOGIN_REDIRECT_URL = '/'
 
 
 # Allauth Social Settings
-SOCIALACCOUNT_LOGIN_ON_SEPARATE_URLS = True
+# NOTE: SOCIALACCOUNT_LOGIN_ON_SEPARATE_URLS must NOT be True.
+# When True, allauth sends new Google users to /accounts/3rdparty/signup/
+# which requires a template we don't have and triggers a 500 error.
+# Leaving it False (the default) means allauth signs users up seamlessly.
+SOCIALACCOUNT_LOGIN_ON_SEPARATE_URLS = False
 SESSION_COOKIE_AGE = 25920000 # 30 days
 
 
@@ -294,16 +314,11 @@ if os.environ.get('PRODUCTION'):
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
 
-    # Enable database caching for production
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
-            'LOCATION': 'django_cache_table',
-        }
-    }
-    
     # WhiteNoise optimization: cache static files for 1 year
     WHITENOISE_MAX_AGE = 31536000
+
+    # Automated emails stay off unless EMAIL_AUTOMATION_ENABLED is set (see utils).
+    # Keeps Google OAuth signup fast on Cloud Run.
 
     # Cloud Logging
     LOGGING = {

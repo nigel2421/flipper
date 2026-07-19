@@ -1,4 +1,5 @@
-from django.test import TestCase
+import os
+from django.test import TestCase, override_settings
 from django.utils import timezone
 from datetime import timedelta
 from django.core.management import call_command
@@ -20,10 +21,15 @@ class EmailAutomationTest(TestCase):
         self.user1.profile.save()
         
         # Enable email automation by default for other tests
+        # Requires BOTH env flag and admin toggle (production-safe double gate).
+        os.environ['EMAIL_AUTOMATION_ENABLED'] = '1'
         EmailConfiguration.objects.update_or_create(id=1, defaults={'is_automation_enabled': True})
         
         self.user2.profile.is_subscribed = False
         self.user2.profile.save()
+
+    def tearDown(self):
+        os.environ.pop('EMAIL_AUTOMATION_ENABLED', None)
 
     def test_send_publication_emails_logic(self):
         # 1. Create a Magazine uploaded 25 hours ago (should be picked up)
@@ -136,7 +142,7 @@ class EmailAutomationTest(TestCase):
         self.assertIn('track-email-open', html_content)
 
     def test_global_email_toggle(self):
-        # Explicitly turn automation OFF for this test
+        # Explicitly turn automation OFF for this test (admin toggle)
         EmailConfiguration.objects.update_or_create(id=1, defaults={'is_automation_enabled': False})
         
         # Clear outbox
@@ -154,6 +160,14 @@ class EmailAutomationTest(TestCase):
         # 3. Test Manual Override (Should WORK)
         send_publication_notifications(new_magazines=Magazine.objects.filter(title="Toggle Test Mag"), force_manual=True)
         self.assertEqual(len(mail.outbox), 1, "Manual trigger SHOULD work even if toggle is OFF")
+
+        # 3b. Env flag off should also block automation even if admin toggle is on
+        mail.outbox = []
+        EmailConfiguration.objects.update_or_create(id=1, defaults={'is_automation_enabled': True})
+        os.environ['EMAIL_AUTOMATION_ENABLED'] = '0'
+        send_publication_notifications(new_magazines=Magazine.objects.filter(title="Toggle Test Mag"))
+        self.assertEqual(len(mail.outbox), 0, "Digest email should NOT be sent when env flag is OFF")
+        os.environ['EMAIL_AUTOMATION_ENABLED'] = '1'
         
         # 4. Turn toggle ON
         config = EmailConfiguration.objects.first()

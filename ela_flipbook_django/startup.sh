@@ -16,9 +16,10 @@ fi
 echo "[STARTUP] Starting Gunicorn on port $PORT..."
 exec gunicorn flipbook_project.wsgi:application \
     --bind 0.0.0.0:$PORT \
-    --workers 2 \
-    --threads 4 \
-    --timeout 90 \
+    --workers ${GUNICORN_WORKERS:-2} \
+    --threads ${GUNICORN_THREADS:-4} \
+    --timeout ${GUNICORN_TIMEOUT:-60} \
+    --keep-alive 5 \
     --access-logfile - \
     --error-logfile - \
     --log-level info
