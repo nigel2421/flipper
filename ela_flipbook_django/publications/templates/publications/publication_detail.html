@@ -46,6 +46,16 @@
 <!-- Immersive Viewer Layout (Flush between header and bottom bar) -->
 <div class="w-full bg-black fixed top-16 left-0 right-0 overflow-hidden" style="bottom: 64px;">
 
+    <!-- Our own loader pill (independent of dFlip DOM classes) -->
+    {% if publication.pdf_file %}
+    <div id="bm-magazine-loader" class="bm-magazine-loader" role="status" aria-live="polite">
+        <div class="bm-magazine-loader-pill">
+            <span class="bm-magazine-loader-spinner" aria-hidden="true"></span>
+            <span class="bm-magazine-loader-text">Loading magazine…</span>
+        </div>
+    </div>
+    {% endif %}
+
     <!-- The Flipbook -->
     <div class="h-full w-full relative z-10">
         {% if publication.pdf_file %}
@@ -129,102 +139,74 @@
         background: #000 !important;
     }
 
-    /*
-      dFlip loader pill: style only while loading, then force-hide.
-      Earlier opacity:1 !important kept the pill stuck after load.
-    */
+    /* ---- Our controlled magazine loader (always reliable) ---- */
+    .bm-magazine-loader {
+        position: absolute;
+        inset: 0;
+        z-index: 50;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.55);
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+        pointer-events: none;
+    }
+    .bm-magazine-loader.is-hidden {
+        opacity: 0;
+        visibility: hidden;
+    }
+    .bm-magazine-loader-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        max-width: min(320px, 90vw);
+        padding: 16px 28px;
+        border-radius: 9999px;
+        background: rgba(10, 25, 47, 0.95);
+        border: 1px solid rgba(251, 191, 36, 0.4);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+        color: #fbbf24;
+        font-weight: 800;
+        font-size: 12px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+    .bm-magazine-loader-spinner {
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(251, 191, 36, 0.25);
+        border-top-color: #fbbf24;
+        border-radius: 50%;
+        animation: bm-spin 0.7s linear infinite;
+        flex-shrink: 0;
+    }
+    .bm-magazine-loader-text {
+        line-height: 1.2;
+    }
+    @keyframes bm-spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Hide dFlip's native loading UI — we use #bm-magazine-loader instead */
     .df-container .df-loading-info,
     .df-loading-info,
-    .df-loading {
-        position: absolute !important;
-        top: 50% !important;
-        left: 50% !important;
-        right: auto !important;
-        bottom: auto !important;
-        transform: translate(-50%, -50%) !important;
-        -webkit-transform: translate(-50%, -50%) !important;
-        margin: 0 !important;
-        margin-top: 0 !important;
-        z-index: 999 !important;
-        width: min(320px, 86vw) !important;
-        max-width: min(320px, 86vw) !important;
-        min-height: 0 !important;
-        height: auto !important;
-        padding: 18px 28px !important;
-        box-sizing: border-box !important;
-        background: rgba(10, 25, 47, 0.92) !important;
-        border: 1px solid rgba(251, 191, 36, 0.35) !important;
-        border-radius: 9999px !important;
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55) !important;
-        color: #fbbf24 !important;
-        font-weight: 800 !important;
-        font-size: 12px !important;
-        line-height: 1.35 !important;
-        letter-spacing: 0.14em !important;
-        text-transform: uppercase !important;
-        text-align: center !important;
-        white-space: nowrap !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-        word-break: normal !important;
-        overflow-wrap: normal !important;
-        writing-mode: horizontal-tb !important;
-        direction: ltr !important;
+    .df-container .df-loading-icon,
+    .df-loading-icon {
         display: none !important;
         opacity: 0 !important;
         visibility: hidden !important;
         pointer-events: none !important;
-        text-shadow: none !important;
-        transition: opacity 0.25s ease, visibility 0.25s ease !important;
-    }
-
-    /* Visible only while dFlip is initializing / loading */
-    .df-container.df-init .df-loading-info,
-    .df-container.df-loading .df-loading-info,
-    .df-container.df-init .df-loading,
-    .df-container.df-loading .df-loading,
-    .df-container.df-error .df-loading-info {
-        display: block !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-        pointer-events: none !important;
-    }
-
-    /* After ready (or when app marks loader done), never stick */
-    .df-container.df-ready .df-loading-info,
-    .df-container.df-ready .df-loading,
-    .df-container.df-ready .df-loading-icon,
-    .df-container.bm-loader-done .df-loading-info,
-    .df-container.bm-loader-done .df-loading,
-    .df-container.bm-loader-done .df-loading-icon,
-    .df-loading-info.bm-hidden,
-    .df-loading.bm-hidden,
-    .df-loading-icon.bm-hidden {
-        display: none !important;
-        opacity: 0 !important;
-        visibility: hidden !important;
-        pointer-events: none !important;
-        top: -9999px !important;
-    }
-
-    .df-container .df-loading-icon {
-        z-index: 998 !important;
-        filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.45));
     }
 
     /* =====================================================
        MOBILE-SPECIFIC OVERRIDES (max-width: 767px)
        ===================================================== */
     @media (max-width: 767px) {
-        .df-container.df-init .df-loading-info,
-        .df-container.df-loading .df-loading-info {
-            width: min(280px, 90vw) !important;
-            max-width: min(280px, 90vw) !important;
-            font-size: 11px !important;
-            letter-spacing: 0.1em !important;
-            padding: 14px 20px !important;
-            white-space: normal !important;
-            line-height: 1.4 !important;
+        .bm-magazine-loader-pill {
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            padding: 14px 22px;
         }
 
         /* Hide dFlip's own built-in toolbar on mobile — we use our custom bottom bar */
@@ -328,66 +310,54 @@
         }
     };
 
+    function showFlipbookLoader() {
+        const loader = document.getElementById('bm-magazine-loader');
+        if (!loader) return;
+        loader.classList.remove('is-hidden');
+        loader.setAttribute('aria-hidden', 'false');
+    }
+
     function hideFlipbookLoader() {
-        const root = document.getElementById('df_manual_book');
-        const containers = document.querySelectorAll('.df-container, #df_manual_book');
-        containers.forEach((el) => {
-            el.classList.add('bm-loader-done', 'df-ready');
-            el.classList.remove('df-init', 'df-loading');
-        });
-        document.querySelectorAll('.df-loading-info, .df-loading, .df-loading-icon').forEach((el) => {
-            el.classList.add('bm-hidden');
-            el.style.setProperty('display', 'none', 'important');
-            el.style.setProperty('opacity', '0', 'important');
-            el.style.setProperty('visibility', 'hidden', 'important');
-            el.style.setProperty('pointer-events', 'none', 'important');
-        });
-        if (root && root.parentElement) {
-            root.parentElement.classList.add('bm-loader-done');
-        }
+        const loader = document.getElementById('bm-magazine-loader');
+        if (!loader) return;
+        loader.classList.add('is-hidden');
+        loader.setAttribute('aria-hidden', 'true');
+        // Remove from layout after fade so it cannot block interaction
+        setTimeout(() => {
+            if (loader.classList.contains('is-hidden')) {
+                loader.style.display = 'none';
+            }
+        }, 320);
     }
 
     $(document).ready(function() {
         const source = $("#df_manual_book").attr("source");
+        showFlipbookLoader();
+
         if (source && $.fn.flipBook) {
             console.log("Initializing dFlip...");
             $("#df_manual_book").flipBook(source, option_df_manual_book);
 
-            // Keep loader text short even if dFlip injects a long URL string
-            const tidyLoader = () => {
-                document.querySelectorAll('.df-loading-info, .df-loading').forEach((el) => {
-                    if (el.classList.contains('bm-hidden')) return;
-                    const t = (el.textContent || '').trim();
-                    if (!t) return;
-                    if (t.length > 40 || t.includes('http') || t.includes('storage.googleapis')) {
-                        el.textContent = 'Loading magazine…';
-                    }
-                });
-            };
-            tidyLoader();
             const bookEl = document.getElementById('df_manual_book');
             if (bookEl && window.MutationObserver) {
                 const mo = new MutationObserver(() => {
-                    tidyLoader();
-                    // If dFlip removed df-init / stopped loading, hide the pill
-                    const container = bookEl.closest('.df-container') || bookEl.querySelector('.df-container') || bookEl;
-                    if (container && !container.classList.contains('df-init') && !container.classList.contains('df-loading')) {
-                        // Viewer is present → treat as ready
-                        if (container.querySelector('.df-viewer, .df-book-page, canvas, .df-page')) {
-                            hideFlipbookLoader();
-                            mo.disconnect();
-                        }
+                    // Pages / canvas rendered → magazine is ready
+                    if (bookEl.querySelector('.df-viewer, .df-book-page, canvas, .df-page')) {
+                        hideFlipbookLoader();
+                        mo.disconnect();
                     }
                 });
-                mo.observe(bookEl, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['class'] });
-                // Safety: never leave the pill up more than 20s
+                mo.observe(bookEl, { childList: true, subtree: true });
+                // Safety: never leave the pill up more than 25s
                 setTimeout(() => {
                     hideFlipbookLoader();
                     mo.disconnect();
-                }, 20000);
+                }, 25000);
             } else {
-                setTimeout(hideFlipbookLoader, 20000);
+                setTimeout(hideFlipbookLoader, 25000);
             }
+        } else {
+            hideFlipbookLoader();
         }
 
         // --- ROBUST CONTROL BINDING ---
