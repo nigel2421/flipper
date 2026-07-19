@@ -21,15 +21,21 @@ else
 fi
 
 echo "Starting Gunicorn..."
+# Ensure the app package is importable regardless of how gunicorn is invoked.
+cd /app
+export PYTHONPATH="/app:${PYTHONPATH:-}"
+PORT_NUM="${PORT:-8080}"
+echo "Binding to 0.0.0.0:${PORT_NUM}"
+ls -la /app | head -40
+python -c "import flipbook_project; print('flipbook_project OK', flipbook_project.__file__)"
+
 # Cloud Run: 2 workers x 4 threads balances concurrency without huge memory.
-# Keep timeout moderate so stuck PDF/AI work cannot hold a worker forever.
 exec python -u -m gunicorn \
-    --chdir /app \
     flipbook_project.wsgi:application \
-    --bind 0.0.0.0:${PORT:-8080} \
-    --workers ${GUNICORN_WORKERS:-2} \
-    --threads ${GUNICORN_THREADS:-4} \
-    --timeout ${GUNICORN_TIMEOUT:-60} \
+    --bind "0.0.0.0:${PORT_NUM}" \
+    --workers "${GUNICORN_WORKERS:-2}" \
+    --threads "${GUNICORN_THREADS:-4}" \
+    --timeout "${GUNICORN_TIMEOUT:-60}" \
     --keep-alive 5 \
     --access-logfile - \
     --error-logfile - \

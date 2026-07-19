@@ -2,8 +2,10 @@
 FROM python:3.12-slim
 
 # Allow statements and log messages to immediately appear in the Cloud Run logs
-ENV PYTHONUNBUFFERED True
-ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED=True
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONPATH=/app
+ENV DJANGO_SETTINGS_MODULE=flipbook_project.settings
 
 # Set the working directory in the container
 WORKDIR /app
@@ -30,13 +32,17 @@ RUN tailwindcss -i ./static_src/tailwind_input.css -o ./publications/static/publ
 # Collect static files. We pass dummy env vars so settings.py doesn't crash during build.
 RUN SECRET_KEY=dummy-key-for-build python manage.py collectstatic --noinput
 
-# Copy entrypoint script and make it executable
+# Copy the entrypoint script, normalize Windows line endings, and make it executable.
+# Cloud Run runs Linux containers; without this conversion a CRLF shebang is interpreted
+# as `/bin/bash\r`, causing the Django start script to fail immediately.
 COPY debug_startup.sh .
 COPY health_check_app.py .
-RUN chmod +x debug_startup.sh
+RUN sed -i 's/\r$//' debug_startup.sh && chmod +x debug_startup.sh
 
 # Expose port for Cloud Run
 EXPOSE 8080
 
-# Try Django first, fall back to health check if it fails
-CMD ./debug_startup.sh || python health_check_app.py
+# Start Django directly.  Do not mask startup failures with the health-check app:
+# Cloud Run logs should show the actual error and the service must not return a
+# misleading `OK` response in place of the website.
+CMD ["./debug_startup.sh"]
