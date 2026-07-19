@@ -1,8 +1,8 @@
-const CACHE_NAME = 'business-matters-v5'; // Bump to clear stale caches
+const CACHE_NAME = 'business-matters-v6'; // Bump: fix invisible lazy images + loader
 const ASSETS_TO_CACHE = [
     '/',
-    '/static/publications/css/style.css',
-    '/static/publications/css/tailwind.css',
+    '/static/publications/css/style.css?v=5.2',
+    '/static/publications/css/tailwind.css?v=5.1',
     '/static/img/logo.png',
     '/static/manifest.json'
 ];

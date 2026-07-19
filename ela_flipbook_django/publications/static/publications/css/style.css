@@ -2523,12 +2523,10 @@ main>.container {
     100% { background-position: -200% 0; }
 }
 
-/* Image Lazy Loading Placeholder */
-img[loading="lazy"] {
-    opacity: 0;
-    transition: opacity 0.5s ease-in;
-}
-
+/* Lazy-loaded images must remain visible.
+   Previous rule set opacity:0 until .loaded was added, but home /
+   magazine / articles never added that class — covers stayed invisible. */
+img[loading="lazy"],
 img.loaded {
-    opacity: 1;
-}
+    opacity: 1 !important;
+}

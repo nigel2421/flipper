@@ -126,28 +126,81 @@
     /* Maximize dFlip fill */
     .df-container {
         padding: 0 !important;
+        background: #000 !important;
     }
 
-    /* Centralize Loading Text on desktop */
+    /*
+      dFlip default .df-loading-info uses max-width ~200px + word-break,
+      so long "Loading https://storage...pdf" messages stack as a vertical
+      column of characters. Override into a clean centered pill.
+    */
+    .df-container .df-loading-info,
+    .df-container.df-init .df-loading-info,
+    .df-container.df-error .df-loading-info,
+    .df-loading-info,
     .df-loading {
         position: absolute !important;
         top: 50% !important;
         left: 50% !important;
+        right: auto !important;
+        bottom: auto !important;
         transform: translate(-50%, -50%) !important;
+        -webkit-transform: translate(-50%, -50%) !important;
         margin: 0 !important;
+        margin-top: 0 !important;
         z-index: 999 !important;
+        width: min(320px, 86vw) !important;
+        max-width: min(320px, 86vw) !important;
+        min-height: 0 !important;
+        height: auto !important;
+        padding: 18px 28px !important;
+        box-sizing: border-box !important;
+        background: rgba(10, 25, 47, 0.92) !important;
+        border: 1px solid rgba(251, 191, 36, 0.35) !important;
+        border-radius: 9999px !important;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55) !important;
         color: #fbbf24 !important;
-        font-weight: 900 !important;
+        font-weight: 800 !important;
+        font-size: 12px !important;
+        line-height: 1.35 !important;
+        letter-spacing: 0.14em !important;
         text-transform: uppercase !important;
-        letter-spacing: 0.2em !important;
-        font-size: 14px !important;
-        text-shadow: 0 0 20px rgba(0,0,0,0.5) !important;
+        text-align: center !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        word-break: normal !important;
+        overflow-wrap: normal !important;
+        writing-mode: horizontal-tb !important;
+        text-orientation: mixed !important;
+        direction: ltr !important;
+        display: block !important;
+        opacity: 1 !important;
+        text-shadow: none !important;
+    }
+
+    .df-container .df-loading-icon,
+    .df-container.df-loading .df-loading-icon {
+        z-index: 998 !important;
+        filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.45));
     }
 
     /* =====================================================
        MOBILE-SPECIFIC OVERRIDES (max-width: 767px)
        ===================================================== */
     @media (max-width: 767px) {
+        .df-container .df-loading-info,
+        .df-container.df-init .df-loading-info,
+        .df-loading-info {
+            width: min(280px, 90vw) !important;
+            max-width: min(280px, 90vw) !important;
+            font-size: 11px !important;
+            letter-spacing: 0.1em !important;
+            padding: 14px 20px !important;
+            white-space: normal !important;
+            line-height: 1.4 !important;
+        }
+
         /* Hide dFlip's own built-in toolbar on mobile — we use our custom bottom bar */
         .df-ui-wrapper,
         .df-ui-controls,
@@ -235,6 +288,12 @@
         enableSound: false,
         paddingTop: 0,
         paddingBottom: 0,
+        // Short message — long PDF URLs were wrapping vertically in the loader
+        text: {
+            loading: "Loading magazine…",
+            loadingPDF: "Loading magazine…",
+            loadingPDFFailed: "Could not load magazine"
+        },
         // On mobile: single page so PDF fills the screen width correctly
         singlePageMode: isMobile ? 1 : 0,
         onReady: function(flipbook) {
@@ -247,6 +306,24 @@
         if (source && $.fn.flipBook) {
             console.log("Initializing dFlip...");
             $("#df_manual_book").flipBook(source, option_df_manual_book);
+
+            // Keep loader text short even if dFlip injects a long URL string
+            const tidyLoader = () => {
+                document.querySelectorAll('.df-loading-info, .df-loading').forEach((el) => {
+                    const t = (el.textContent || '').trim();
+                    if (!t) return;
+                    if (t.length > 40 || t.includes('http') || t.includes('storage.googleapis')) {
+                        el.textContent = 'Loading magazine…';
+                    }
+                });
+            };
+            tidyLoader();
+            const bookEl = document.getElementById('df_manual_book');
+            if (bookEl && window.MutationObserver) {
+                const mo = new MutationObserver(tidyLoader);
+                mo.observe(bookEl, { childList: true, subtree: true, characterData: true });
+                setTimeout(() => mo.disconnect(), 60000);
+            }
         }
 
         // --- ROBUST CONTROL BINDING ---
