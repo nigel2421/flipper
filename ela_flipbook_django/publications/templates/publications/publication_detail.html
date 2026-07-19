@@ -130,13 +130,10 @@
     }
 
     /*
-      dFlip default .df-loading-info uses max-width ~200px + word-break,
-      so long "Loading https://storage...pdf" messages stack as a vertical
-      column of characters. Override into a clean centered pill.
+      dFlip loader pill: style only while loading, then force-hide.
+      Earlier opacity:1 !important kept the pill stuck after load.
     */
     .df-container .df-loading-info,
-    .df-container.df-init .df-loading-info,
-    .df-container.df-error .df-loading-info,
     .df-loading-info,
     .df-loading {
         position: absolute !important;
@@ -172,15 +169,45 @@
         word-break: normal !important;
         overflow-wrap: normal !important;
         writing-mode: horizontal-tb !important;
-        text-orientation: mixed !important;
         direction: ltr !important;
-        display: block !important;
-        opacity: 1 !important;
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
         text-shadow: none !important;
+        transition: opacity 0.25s ease, visibility 0.25s ease !important;
     }
 
-    .df-container .df-loading-icon,
-    .df-container.df-loading .df-loading-icon {
+    /* Visible only while dFlip is initializing / loading */
+    .df-container.df-init .df-loading-info,
+    .df-container.df-loading .df-loading-info,
+    .df-container.df-init .df-loading,
+    .df-container.df-loading .df-loading,
+    .df-container.df-error .df-loading-info {
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: none !important;
+    }
+
+    /* After ready (or when app marks loader done), never stick */
+    .df-container.df-ready .df-loading-info,
+    .df-container.df-ready .df-loading,
+    .df-container.df-ready .df-loading-icon,
+    .df-container.bm-loader-done .df-loading-info,
+    .df-container.bm-loader-done .df-loading,
+    .df-container.bm-loader-done .df-loading-icon,
+    .df-loading-info.bm-hidden,
+    .df-loading.bm-hidden,
+    .df-loading-icon.bm-hidden {
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+        top: -9999px !important;
+    }
+
+    .df-container .df-loading-icon {
         z-index: 998 !important;
         filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.45));
     }
@@ -189,9 +216,8 @@
        MOBILE-SPECIFIC OVERRIDES (max-width: 767px)
        ===================================================== */
     @media (max-width: 767px) {
-        .df-container .df-loading-info,
         .df-container.df-init .df-loading-info,
-        .df-loading-info {
+        .df-container.df-loading .df-loading-info {
             width: min(280px, 90vw) !important;
             max-width: min(280px, 90vw) !important;
             font-size: 11px !important;
@@ -298,8 +324,28 @@
         singlePageMode: isMobile ? 1 : 0,
         onReady: function(flipbook) {
             console.log("dFlip Ready event fired");
+            hideFlipbookLoader();
         }
     };
+
+    function hideFlipbookLoader() {
+        const root = document.getElementById('df_manual_book');
+        const containers = document.querySelectorAll('.df-container, #df_manual_book');
+        containers.forEach((el) => {
+            el.classList.add('bm-loader-done', 'df-ready');
+            el.classList.remove('df-init', 'df-loading');
+        });
+        document.querySelectorAll('.df-loading-info, .df-loading, .df-loading-icon').forEach((el) => {
+            el.classList.add('bm-hidden');
+            el.style.setProperty('display', 'none', 'important');
+            el.style.setProperty('opacity', '0', 'important');
+            el.style.setProperty('visibility', 'hidden', 'important');
+            el.style.setProperty('pointer-events', 'none', 'important');
+        });
+        if (root && root.parentElement) {
+            root.parentElement.classList.add('bm-loader-done');
+        }
+    }
 
     $(document).ready(function() {
         const source = $("#df_manual_book").attr("source");
@@ -310,6 +356,7 @@
             // Keep loader text short even if dFlip injects a long URL string
             const tidyLoader = () => {
                 document.querySelectorAll('.df-loading-info, .df-loading').forEach((el) => {
+                    if (el.classList.contains('bm-hidden')) return;
                     const t = (el.textContent || '').trim();
                     if (!t) return;
                     if (t.length > 40 || t.includes('http') || t.includes('storage.googleapis')) {
@@ -320,9 +367,26 @@
             tidyLoader();
             const bookEl = document.getElementById('df_manual_book');
             if (bookEl && window.MutationObserver) {
-                const mo = new MutationObserver(tidyLoader);
-                mo.observe(bookEl, { childList: true, subtree: true, characterData: true });
-                setTimeout(() => mo.disconnect(), 60000);
+                const mo = new MutationObserver(() => {
+                    tidyLoader();
+                    // If dFlip removed df-init / stopped loading, hide the pill
+                    const container = bookEl.closest('.df-container') || bookEl.querySelector('.df-container') || bookEl;
+                    if (container && !container.classList.contains('df-init') && !container.classList.contains('df-loading')) {
+                        // Viewer is present → treat as ready
+                        if (container.querySelector('.df-viewer, .df-book-page, canvas, .df-page')) {
+                            hideFlipbookLoader();
+                            mo.disconnect();
+                        }
+                    }
+                });
+                mo.observe(bookEl, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['class'] });
+                // Safety: never leave the pill up more than 20s
+                setTimeout(() => {
+                    hideFlipbookLoader();
+                    mo.disconnect();
+                }, 20000);
+            } else {
+                setTimeout(hideFlipbookLoader, 20000);
             }
         }
 
