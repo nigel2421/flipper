@@ -1,7 +1,8 @@
-const CACHE_NAME = 'business-matters-v4'; // Increment version
+const CACHE_NAME = 'business-matters-v5'; // Bump to clear stale caches
 const ASSETS_TO_CACHE = [
     '/',
     '/static/publications/css/style.css',
+    '/static/publications/css/tailwind.css',
     '/static/img/logo.png',
     '/static/manifest.json'
 ];
@@ -10,7 +11,7 @@ self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
             return cache.addAll(ASSETS_TO_CACHE);
-        })
+        }).then(() => self.skipWaiting())
     );
 });
 
@@ -24,37 +25,47 @@ self.addEventListener('activate', (event) => {
                     }
                 })
             );
-        })
+        }).then(() => self.clients.claim())
     );
 });
 
 self.addEventListener('fetch', (event) => {
     const url = new URL(event.request.url);
 
-    // 0. Skip interception for Google Ads to avoid CORS issues
-    if (url.hostname.includes('doubleclick.net') || 
+    // Never intercept ads, analytics, fonts, or media on GCS —
+    // cross-origin image caching was a common cause of blank covers.
+    if (
+        url.hostname.includes('doubleclick.net') ||
         url.hostname.includes('googlesyndication.com') ||
-        url.hostname.includes('googletagservices.com')) {
+        url.hostname.includes('googletagservices.com') ||
+        url.hostname.includes('google-analytics.com') ||
+        url.hostname.includes('googletagmanager.com') ||
+        url.hostname.includes('storage.googleapis.com') ||
+        url.hostname.includes('googleapis.com') ||
+        url.hostname.includes('gstatic.com') ||
+        url.hostname.includes('cdn.tailwindcss.com') ||
+        url.hostname.includes('cdnjs.cloudflare.com') ||
+        url.hostname.includes('fonts.googleapis.com') ||
+        url.hostname.includes('fonts.gstatic.com')
+    ) {
         return;
     }
 
-
-    // 1. Skip caching for POST requests
+    // Skip caching for POST requests
     if (event.request.method !== 'GET') {
         return;
     }
 
-    // 2. Skip caching for auth and admin URLs to ensure dynamic behavior
+    // Skip caching for auth and admin URLs
     if (url.pathname.includes('/accounts/') || url.pathname.includes('/admin/')) {
         return;
     }
 
-    // 3. For navigation requests or dynamic pages, use Network First
+    // Navigation / shell: Network First
     if (event.request.mode === 'navigate' || ASSETS_TO_CACHE.includes(url.pathname)) {
         event.respondWith(
             fetch(event.request)
                 .then((response) => {
-                    // Update cache with fresh version
                     const responseClone = response.clone();
                     caches.open(CACHE_NAME).then((cache) => {
                         cache.put(event.request, responseClone);
@@ -66,10 +77,12 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // 4. For other assets, use Cache First
-    event.respondWith(
-        caches.match(event.request).then((response) => {
-            return response || fetch(event.request);
-        })
-    );
+    // Same-origin static assets: Cache First
+    if (url.origin === self.location.origin) {
+        event.respondWith(
+            caches.match(event.request).then((response) => {
+                return response || fetch(event.request);
+            })
+        );
+    }
 });

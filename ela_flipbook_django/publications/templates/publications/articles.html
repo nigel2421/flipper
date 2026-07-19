@@ -120,7 +120,7 @@
                             <div class="group relative flex flex-col min-w-0 bg-white/5 rounded-2xl md:rounded-3xl overflow-hidden border border-white/10 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2">
                                 <a href="{% url 'publications:article_detail' slug=article.slug %}" class="block overflow-hidden bg-slate-800">
                                     {% if article.cover_image %}
-                                    <img src="{{ article.cover_image.url }}" alt="Cover for {{ article.title }}" class="w-full aspect-video object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy">
+                                    <img src="{{ article.cover_image.url }}" alt="Cover for {{ article.title }}" class="w-full aspect-video object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" decoding="async" referrerpolicy="no-referrer">
                                     {% endif %}
                                 </a>
                                 <div class="p-5 sm:p-6 md:p-8 flex-1 flex flex-col min-w-0">
