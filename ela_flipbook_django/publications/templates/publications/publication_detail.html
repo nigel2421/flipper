@@ -143,12 +143,12 @@
     .bm-magazine-loader {
         position: absolute;
         inset: 0;
-        z-index: 50;
+        z-index: 80;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: rgba(0, 0, 0, 0.55);
-        transition: opacity 0.3s ease, visibility 0.3s ease;
+        background: rgba(0, 0, 0, 0.72);
+        transition: opacity 0.35s ease, visibility 0.35s ease;
         pointer-events: none;
     }
     .bm-magazine-loader.is-hidden {
@@ -305,29 +305,133 @@
         // On mobile: single page so PDF fills the screen width correctly
         singlePageMode: isMobile ? 1 : 0,
         onReady: function(flipbook) {
-            console.log("dFlip Ready event fired");
-            hideFlipbookLoader();
+            console.log("dFlip Ready event fired — waiting for first page paint");
+            // Do NOT hide immediately: onReady fires before pages are painted.
+            markFlipbookEngineReady();
         }
     };
+
+    var loaderHidden = false;
+    var loaderShownAt = 0;
+    var engineReady = false;
+    var MIN_LOADER_MS = 900;   // avoid a brief flash
+    var POLL_MS = 200;
+    var ABSOLUTE_MAX_MS = 60000; // large PDFs on slow networks
 
     function showFlipbookLoader() {
         const loader = document.getElementById('bm-magazine-loader');
         if (!loader) return;
+        loader.style.display = 'flex';
         loader.classList.remove('is-hidden');
         loader.setAttribute('aria-hidden', 'false');
+        loaderShownAt = Date.now();
+        loaderHidden = false;
+        const text = loader.querySelector('.bm-magazine-loader-text');
+        if (text) text.textContent = 'Loading magazine…';
     }
 
-    function hideFlipbookLoader() {
+    function hideFlipbookLoader(force) {
+        if (loaderHidden) return;
         const loader = document.getElementById('bm-magazine-loader');
         if (!loader) return;
-        loader.classList.add('is-hidden');
-        loader.setAttribute('aria-hidden', 'true');
-        // Remove from layout after fade so it cannot block interaction
-        setTimeout(() => {
-            if (loader.classList.contains('is-hidden')) {
-                loader.style.display = 'none';
+
+        const elapsed = Date.now() - (loaderShownAt || Date.now());
+        const wait = force ? 0 : Math.max(0, MIN_LOADER_MS - elapsed);
+
+        setTimeout(function() {
+            if (loaderHidden) return;
+            loaderHidden = true;
+            loader.classList.add('is-hidden');
+            loader.setAttribute('aria-hidden', 'true');
+            setTimeout(function() {
+                if (loader.classList.contains('is-hidden')) {
+                    loader.style.display = 'none';
+                }
+            }, 320);
+        }, wait);
+    }
+
+    function markFlipbookEngineReady() {
+        engineReady = true;
+        const text = document.querySelector('#bm-magazine-loader .bm-magazine-loader-text');
+        if (text && !loaderHidden) text.textContent = 'Preparing pages…';
+    }
+
+    /**
+     * True only when the flipbook has something the user can actually see.
+     * Empty canvas / shell DOM must NOT count (that was hiding the loader too early).
+     */
+    function isFlipbookVisiblyReady(bookEl) {
+        if (!bookEl) return false;
+
+        const container =
+            bookEl.closest('.df-container') ||
+            bookEl.querySelector('.df-container') ||
+            bookEl;
+
+        // Still in dFlip init/loading states
+        if (container.classList && (
+            container.classList.contains('df-init') ||
+            container.classList.contains('df-loading') ||
+            container.classList.contains('df-fetch-pdf')
+        )) {
+            return false;
+        }
+
+        // Prefer painted canvases with real bitmap size
+        const canvases = bookEl.querySelectorAll('canvas');
+        for (let i = 0; i < canvases.length; i++) {
+            const c = canvases[i];
+            if (c.width >= 80 && c.height >= 80) {
+                const rect = c.getBoundingClientRect();
+                if (rect.width >= 40 && rect.height >= 40) {
+                    return true;
+                }
             }
-        }, 320);
+        }
+
+        // Fallback: page content images that have finished loading
+        const imgs = bookEl.querySelectorAll('.df-page-content img, .df-page img');
+        for (let i = 0; i < imgs.length; i++) {
+            const img = imgs[i];
+            if (img.complete && img.naturalWidth >= 80 && img.naturalHeight >= 80) {
+                const rect = img.getBoundingClientRect();
+                if (rect.width >= 40 && rect.height >= 40) {
+                    return true;
+                }
+            }
+        }
+
+        // Fallback after engine ready: a non-loading page with size
+        if (engineReady) {
+            const pages = bookEl.querySelectorAll('.df-page:not(.df-loading)');
+            for (let i = 0; i < pages.length; i++) {
+                const rect = pages[i].getBoundingClientRect();
+                if (rect.width >= 80 && rect.height >= 80 &&
+                    !pages[i].classList.contains('df-loading')) {
+                    // Require engine ready + visible page shell for a short grace period
+                    // only if we have been engine-ready for a bit — still prefer canvas
+                    return false; // don't hide on empty page shells alone
+                }
+            }
+        }
+
+        return false;
+    }
+
+    function startLoaderWatch(bookEl) {
+        const poll = setInterval(function() {
+            if (isFlipbookVisiblyReady(bookEl)) {
+                clearInterval(poll);
+                hideFlipbookLoader(false);
+            }
+        }, POLL_MS);
+
+        // Absolute safety for very large PDFs
+        setTimeout(function() {
+            clearInterval(poll);
+            hideFlipbookLoader(true);
+        }, ABSOLUTE_MAX_MS);
     }
 
     $(document).ready(function() {
@@ -339,25 +443,13 @@
             $("#df_manual_book").flipBook(source, option_df_manual_book);
 
             const bookEl = document.getElementById('df_manual_book');
-            if (bookEl && window.MutationObserver) {
-                const mo = new MutationObserver(() => {
-                    // Pages / canvas rendered → magazine is ready
-                    if (bookEl.querySelector('.df-viewer, .df-book-page, canvas, .df-page')) {
-                        hideFlipbookLoader();
-                        mo.disconnect();
-                    }
-                });
-                mo.observe(bookEl, { childList: true, subtree: true });
-                // Safety: never leave the pill up more than 25s
-                setTimeout(() => {
-                    hideFlipbookLoader();
-                    mo.disconnect();
-                }, 25000);
+            if (bookEl) {
+                startLoaderWatch(bookEl);
             } else {
-                setTimeout(hideFlipbookLoader, 25000);
+                setTimeout(function() { hideFlipbookLoader(true); }, ABSOLUTE_MAX_MS);
             }
         } else {
-            hideFlipbookLoader();
+            hideFlipbookLoader(true);
         }
 
         // --- ROBUST CONTROL BINDING ---
