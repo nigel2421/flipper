@@ -1,0 +1,60 @@
+# Exclude large Windows-only dev binaries
+tailwindcss.exe
+cloud-sql-proxy.x64.exe
+
+# Exclude virtual environments
+node_modules/
+venv/
+.venv/
+
+# Exclude git data
+.git/
+.github/
+.gitattributes
+.gitignore
+
+# Exclude local dev environment files
+.env
+.env.local
+dev.nix
+.idx/
+
+# Exclude specific debug and test output files (NOT requirements.txt)
+test_output.txt
+test_mod_fail.txt
+test_mod_fail_2.txt
+modernization_results.txt
+modernization_results_2.txt
+single_test_output.txt
+single_test_output_debug.txt
+test_debug.txt
+full_test_output.txt
+output.txt
+output_v2.txt
+publications_migrations_rows_before.txt
+working_model.txt
+working_model_final.txt
+
+# Exclude Python cache
+*.pyc
+__pycache__/
+.pytest_cache/
+
+# Exclude local SQLite databases
+db.sqlite3
+hostpinnaclrdb.sqlite3
+
+# Exclude OS and IDE files
+.DS_Store
+.idea/
+.vscode/
+desktop.ini
+
+# Exclude local datadump and backup files
+datadump.json
+publications_backup.json
+localhost.sql
+cors.json
+
+# Exclude test cover images
+test_cover.jpg
