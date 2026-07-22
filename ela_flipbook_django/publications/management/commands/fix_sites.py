@@ -42,14 +42,24 @@ class Command(BaseCommand):
         secret = os.environ.get('GOOGLE_SECRET')
 
         if client_id and secret:
-            app, created = SocialApp.objects.get_or_create(
-                provider='google',
-                defaults={'name': 'Google Login', 'client_id': client_id, 'secret': secret}
-            )
-            if not created:
-                app.client_id = client_id
-                app.secret = secret
-                app.save()
+            google_apps = list(SocialApp.objects.filter(provider='google'))
+            if len(google_apps) > 1:
+                app = google_apps[0]
+                for extra in google_apps[1:]:
+                    extra.delete()
+            elif len(google_apps) == 1:
+                app = google_apps[0]
+            else:
+                app = SocialApp.objects.create(
+                    provider='google',
+                    name='Google Login',
+                    client_id=client_id,
+                    secret=secret
+                )
+
+            app.client_id = client_id
+            app.secret = secret
+            app.save()
             
             # Link to all sites
             for s in site_objs:

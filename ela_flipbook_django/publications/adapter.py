@@ -27,19 +27,36 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
     def pre_social_login(self, request, sociallogin):
         """
         Invoked just after a user successfully authenticates via a
-        social provider. We use this to auto-verify social accounts.
+        social provider. Connects social login to existing account if email matches.
         """
-        # Auto-verify social accounts (e.g. Google)
+        from django.contrib.auth import get_user_model
         from allauth.account.models import EmailAddress
-        email = sociallogin.user.email
-        if email and sociallogin.user.pk:
-            # Only update if user is already saved
-            EmailAddress.objects.filter(user=sociallogin.user, email=email).update(verified=True)
-            # Alternatively, if multiple emails are possible:
-            # sociallogin.user.email_address_set.all().update(verified=True)
 
-        # Get the user instance from the social login
+        User = get_user_model()
+
+        # Extract email from social account data or user object
+        email = sociallogin.account.extra_data.get('email') or (sociallogin.user and sociallogin.user.email)
+        
+        is_existing = getattr(sociallogin, 'is_existing', False)
+        if callable(is_existing):
+            is_existing = is_existing()
+
+        # Connect to existing user account if email matches and sociallogin is not connected yet
+        if email and not is_existing and hasattr(sociallogin, 'connect'):
+            try:
+                existing_user = User.objects.get(email__iexact=email)
+                sociallogin.connect(request, existing_user)
+            except User.DoesNotExist:
+                pass
+            except User.MultipleObjectsReturned:
+                existing_user = User.objects.filter(email__iexact=email).first()
+                if existing_user:
+                    sociallogin.connect(request, existing_user)
+
+        # Auto-verify social accounts
         user = sociallogin.user
+        if email and user and user.pk:
+            EmailAddress.objects.filter(user=user, email=email).update(verified=True)
 
         # Ensure first_name and last_name are never None
         if user.first_name is None:
@@ -49,7 +66,7 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
 
         # If the username is somehow empty, generate a unique one
         if not user.username:
-            user.username = self.generate_unique_username(user.email)
+            user.username = self.generate_unique_username(email or user.email)
 
 
     def populate_user(self, request, sociallogin, data):

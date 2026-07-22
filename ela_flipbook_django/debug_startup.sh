@@ -17,18 +17,14 @@ python -c "import django; print(f'Django {django.__version__} loaded')"
 echo "Testing flipbook_project import..."
 python -c "import flipbook_project; print('flipbook_project OK', flipbook_project.__file__)"
 
-# OAuth site fix must NOT block port bind — Cloud Run kills slow startups.
+# OAuth site fix & sequence reset must NOT block port bind — Cloud Run kills slow startups.
 # Run in background with a hard timeout so cold starts stay fast.
-if [ -n "${GOOGLE_CLIENT_ID:-}" ] && [ -n "${GOOGLE_SECRET:-}" ]; then
-    echo "Scheduling Google OAuth fix_sites in background..."
-    (
-        timeout 25 python manage.py fix_sites \
-            && echo "fix_sites completed" \
-            || echo "WARNING: fix_sites skipped/failed (non-fatal)"
-    ) &
-else
-    echo "WARNING: GOOGLE_CLIENT_ID/GOOGLE_SECRET not set; skipping fix_sites."
-fi
+(
+    timeout 25 python manage.py fix_sites \
+        && timeout 25 python manage.py reset_sequences \
+        && echo "fix_sites & reset_sequences completed" \
+        || echo "WARNING: fix_sites/reset_sequences skipped or failed (non-fatal)"
+) &
 
 echo "Starting Gunicorn on 0.0.0.0:${PORT_NUM}..."
 # Prefer fewer workers on small Cloud Run instances so cold start succeeds.

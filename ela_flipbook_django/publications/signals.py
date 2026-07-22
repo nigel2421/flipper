@@ -19,7 +19,7 @@ def create_user_profile(sender, instance, created, **kwargs):
     """Create a user profile when a new user is created."""
     if created:
         from .models import Profile
-        Profile.objects.create(user=instance)
+        Profile.objects.get_or_create(user=instance)
 
 def _generate_article_summary(article_id):
     """Internal function to generate summary in background."""
@@ -59,20 +59,31 @@ from .security_utils import log_security_event, get_client_ip
 @receiver(user_logged_in)
 def log_successful_login(sender, request, user, **kwargs):
     """Log a successful login event."""
-    log_security_event(user, 'login_success', request)
+    try:
+        log_security_event(user, 'login_success', request)
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f"Error in log_successful_login signal: {e}")
 
 @receiver(user_login_failed)
 def log_failed_login(sender, credentials, request, **kwargs):
     """Log a failed login event."""
-    # Find the user by email if possible (credentials contains the username/email)
-    email = credentials.get('username') or credentials.get('email')
-    user = User.objects.filter(email=email).first()
-    
-    details = {
-        'provided_username': email,
-        'reason': 'Invalid credentials'
-    }
-    log_security_event(user, 'login_failed', request, details=details)
+    try:
+        if not credentials or not isinstance(credentials, dict):
+            email = None
+        else:
+            email = credentials.get('username') or credentials.get('email')
+        
+        user = User.objects.filter(email=email).first() if email else None
+        
+        details = {
+            'provided_username': email,
+            'reason': 'Invalid credentials'
+        }
+        log_security_event(user, 'login_failed', request, details=details)
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f"Error in log_failed_login signal: {e}")
 
 @receiver(user_signed_up)
 def handle_referral_signup(sender, request, user, **kwargs):
