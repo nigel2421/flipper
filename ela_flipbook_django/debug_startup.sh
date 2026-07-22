@@ -17,14 +17,16 @@ python -c "import django; print(f'Django {django.__version__} loaded')"
 echo "Testing flipbook_project import..."
 python -c "import flipbook_project; print('flipbook_project OK', flipbook_project.__file__)"
 
-# OAuth site fix & sequence reset must NOT block port bind — Cloud Run kills slow startups.
-# Run in background with a hard timeout so cold starts stay fast.
-(
-    timeout 25 python manage.py fix_sites \
-        && timeout 25 python manage.py reset_sequences \
-        && echo "fix_sites & reset_sequences completed" \
-        || echo "WARNING: fix_sites/reset_sequences skipped or failed (non-fatal)"
-) &
+# --- CRITICAL: Fix DB sequences BEFORE accepting traffic ---
+# Run synchronously so no OAuth callback can hit an out-of-sync sequence.
+# Wrapped in || true so a DB connectivity blip doesn't kill the whole startup.
+echo "Running fix_sites..."
+timeout 30 python manage.py fix_sites || echo "WARNING: fix_sites failed (non-fatal)"
+
+echo "Running reset_sequences (fixing auth_user_pkey)..."
+timeout 30 python manage.py reset_sequences || echo "WARNING: reset_sequences failed (non-fatal)"
+
+echo "DB setup complete."
 
 echo "Starting Gunicorn on 0.0.0.0:${PORT_NUM}..."
 # Prefer fewer workers on small Cloud Run instances so cold start succeeds.
