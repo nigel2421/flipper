@@ -121,11 +121,27 @@ WSGI_APPLICATION = 'flipbook_project.wsgi.application'
 
 
 # --- DATABASE CONFIGURATION ---
-# Cloud Run detection: Only use Cloud SQL if we're truly ready (i.e., have Cloud SQL Proxy or Private IP)
 IN_CLOUD_RUN = bool(os.environ.get('K_SERVICE'))
 HAS_DB_CREDENTIALS = os.environ.get('CLOUD_SQL_CONNECTION_NAME')
+DB_ENGINE = os.environ.get('DB_ENGINE', '').lower()
 
-if (os.environ.get('PRODUCTION') or os.environ.get('GAE_APPLICATION')) and HAS_DB_CREDENTIALS:
+if DB_ENGINE == 'mysql' or (os.environ.get('DB_NAME') and os.environ.get('DB_USER') and not HAS_DB_CREDENTIALS):
+    # HostPinnacle cPanel MySQL / MariaDB Setup
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': os.environ.get('DB_NAME', 'flipbook_db'),
+            'USER': os.environ.get('DB_USER', 'root'),
+            'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+            'HOST': os.environ.get('DB_HOST', '127.0.0.1'),
+            'PORT': os.environ.get('DB_PORT', '3306'),
+            'OPTIONS': {
+                'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+                'charset': 'utf8mb4',
+            },
+        }
+    }
+elif (os.environ.get('PRODUCTION') or os.environ.get('GAE_APPLICATION')) and HAS_DB_CREDENTIALS:
     # Running on production WITH explicit Cloud SQL config
     DATABASES = {
         'default': {
@@ -134,7 +150,6 @@ if (os.environ.get('PRODUCTION') or os.environ.get('GAE_APPLICATION')) and HAS_D
             'USER': os.environ.get('DB_USER', 'businessmatters'),
             'PASSWORD': os.environ.get('DB_PASSWORD', 'q1w2e3r4t5y.'),
             'HOST': f"/cloudsql/{os.environ.get('CLOUD_SQL_CONNECTION_NAME')}",
-            # Reuse connections across requests (Cloud Run + Cloud SQL)
             'CONN_MAX_AGE': int(os.environ.get('DB_CONN_MAX_AGE', '60')),
             'OPTIONS': {
                 'connect_timeout': 10,
@@ -155,14 +170,14 @@ elif os.environ.get('USE_DB_PROXY'):
         }
     }
 else:
-    # Local development OR Cloud Run without explicit DB setup - use SQLite
-    # This allows the app to start without database connection
+    # Local development OR default SQLite fallback
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
+
 
 # Cache: prefer Redis (Memorystore) when REDIS_URL is set; otherwise LocMem.
 # Avoid DatabaseCache on Cloud Run — it adds a DB round-trip to every cache hit.
