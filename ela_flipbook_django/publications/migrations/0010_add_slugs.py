@@ -62,6 +62,13 @@ def add_slug_columns_safe(apps, schema_editor):
             columns = [c[1] for c in cursor.fetchall()]
             if 'slug' not in columns:
                 schema_editor.execute(f"ALTER TABLE {table} ADD COLUMN slug varchar(220) NULL;")
+    elif vendor == 'mysql':
+        print(f"[MIGRATION] Running MySQL-specific safe column addition...")
+        for table in tables:
+            cursor = schema_editor.connection.cursor()
+            cursor.execute(f"SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = '{table}' AND column_name = 'slug';")
+            if cursor.fetchone()[0] == 0:
+                schema_editor.execute(f"ALTER TABLE {table} ADD COLUMN slug varchar(220) NULL;")
     else:
         print(f"[MIGRATION] Vendor {vendor} not specifically handled, skipping raw SQL column addition.")
 
@@ -83,6 +90,15 @@ def create_unique_indexes_safe(apps, schema_editor):
         schema_editor.execute("CREATE UNIQUE INDEX IF NOT EXISTS publications_magazine_slug_unique ON publications_magazine (slug);")
         schema_editor.execute("CREATE UNIQUE INDEX IF NOT EXISTS publications_article_slug_unique ON publications_article (slug);")
         schema_editor.execute("CREATE UNIQUE INDEX IF NOT EXISTS publications_whatsappupdate_slug_unique ON publications_whatsappupdate (slug);")
+    elif vendor == 'mysql':
+        print(f"[MIGRATION] Creating unique indexes (MySQL)...")
+        tables = ['publications_magazine', 'publications_article', 'publications_whatsappupdate']
+        for table in tables:
+            cursor = schema_editor.connection.cursor()
+            idx_name = f"{table}_slug_unique"
+            cursor.execute(f"SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = '{table}' AND index_name = '{idx_name}';")
+            if cursor.fetchone()[0] == 0:
+                schema_editor.execute(f"CREATE UNIQUE INDEX {idx_name} ON {table} (slug);")
 
 class Migration(migrations.Migration):
 
