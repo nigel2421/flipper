@@ -127,7 +127,19 @@ IN_CLOUD_RUN = bool(os.environ.get('K_SERVICE'))
 HAS_DB_CREDENTIALS = os.environ.get('CLOUD_SQL_CONNECTION_NAME')
 DB_ENGINE = os.environ.get('DB_ENGINE', '').lower()
 
-if DB_ENGINE == 'mysql' or (os.environ.get('DB_NAME') and os.environ.get('DB_USER') and not HAS_DB_CREDENTIALS):
+if DB_ENGINE in ('postgresql', 'postgres'):
+    # HostPinnacle cPanel PostgreSQL Setup
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('DB_NAME', 'flipbook_db'),
+            'USER': os.environ.get('DB_USER', 'postgres'),
+            'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+            'HOST': os.environ.get('DB_HOST', '127.0.0.1'),
+            'PORT': os.environ.get('DB_PORT', '5432'),
+        }
+    }
+elif DB_ENGINE == 'mysql' or (os.environ.get('DB_NAME') and os.environ.get('DB_USER') and not HAS_DB_CREDENTIALS):
     # HostPinnacle cPanel MySQL / MariaDB Setup
     DATABASES = {
         'default': {
