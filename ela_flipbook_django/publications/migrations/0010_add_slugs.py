@@ -68,7 +68,7 @@ def add_slug_columns_safe(apps, schema_editor):
             cursor = schema_editor.connection.cursor()
             cursor.execute(f"SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = '{table}' AND column_name = 'slug';")
             if cursor.fetchone()[0] == 0:
-                schema_editor.execute(f"ALTER TABLE {table} ADD COLUMN slug varchar(220) NULL;")
+                cursor.execute(f"ALTER TABLE {table} ADD COLUMN slug varchar(220) NULL;")
     else:
         print(f"[MIGRATION] Vendor {vendor} not specifically handled, skipping raw SQL column addition.")
 
@@ -98,9 +98,10 @@ def create_unique_indexes_safe(apps, schema_editor):
             idx_name = f"{table}_slug_unique"
             cursor.execute(f"SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = '{table}' AND index_name = '{idx_name}';")
             if cursor.fetchone()[0] == 0:
-                schema_editor.execute(f"CREATE UNIQUE INDEX {idx_name} ON {table} (slug);")
+                cursor.execute(f"CREATE UNIQUE INDEX {idx_name} ON {table} (slug);")
 
 class Migration(migrations.Migration):
+    atomic = False
 
     dependencies = [
         ('publications', '0009_alter_magazine_pdf_file'),
