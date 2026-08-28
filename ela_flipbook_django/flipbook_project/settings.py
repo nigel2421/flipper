@@ -35,7 +35,9 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     'localhost',
     'www.businessmatters.co.ke',
-    # Add the development server host
+    # HostPinnacle cPanel
+    'wemisico.com',
+    # Cloud Run (legacy)
     '8000-firebase-flippergit-1764678684466.cluster-cbeiita7rbe7iuwhvjs5zww2i4.cloudworkstations.dev',
     'idx-flippergit-09470411-122195396017.africa-south1.run.app',
     'flipper-app-122195396017.africa-south1.run.app',
@@ -306,8 +308,8 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
 
-if os.environ.get('PRODUCTION'):
-    # Production: Use Google Cloud Storage for media files
+if os.environ.get('PRODUCTION') and not os.environ.get('CPANEL'):
+    # Production on Google Cloud Run: Use Google Cloud Storage for media files
     GS_BUCKET_NAME = 'businessmatters-media-bucket'
     GS_DEFAULT_ACL = None
     GS_QUERYSTRING_AUTH = False  # Generate clean URLs matching the public bucket
@@ -331,9 +333,6 @@ if os.environ.get('PRODUCTION'):
 
     # WhiteNoise optimization: cache static files for 1 year
     WHITENOISE_MAX_AGE = 31536000
-
-    # Automated emails stay off unless EMAIL_AUTOMATION_ENABLED is set (see utils).
-    # Keeps Google OAuth signup fast on Cloud Run.
 
     # Cloud Logging
     LOGGING = {
@@ -384,7 +383,7 @@ if os.environ.get('PRODUCTION'):
         },
     }
 else:
-    # Development: Use local file system for media files
+    # HostPinnacle cPanel (CPANEL=1) OR Local Development: Use local file system
     MEDIA_URL = '/media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
@@ -396,6 +395,15 @@ else:
             "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
         },
     }
+
+    # Security Cookies (also enable for cPanel HTTPS)
+    if os.environ.get('CPANEL'):
+        SESSION_COOKIE_SECURE = True
+        CSRF_COOKIE_SECURE = True
+        SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+        ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
+        WHITENOISE_MAX_AGE = 31536000
+
 
 
 
