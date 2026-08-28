@@ -38,7 +38,7 @@ def main():
     data_file = "cpanel_data_dump.json"
     if os.path.exists(data_file):
         print(f"Step 2: Loading data from {data_file}...")
-        call_command("loaddata", data_file)
+        call_command("loaddata", data_file, ignorenonexistent=True)
         print("Data loaded successfully!")
     else:
         print(f"WARNING: {data_file} not found. Please upload it to your cPanel app root.")
