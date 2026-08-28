@@ -57,6 +57,27 @@ def main():
     else:
         print(f"WARNING: {data_file} not found. Please upload it to your cPanel app root.")
 
+    # 2b. Ensure Google SocialApp is linked to current site (businessmatters.co.ke) for Google OAuth
+    try:
+        from django.contrib.sites.models import Site
+        from allauth.socialaccount.models import SocialApp
+        
+        # Ensure site for businessmatters.co.ke exists and matches SITE_ID
+        site_id = getattr(django.conf.settings, 'SITE_ID', 1)
+        site, _ = Site.objects.get_or_create(id=site_id, defaults={'domain': 'businessmatters.co.ke', 'name': 'Business Matters Africa'})
+        site.domain = 'businessmatters.co.ke'
+        site.name = 'Business Matters Africa'
+        site.save()
+
+        all_sites = list(Site.objects.all())
+        for app in SocialApp.objects.all():
+            for s in all_sites:
+                app.sites.add(s)
+            app.save()
+            print(f"Linked SocialApp '{app.name}' to sites: {[s.domain for s in app.sites.all()]}")
+    except Exception as e:
+        print(f"Note on SocialApp setup: {e}")
+
     # 3. Collect static files
     print("Step 3: Collecting static files...")
     call_command("collectstatic", interactive=False)
