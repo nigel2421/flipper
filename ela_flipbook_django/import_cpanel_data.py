@@ -26,6 +26,14 @@ def main():
             for table in tables:
                 cursor.execute(f"ALTER TABLE `{table}` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;")
 
+    # 1c. Disconnect auto-profile creation signal and clear auto-created profiles to prevent duplicate key errors
+    from django.db.models.signals import post_save
+    from publications.signals import create_user_profile
+    from publications.models import Profile
+
+    post_save.disconnect(create_user_profile, sender=User)
+    Profile.objects.all().delete()
+
     # 2. Import data dump if present
     data_file = "cpanel_data_dump.json"
     if os.path.exists(data_file):
