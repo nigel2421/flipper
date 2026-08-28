@@ -4,7 +4,30 @@ import django
 from django.core.management import call_command
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'flipbook_project.settings')
+
+# Check if hostpinnaclrdb.sqlite3 exists and point settings to it if db.sqlite3 is empty
+import pathlib
+base_dir = pathlib.Path(__file__).resolve().parent
+hostpinnacle_db = base_dir / 'hostpinnaclrdb.sqlite3'
+if hostpinnacle_db.exists() and os.path.getsize(hostpinnacle_db) > 1000:
+    from django.conf import settings
+    # Override sqlite database path before setup
+    os.environ['CUSTOM_DB_PATH'] = str(hostpinnacle_db)
+
 django.setup()
+
+if os.environ.get('CUSTOM_DB_PATH'):
+    from django.conf import settings
+    settings.DATABASES['default']['NAME'] = os.environ['CUSTOM_DB_PATH']
+
+# Ensure all database migrations/columns exist on sqlite DB
+try:
+    print("Ensuring database schema is up-to-date with migrations...")
+    call_command("migrate", interactive=False)
+except Exception as e:
+    print(f"Migration notice: {e}")
+
+
 
 from django.contrib.auth.models import User
 from publications.models import Magazine, Article, Author, Tag, Profile, Event
