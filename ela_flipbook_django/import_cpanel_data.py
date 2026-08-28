@@ -34,6 +34,12 @@ def main():
     post_save.disconnect(create_user_profile, sender=User)
     Profile.objects.all().delete()
 
+    # 1d. Ensure legacy ContentTypes referenced in old permission dumps exist
+    from django.contrib.contenttypes.models import ContentType
+    legacy_models = ['publication', 'author', 'contributor', 'rating', 'commentreport', 'customuser']
+    for model_name in legacy_models:
+        ContentType.objects.get_or_create(app_label='publications', model=model_name)
+
     # 2. Import data dump if present
     data_file = "cpanel_data_dump.json"
     if os.path.exists(data_file):
